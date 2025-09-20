@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Portfolio</title>
+    <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="icon" href="favicon.ico">
+</head>
+<body>
+    <div class="menu-bar">
+        <div class="datetime" id="datetime"></div>
+    </div>
+    <div class="desktop" id="desktop">
+        <div class="file folder" data-type="projects">
+            <div class="file-icon">
+                <svg viewBox="0 0 100 100" class="folder-icon">
+                    <path d="M90 30H50L40 20H10C5 20 0 25 0 30V80C0 85 5 90 10 90H90C95 90 100 85 100 80V40C100 35 95 30 90 30Z" fill="url(#folder-gradient)"/>
+                    <defs>
+                        <linearGradient id="folder-gradient" x1="0" y1="0" x2="100" y2="100">
+                            <stop offset="0%" style="stop-color:var(--neon-blue);"/>
+                            <stop offset="100%" style="stop-color:var(--neon-purple);"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <span>Projects</span>
+        </div>
+        <div class="file folder" data-type="photos">
+            <div class="file-icon">
+                <svg viewBox="0 0 100 100" class="folder-icon">
+                    <path d="M90 30H50L40 20H10C5 20 0 25 0 30V80C0 85 5 90 10 90H90C95 90 100 85 100 80V40C100 35 95 30 90 30Z" fill="url(#folder-gradient)"/>
+                    <defs>
+                        <linearGradient id="folder-gradient" x1="0" y1="0" x2="100" y2="100">
+                            <stop offset="0%" style="stop-color:var(--neon-blue);"/>
+                            <stop offset="100%" style="stop-color:var(--neon-purple);"/>
+                        </linearGradient>
+                    </defs>
+                </svg>
+            </div>
+            <span>Photos</span>
+        </div>
+        <div class="file" data-type="text">
+            <div class="file-icon">
+                <svg viewBox="0 0 100 100" class="text-icon">
+                    <rect x="10" y="10" width="80" height="80" rx="10" fill="var(--code-bg)"/>
+                    <path d="M30 30H70M30 40H70M30 50H60M30 60H65M30 70H55" stroke="var(--neon-green)" stroke-width="4"/>
+                </svg>
+            </div>
+            <span>About.txt</span>
+        </div>
+    </div>
+    <div class="window" id="window">
+        <div class="window-header">
+            <div class="window-controls">
+                <div class="window-control close" id="close-window">
+                    <svg viewBox="0 0 12 12" class="close-icon">
+                        <path d="M2 2L10 10M2 10L10 2" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                    </svg>
+                </div>
+            </div>
+            <span class="window-title">Portfolio</span>
+        </div>
+        <div class="window-content" id="window-content"></div>
+    </div>
+    <div class="dock">
+        <div class="dock-item" data-type="calls">
+            <img src="icons/phone.png" alt="Calls" class="dock-icon">
+            <span class="dock-tooltip">Recent Calls</span>
+        </div>
+        <div class="dock-item" data-type="github">
+            <img src="icons/github.png" alt="GitHub" class="dock-icon">
+            <span class="dock-tooltip">GitHub</span>
+        </div>
+        <div class="dock-item" data-type="telegram">
+            <img src="icons/telegram.png" alt="Telegram" class="dock-icon">
+            <span class="dock-tooltip">Telegram</span>
+            <span class="notification">1</span>
+        </div>
+        <div class="dock-item" data-type="instagram">
+            <img src="icons/instagram.png" alt="Instagram" class="dock-icon">
+            <span class="dock-tooltip">Instagram</span>
+        </div>
+        <div class="dock-item" data-type="notes">
+            <img src="icons/notes.png" alt="Notes" class="dock-icon">
+            <span class="dock-tooltip">Notes</span>
+        </div>
+        <div class="dock-item" data-type="trash">
+            <img src="icons/trash.png" alt="Trash" class="dock-icon">
+            <span class="dock-tooltip">Trash</span>
+        </div>
+    </div>
+	<div class="system-notification-container" id="sys-notif-unique-container">
+		<div class="system-notification-content" id="sys-notif-unique-content">
+			<img src="icons/system-icon.png" alt="System Icon" class="system-notification-icon" id="sys-notif-icon">
+			<div class="system-notification-text" id="sys-notif-text">
+				<h3>Обновление системы</h3>
+				<p>Теперь вы можете свободно перемещать папки и окна на рабочем столе! Попробуйте перетащить их, чтобы настроить пространство по своему вкусу.</p>
+			</div>
+		</div>
+	</div>
+    <script src="script.js"></script>
+</body>
+</html>

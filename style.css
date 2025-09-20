@@ -1,0 +1,787 @@
+/* styles.css  */
+:root {
+    --code-bg: #1E1E1E;
+    --neon-blue: #00DDEB;
+    --neon-purple: #BB86FC;
+    --neon-green: #03DAC6;
+    --text-light: #E0E0E0;
+    --shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    --border-radius: 12px;
+    --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+    --font: 'Source Code Pro', monospace;
+}
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: var(--font);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background: linear-gradient(to bottom, #87CEEB 0%, #6BB6FF 25%, #FFB6C1 75%, #FF9FB3 100%);
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    position: fixed;
+    touch-action: manipulation;
+}
+
+
+.menu-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 28px;
+    background: rgba(0, 0, 0, 0.5);
+    backdrop-filter: blur(10px);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 100;
+    color: var(--text-light);
+    font-size: 14px;
+    font-weight: 500;
+    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.datetime {
+    padding: 4px 12px;
+    border-radius: 6px;
+}
+
+.desktop {
+    width: 100%;
+    height: 100%;
+    padding: 50px 20px 80px 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.3));
+    z-index: 10;
+    overflow: hidden;
+    touch-action: none;
+}
+
+.file {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    z-index: 20;
+    touch-action: none;
+    will-change: left, top;
+}
+
+.file.dragging {
+    opacity: 0.7;
+    transform: scale(1.1);
+}
+
+
+.file-icon {
+    position: relative;
+    width: 100px;
+    height: 100px;
+    border-radius: var(--border-radius);
+    overflow: hidden;
+    box-shadow: var(--shadow);
+    background: var(--code-bg);
+    transition: var(--transition);
+}
+
+.file-icon img,
+.file-icon video,
+.file-icon svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: var(--code-bg);
+}
+
+.file-icon video::-webkit-media-controls {
+    display: none;
+}
+
+.folder .file-icon {
+    background: linear-gradient(135deg, var(--neon-blue), var(--neon-purple));
+}
+
+.text-icon {
+    padding: 8px;
+}
+
+.file span {
+    margin-top: 10px;
+    font-size: 14px;
+    color: var(--text-light);
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    font-weight: 500;
+    background: rgba(0, 0, 0, 0.4);
+    padding: 4px 8px;
+    border-radius: 6px;
+    transition: var(--transition);
+}
+
+.window {
+    display: none;
+    position: absolute;
+    top: 50px;
+    left: calc(50% - 400px);
+    width: 800px;
+    height: 600px;
+    max-height: 90vh;
+    background: var(--code-bg);
+    border-radius: var(--border-radius);
+    box-shadow: var(--shadow);
+    overflow: hidden;
+    z-index: 1000;
+    animation: window-open 0.4s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    touch-action: none;
+}
+
+.window-header {
+    background: var(--code-bg);
+    padding: 12px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    cursor: move;
+    touch-action: none;
+}
+
+.window-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.window-control {
+    width: 14px;
+    height: 14px;
+    border-radius: 50%;
+    background: #ff5555;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: var(--transition);
+    cursor: pointer;
+}
+
+.close-icon {
+    width: 8px;
+    height: 8px;
+}
+
+.window-control:hover {
+    transform: scale(1.2);
+    filter: brightness(1.2);
+}
+
+.window-title {
+    font-size: 14px;
+    color: var(--neon-green);
+    font-weight: 700;
+    letter-spacing: 1px;
+    margin-left: 20px;
+}
+
+.window-content {
+    padding: 20px;
+    height: calc(100% - 50px);
+    color: var(--text-light);
+    font-size: 16px;
+    line-height: 1.6;
+    touch-action: pan-y;
+    background: var(--code-bg);
+    overflow-y: auto;
+}
+
+.window-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.window-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.window-content::-webkit-scrollbar-thumb {
+    background: var(--neon-blue);
+    border-radius: 4px;
+}
+
+.window-content::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-purple);
+}
+
+.window-content img,
+.window-content video {
+    max-width: 100%;
+    max-height: 80%;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+    margin: 0 auto;
+    display: block;
+}
+
+.window-content video::-webkit-media-controls {
+    display: none;
+}
+
+.folder-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: 20px;
+    background: var(--code-bg);
+}
+
+.folder-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    padding: 10px;
+    transition: var(--transition);
+}
+
+.folder-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 8px;
+}
+
+.folder-item img,
+.folder-item video {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.folder-item span {
+    margin-top: 8px;
+    font-size: 14px;
+    color: var(--text-light);
+    text-align: center;
+}
+
+.call-log {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow-y: auto;
+    max-height: 100%;
+}
+
+.call-item {
+    display: flex;
+    align-items: center;
+    padding: 10px;
+    background: rgba(255, 255, 255, 0.05);
+    border-radius: 8px;
+    transition: var(--transition);
+}
+
+.call-item:hover {
+    background: rgba(255, 255, 255, 0.1);
+}
+
+.call-item img {
+    width: 40px;
+    height: 40px;
+    margin-right: 15px;
+    border-radius: 50%;
+}
+
+.call-info {
+    flex: 1;
+}
+
+.call-info h3 {
+    font-size: 16px;
+    font-weight: 600;
+    margin-bottom: 4px;
+}
+
+.call-info p {
+    font-size: 14px;
+    color: var(--text-light);
+    opacity: 0.7;
+}
+
+.text-content {
+    overflow-y: auto;
+    max-height: 100%;
+}
+
+.text-content::-webkit-scrollbar {
+    width: 8px;
+}
+
+.text-content::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.text-content::-webkit-scrollbar-thumb {
+    background: var(--neon-blue);
+    border-radius: 4px;
+}
+
+.text-content::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-purple);
+}
+
+.text-content p {
+    margin-bottom: 15px;
+    font-size: 14px;
+}
+
+.text-content h2 {
+    margin-bottom: 20px;
+    font-size: 18px;
+    font-weight: 700;
+}
+
+.notes-area {
+    width: 100%;
+    height: 100%;
+    padding: 15px;
+    font-size: 14px;
+    line-height: 1.6;
+    border: none;
+    border-radius: 8px;
+    background: rgba(255, 255, 255, 0.1);
+    resize: none;
+    color: var(--text-light);
+    font-family: var(--font);
+    overflow-y: auto;
+}
+
+.notes-area:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--neon-blue);
+}
+
+.gallery {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    touch-action: none;
+    background: var(--code-bg);
+}
+
+.gallery-container {
+    display: flex;
+    transition: transform 0.4s ease;
+    height: 100%;
+    width: 100%;
+}
+
+.gallery-item {
+    flex: 0 0 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.gallery-item img,
+.gallery-item video {
+    max-width: 90%;
+    max-height: 70%;
+    border-radius: 8px;
+    box-shadow: var(--shadow);
+}
+
+.arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background: rgba(0, 0, 0, 0.5);
+    color: var(--text-light);
+    font-size: 20px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border-radius: 50%;
+    z-index: 1001;
+    transition: var(--transition);
+}
+
+.arrow:hover {
+    background: rgba(0, 0, 0, 0.7);
+}
+
+.arrow.left {
+    left: 15px;
+}
+
+.arrow.right {
+    right: 15px;
+}
+
+.dock {
+    position: fixed;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.4));
+    backdrop-filter: blur(12px);
+    border-radius: 14px;
+    padding: 10px;
+    display: flex;
+    gap: 15px;
+    box-shadow: var(--shadow);
+    z-index: 50;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+}
+
+.dock-item {
+    position: relative;
+    cursor: pointer;
+    transition: var(--transition);
+}
+
+.dock-icon {
+    width: 50px;
+    height: 50px;
+    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5));
+    border-radius: 10px;
+}
+
+
+.dock-item:hover .dock-tooltip {
+    opacity: 1;
+    transform: translateY(-10px);
+}
+
+.dock-tooltip {
+    position: absolute;
+    bottom: 65px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: var(--code-bg);
+    color: var(--text-light);
+    padding: 6px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    opacity: 0;
+    transition: var(--transition);
+    white-space: nowrap;
+}
+
+.notification {
+    position: absolute;
+    top: -5px;
+    right: -5px;
+    width: 18px;
+    height: 18px;
+    background: #ff5555;
+    color: white;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 12px;
+    font-weight: 700;
+    box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+}
+
+@keyframes window-open {
+    from {
+        transform: scale(0.9) translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+@media (min-width: 769px) {
+    .desktop {
+        display: flex;
+        flex-direction: row;
+        align-items: flex-start;
+        justify-content: flex-start;
+        padding: 50px 20px 80px 20px;
+    }
+
+    .file[data-type="projects"] {
+        position: absolute;
+        left: 80px;
+        top: 80px;
+    }
+
+    .file[data-type="photos"] {
+        position: absolute;
+        left: 220px;
+        top: 80px;
+    }
+
+    .file[data-type="text"] {
+        position: absolute;
+        left: 360px;
+        top: 80px;
+    }
+}
+
+@media (max-width: 768px) {
+    .desktop {
+        padding: 40px 15px 100px 15px;
+        display: block; /* Убираем flex для мобильной версии */
+    }
+
+    .file {
+        position: absolute; /* Все иконки абсолютно позиционированы */
+    }
+
+    .file[data-type="projects"] {
+        left: 20px;
+        top: 40px;
+    }
+
+    .file[data-type="photos"] {
+        left: 20px;
+        top: 160px;
+    }
+
+    .file[data-type="text"] {
+        left: 20px;
+        top: 280px;
+    }
+
+
+    .file-icon {
+        width: 80px;
+        height: 80px;
+    }
+
+    .file span {
+        font-size: 13px;
+    }
+
+    .window {
+        width: 90vw;
+        max-height: 500px;
+        left: calc(50% - 45vw);
+    }
+
+    .window-content {
+        padding: 12px;
+        font-size: 14px;
+    }
+
+    .text-content p {
+        font-size: 13px;
+        margin-bottom: 12px;
+    }
+
+    .text-content h2 {
+        font-size: 18px;
+    }
+
+    .dock {
+        padding: 8px;
+        gap: 12px;
+    }
+
+    .dock-icon {
+        width: 45px;
+        height: 45px;
+    }
+
+    .menu-bar {
+        font-size: 13px;
+        height: 24px;
+    }
+
+    .arrow {
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+    }
+
+    .notification {
+        width: 15px;
+        height: 15px;
+        font-size: 10px;
+    }
+}
+
+@media (max-width: 480px) {
+    .window {
+        max-height: 450px;
+    }
+
+    .desktop {
+        padding: 30px 10px 90px 10px;
+    }
+
+    .file-icon {
+        width: 70px;
+        height: 70px;
+    }
+
+    .file span {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+
+    .window-content {
+        padding: 10px;
+        font-size: 13px;
+    }
+
+
+    .dock {
+        padding: 6px;
+        gap: 10px;
+    }
+
+    .dock-icon {
+        width: 40px;
+        height: 40px;
+    }
+
+    .menu-bar {
+        font-size: 12px;
+        height: 22px;
+    }
+
+    .arrow {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+    }
+
+    .window-header {
+        padding: 10px 15px;
+    }
+
+    .window-title {
+        font-size: 13px;
+    }
+
+    .window-control {
+        width: 12px;
+        height: 12px;
+    }
+
+    .close-icon {
+        width: 7px;
+        height: 7px;
+    }
+
+    .notification {
+        width: 14px;
+        height: 14px;
+        font-size: 9px;
+    }
+
+    .call-item img {
+        width: 35px;
+        height: 35px;
+    }
+
+    .folder-item img,
+    .folder-item video {
+        width: 80px;
+        height: 80px;
+    }
+
+    .folder-item span {
+        font-size: 12px;
+    }
+}
+
+
+/* Styles for the system notification */
+.system-notification-container {
+    position: fixed;
+    top: -100px;
+    right: 20px;
+    width: 320px;
+    z-index: 2000;
+    opacity: 0;
+    transition: opacity 0.3s ease, top 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.system-notification-container.show {
+    top: 20px;
+    opacity: 1;
+}
+
+.system-notification-container.hide {
+    top: -100px;
+    opacity: 0;
+}
+
+.system-notification-content {
+    background: rgba(0, 0, 0, 0.7);
+    backdrop-filter: blur(10px);
+    border-radius: 12px;
+    padding: 15px;
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
+    color: var(--text-light);
+    touch-action: none;
+}
+
+.system-notification-icon {
+    width: 40px;
+    height: 40px;
+    border-radius: 8px;
+}
+
+.system-notification-text h3 {
+    font-size: 16px;
+    font-weight: 700;
+    margin-bottom: 6px;
+    color: var(--neon-green);
+}
+
+.system-notification-text p {
+    font-size: 14px;
+    line-height: 1.4;
+    opacity: 0.9;
+}
+
+@media (max-width: 480px) {
+    .system-notification-container {
+        width: 280px;
+        right: 10px;
+    }
+
+    .system-notification-content {
+        padding: 12px;
+    }
+
+    .system-notification-icon {
+        width: 35px;
+        height: 35px;
+    }
+
+    .system-notification-text h3 {
+        font-size: 14px;
+    }
+
+    .system-notification-text p {
+        font-size: 12px;
+    }
+}
