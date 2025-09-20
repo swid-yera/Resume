@@ -21,12 +21,14 @@
 }
 
 body {
-    background: linear-gradient(to bottom, #87CEEB 0%, #6BB6FF 25%, #FFB6C1 75%, #FF9FB3 100%);
+    background: linear-gradient(180deg, #87CEEB 0%, #6BB6FF 30%, #FFB6C1 70%, #FF9FB3 100%);
     height: 100vh;
     width: 100vw;
     overflow: hidden;
     position: fixed;
     touch-action: manipulation;
+    margin: 0;
+    padding: 0;
 }
 
 
@@ -60,7 +62,7 @@ body {
     position: fixed;
     top: 0;
     left: 0;
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.05), rgba(0, 0, 0, 0.3));
+    background: linear-gradient(180deg, #87CEEB 0%, #6BB6FF 30%, #FFB6C1 70%, #FF9FB3 100%);
     z-index: 10;
     overflow: hidden;
     touch-action: none;
@@ -72,6 +74,7 @@ body {
     align-items: center;
     text-align: center;
     cursor: pointer;
+    transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
     z-index: 20;
     touch-action: none;
     will-change: left, top;
@@ -462,6 +465,9 @@ body {
     border-radius: 10px;
 }
 
+.dock-item:hover {
+    transform: scale(1.4) translateY(-8px);
+}
 
 .dock-item:hover .dock-tooltip {
     opacity: 1;
@@ -518,6 +524,7 @@ body {
         align-items: flex-start;
         justify-content: flex-start;
         padding: 50px 20px 80px 20px;
+        background: linear-gradient(180deg, #87CEEB 0%, #6BB6FF 30%, #FFB6C1 70%, #FF9FB3 100%);
     }
 
     .file[data-type="projects"] {
@@ -543,6 +550,7 @@ body {
     .desktop {
         padding: 40px 15px 100px 15px;
         display: block; /* Убираем flex для мобильной версии */
+        background: linear-gradient(180deg, #87CEEB 0%, #6BB6FF 30%, #FFB6C1 70%, #FF9FB3 100%);
     }
 
     .file {
@@ -629,6 +637,7 @@ body {
 
     .desktop {
         padding: 30px 10px 90px 10px;
+        background: linear-gradient(180deg, #87CEEB 0%, #6BB6FF 30%, #FFB6C1 70%, #FF9FB3 100%);
     }
 
     .file-icon {
@@ -704,84 +713,6 @@ body {
     }
 
     .folder-item span {
-        font-size: 12px;
-    }
-}
-
-
-/* Styles for the system notification */
-.system-notification-container {
-    position: fixed;
-    top: -100px;
-    right: 20px;
-    width: 320px;
-    z-index: 2000;
-    opacity: 0;
-    transition: opacity 0.3s ease, top 0.5s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.system-notification-container.show {
-    top: 20px;
-    opacity: 1;
-}
-
-.system-notification-container.hide {
-    top: -100px;
-    opacity: 0;
-}
-
-.system-notification-content {
-    background: rgba(0, 0, 0, 0.7);
-    backdrop-filter: blur(10px);
-    border-radius: 12px;
-    padding: 15px;
-    display: flex;
-    align-items: flex-start;
-    gap: 12px;
-    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
-    color: var(--text-light);
-    touch-action: none;
-}
-
-.system-notification-icon {
-    width: 40px;
-    height: 40px;
-    border-radius: 8px;
-}
-
-.system-notification-text h3 {
-    font-size: 16px;
-    font-weight: 700;
-    margin-bottom: 6px;
-    color: var(--neon-green);
-}
-
-.system-notification-text p {
-    font-size: 14px;
-    line-height: 1.4;
-    opacity: 0.9;
-}
-
-@media (max-width: 480px) {
-    .system-notification-container {
-        width: 280px;
-        right: 10px;
-    }
-
-    .system-notification-content {
-        padding: 12px;
-    }
-
-    .system-notification-icon {
-        width: 35px;
-        height: 35px;
-    }
-
-    .system-notification-text h3 {
-        font-size: 14px;
-    }
-
-    .system-notification-text p {
         font-size: 12px;
     }
 }
