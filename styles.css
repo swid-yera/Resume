@@ -441,15 +441,14 @@ body {
     bottom: 15px;
     left: 50%;
     transform: translateX(-50%);
-    background: linear-gradient(135deg, rgba(255, 255, 255, 0.1), rgba(0, 0, 0, 0.4));
     backdrop-filter: blur(12px);
     border-radius: 14px;
     padding: 10px;
     display: flex;
     gap: 15px;
     box-shadow: var(--shadow);
-    z-index: 50;
-    border: 1px solid rgba(255, 255, 255, 0.1);
+    z-index: 100;
+    border: 3px solid rgba(255, 255, 255, 0.1);
 }
 
 .dock-item {
