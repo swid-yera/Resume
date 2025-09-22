@@ -312,10 +312,12 @@ function loadGitHubProfile() {
             <!-- Header с аватаром и инфой -->
             <div class="gh-header" id="github-info">Loading...</div>
 
-            <!-- Основная часть: README и Repos -->
+            <!-- Основная часть: слева лого + followers/following, справа README и Repos -->
             <div class="gh-body">
-                <!-- Левая колонка пустая, оставим только для будущего -->
-                <div></div>
+                <!-- Левая колонка -->
+                <div style="display:flex; flex-direction:column; gap:10px;">
+                    <div id="github-left"></div>
+                </div>
 
                 <!-- Правая колонка -->
                 <div style="display:flex; flex-direction:column; gap:15px;">
@@ -333,15 +335,14 @@ function loadGitHubProfile() {
     fetch("https://api.github.com/users/swid-yera")
         .then(res => res.json())
         .then(user => {
-            document.getElementById("github-info").innerHTML = `
+            const leftHTML = `
                 <img src="${user.avatar_url}" class="gh-avatar" />
-                <div>
-                    <h2>${user.name || user.login}</h2>
-                    <p>${user.followers} followers · ${user.following} following</p>
-                </div>
+                <h2>${user.name || user.login}</h2>
+                <p>${user.followers} followers · ${user.following} following</p>
             `;
+            document.getElementById("github-left").innerHTML = leftHTML;
         })
-        .catch(() => document.getElementById("github-info").textContent = "Failed to load profile.");
+        .catch(() => document.getElementById("github-left").textContent = "Failed to load profile.");
 
     // Популярные репозитории
     fetch("https://api.github.com/users/swid-yera/repos?sort=updated&per_page=5")
