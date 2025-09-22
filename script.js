@@ -309,17 +309,15 @@ document.addEventListener('DOMContentLoaded', () => {
 function loadGitHubProfile() {
     windowContent.innerHTML = `
         <div class="github-profile">
-            <!-- Header с аватаром и инфой -->
-            <div class="gh-header" id="github-info">Loading...</div>
+            <!-- Header -->
+            <div class="gh-header" id="github-header">Loading...</div>
 
-            <!-- Основная часть: слева лого + followers/following, справа README и Repos -->
+            <!-- Основная часть: левый и правый блоки -->
             <div class="gh-body">
-                <!-- Левая колонка -->
-                <div style="display:flex; flex-direction:column; gap:10px;">
-                    <div id="github-left"></div>
-                </div>
+                <!-- Левая колонка: аватар + имя + followers/following -->
+                <div id="github-left"></div>
 
-                <!-- Правая колонка -->
+                <!-- Правая колонка: README сверху, Repos снизу -->
                 <div style="display:flex; flex-direction:column; gap:15px;">
                     <div class="gh-readme" id="github-readme">Loading README...</div>
                     <div class="gh-repos">
@@ -335,11 +333,13 @@ function loadGitHubProfile() {
     fetch("https://api.github.com/users/swid-yera")
         .then(res => res.json())
         .then(user => {
-            const leftHTML = `
+            let leftHTML = `
                 <img src="${user.avatar_url}" class="gh-avatar" />
                 <h2>${user.name || user.login}</h2>
-                <p>${user.followers} followers · ${user.following} following</p>
             `;
+            if (user.followers !== undefined && user.following !== undefined) {
+                leftHTML += `<p>${user.followers} followers · ${user.following} following</p>`;
+            }
             document.getElementById("github-left").innerHTML = leftHTML;
         })
         .catch(() => document.getElementById("github-left").textContent = "Failed to load profile.");
