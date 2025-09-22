@@ -8,10 +8,12 @@
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Панель сверху -->
     <div class="menu-bar">
         <div class="datetime" id="datetime"></div>
     </div>
 
+    <!-- Рабочий стол -->
     <div class="desktop" id="desktop">
         <div class="file folder" data-type="projects">
             <div class="file-icon">
@@ -33,6 +35,7 @@
         </div>
     </div>
 
+    <!-- Окно -->
     <div class="window" id="window">
         <div class="window-header">
             <div class="window-controls">
@@ -44,30 +47,12 @@
             </div>
             <span class="window-title">Desktop</span>
         </div>
-        <div class="window-content" id="window-content"></div>
-
-        <!-- GitHub окно -->
-        <div class="window-content github-profile" id="github-profile" style="display:none;">
-            <div class="gh-header">
-                <img id="gh-avatar" class="gh-avatar" src="" alt="avatar">
-                <div>
-                    <h2 id="gh-username"></h2>
-                    <p id="gh-followers"></p>
-                </div>
-            </div>
-            <div class="gh-body">
-                <div class="gh-readme">
-                    <h3>README</h3>
-                    <div id="gh-readme">Loading...</div>
-                </div>
-                <div class="gh-repos">
-                    <h3>Popular Repositories</h3>
-                    <ul id="gh-repos">Loading...</ul>
-                </div>
-            </div>
+        <div class="window-content" id="window-content">
+            <!-- Здесь JS будет рендерить GitHub профиль или содержимое файлов -->
         </div>
     </div>
 
+    <!-- Dock -->
     <div class="dock">
         <div class="dock-item" data-type="calls">
             <img src="https://fsystem88.ru/icons/phone.png" alt="Calls" class="dock-icon">
@@ -96,7 +81,7 @@
         </div>
     </div>
 
-    <!-- подключаем библиотеки в самом конце -->
+    <!-- Скрипты -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="script.js"></script>
 </body>
