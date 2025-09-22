@@ -317,14 +317,39 @@ document.addEventListener('DOMContentLoaded', () => {
 
 						// Notes functionality removed
 						break;
-                    case 'github':
-                        windowContent.innerHTML = `
-                        <iframe 
-                        src="https://github.com/swid-yera" 
-                        style="width:100%; height:100%; border:none; border-radius:8px;">
-                        </iframe>`;
-                        break;
+case 'github':
+    windowContent.innerHTML = `
+        <div id="github-profile" style="padding: 15px; font-family: sans-serif; color: #fff;">
+            <h2>GitHub Profile</h2>
+            <div id="github-info">Loading...</div>
+            <ul id="github-repos" style="list-style:none; padding:0; margin-top:15px;"></ul>
+        </div>
+    `;
+    fetch("https://api.github.com/users/swid-yera")
+        .then(res => res.json())
+        .then(user => {
+            document.getElementById("github-info").innerHTML = `
+                <img src="${user.avatar_url}" width="80" style="border-radius:50%; margin-bottom:10px;" />
+                <p><b>${user.name || user.login}</b></p>
+                <p>${user.bio || "No bio available"}</p>
+                <a href="${user.html_url}" target="_blank" style="color:#58a6ff;">View on GitHub</a>
+            `;
+        });
+    fetch("https://api.github.com/users/swid-yera/repos?sort=updated&per_page=5")
+        .then(res => res.json())
+        .then(repos => {
+            let repoList = repos.map(repo => `
+                <li style="margin-bottom:10px;">
+                    <a href="${repo.html_url}" target="_blank" style="color:#58a6ff; text-decoration:none;">
+                    ${repo.name}
+                    </a>
+                    ⭐ ${repo.stargazers_count}
+                    </li>
+                    `).join("");
 
+            document.getElementById("github-repos").innerHTML = repoList;
+        });
+    break;
                 }
             }
         }, 0);
@@ -478,14 +503,5 @@ document.addEventListener('DOMContentLoaded', () => {
 	// System notifications removed
 
 	// Hash checking removed
-
-
-
-
-
-
-
-
-	
 });
 
