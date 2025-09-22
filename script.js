@@ -30,6 +30,28 @@ document.addEventListener('DOMContentLoaded', () => {
     }
     updateDateTime();
 
+    // Check button functionality
+    const checkButton = document.getElementById('check-button');
+    const checkPanel = document.getElementById('check-panel');
+
+    if (checkButton) {
+        checkButton.addEventListener('click', (e) => {
+            e.stopPropagation();
+            if (checkPanel.style.display === 'block') {
+                checkPanel.style.display = 'none';
+            } else {
+                checkPanel.style.display = 'block';
+            }
+        });
+
+        // Close panel when clicking outside
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.corner-area') && !e.target.closest('.check-panel')) {
+                checkPanel.style.display = 'none';
+            }
+        });
+    }
+
     // Инициализация начальных позиций иконок
     files.forEach(file => {
         if (isMobile) {
@@ -132,13 +154,38 @@ document.addEventListener('DOMContentLoaded', () => {
     dockItems.forEach(item => {
         const handler = (e) => {
             e.stopPropagation();
-            if (item.dataset.type === 'telegram' || item.dataset.type === 'github' || item.dataset.type === 'instagram') {
-                // Links removed
-            } else {
+            // if (item.dataset.type === 'telegram' || item.dataset.type === 'github' || item.dataset.type === 'instagram') {
+            //     // Links removed
+            // } else {
                 openWindow(item.dataset.type);
-            }
+            // }
         };
         item.addEventListener(isMobile ? 'touchend' : 'click', handler, { passive: true });
+
+        // Add comments for calls and Instagram
+        if (item.dataset.type === 'calls') {
+            item.addEventListener('mouseenter', () => {
+                if (!isMobile) {
+                    item.setAttribute('title', 'Звонки - История вызовов');
+                }
+            });
+        }
+
+        // if (item.dataset.type === 'instagram') {
+        //     item.addEventListener('mouseenter', () => {
+        //         if (!isMobile) {
+        //             item.setAttribute('title', 'Instagram - Социальная сеть');
+        //         }
+        //     });
+        // }
+
+        // if (item.dataset.type === 'telegram') {
+        //     item.addEventListener('mouseenter', () => {
+        //         if (!isMobile) {
+        //             item.setAttribute('title', 'Telegram - Мессенджер');
+        //         }
+        //     });
+        // }
     });
 
     let isDraggingWindow = false, startX, startY, initialX, initialY;
@@ -466,18 +513,8 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     `;
     document.head.appendChild(style);
-
 	// System notifications removed
-
-	// Hash checking removed
-
-
-
-
-
-
-
-
-	
+	// Hash checking removed	
 });
+
 
