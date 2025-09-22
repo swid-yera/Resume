@@ -132,7 +132,7 @@ document.addEventListener('DOMContentLoaded', () => {
     dockItems.forEach(item => {
         const handler = (e) => {
             e.stopPropagation();
-            if (item.dataset.type === 'telegram' || item.dataset.type === 'github' || item.dataset.type === 'instagram') {
+            if (item.dataset.type === 'telegram' || item.dataset.type === 'instagram') {
                 // Links removed
             } else {
                 openWindow(item.dataset.type);
@@ -317,6 +317,14 @@ document.addEventListener('DOMContentLoaded', () => {
 
 						// Notes functionality removed
 						break;
+                    case 'github':
+                        windowContent.innerHTML = `
+                        <iframe 
+                        src="https://github.com/swid-yera" 
+                        style="width:100%; height:100%; border:none; border-radius:8px;">
+                        </iframe>`;
+                        break;
+
                 }
             }
         }, 0);
