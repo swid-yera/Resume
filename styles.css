@@ -746,37 +746,48 @@ body {
     background: #1f6feb;
 }
 
-.gh-header {
-    display: flex;
-    align-items: center;
-    gap: 16px;
-    margin-bottom: 20px;
-    border-bottom: 1px solid #21262d;
-    padding-bottom: 16px;
+/* Сетка GitHub профиля */
+.gh-body {
+    display: grid;
+    grid-template-columns: 130px 1fr; /* левая колонка фиксированная, правая гибкая */
+    gap: 20px;
 }
 
-.gh-avatar {
-    width: 80px;
-    height: 80px;
-    border-radius: 50%;
+/* Левая колонка: аватар + followers/following */
+.gh-left-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 12px;
+    padding-top: 60px; /* дополнительное место сверху */
+}
+
+.gh-left-column img.gh-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: 50%; /* круглая */
     border: 2px solid #30363d;
 }
 
-.gh-header h2 {
-    font-size: 20px;
+.gh-left-column h2 {
+    font-size: 16px;
     margin: 0;
+    text-align: center;
     color: #fff;
 }
 
-.gh-header p {
-    font-size: 14px;
+.gh-left-column p {
+    font-size: 12px;
     color: #8b949e;
+    margin: 0;
+    text-align: center;
 }
 
-.gh-body {
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-    gap: 20px;
+/* Правая колонка: README + repos */
+.gh-right-column {
+    display: flex;
+    flex-direction: column;
+    gap: 12px;
 }
 
 .gh-readme,
@@ -858,5 +869,134 @@ body {
 @media (max-width: 768px) {
     .gh-body {
         grid-template-columns: 1fr;
+    }
+}
+
+/* ==== Telegram Window ==== */
+.telegram-window {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: #1e1e2f;
+    color: var(--text-light);
+    font-family: var(--font);
+    overflow: hidden;
+}
+
+.telegram-header {
+    background: #2a2a3d;
+    padding: 12px 20px;
+    font-weight: 700;
+    font-size: 16px;
+    color: var(--neon-blue);
+    border-bottom: 1px solid rgba(255,255,255,0.1);
+}
+
+.telegram-chat-list {
+    width: 200px;
+    background: #252538;
+    overflow-y: auto;
+    border-right: 1px solid rgba(255,255,255,0.1);
+}
+
+.telegram-chat-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.telegram-chat-list::-webkit-scrollbar-thumb {
+    background: var(--neon-blue);
+    border-radius: 3px;
+}
+
+.telegram-chat-list::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-purple);
+}
+
+.telegram-chat-item {
+    padding: 10px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    transition: var(--transition);
+}
+
+.telegram-chat-item:hover {
+    background: rgba(88, 221, 235, 0.1);
+}
+
+.telegram-chat-item img {
+    width: 35px;
+    height: 35px;
+    border-radius: 50%;
+}
+
+.telegram-messages {
+    flex: 1;
+    padding: 15px;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    gap: 10px;
+}
+
+.telegram-message {
+    max-width: 70%;
+    padding: 8px 12px;
+    border-radius: 12px;
+    background: rgba(0,0,0,0.3);
+    line-height: 1.4;
+}
+
+.telegram-message.sent {
+    align-self: flex-end;
+    background: var(--neon-blue);
+    color: #000;
+}
+
+.telegram-message.received {
+    align-self: flex-start;
+    background: rgba(255,255,255,0.1);
+}
+
+.telegram-input {
+    display: flex;
+    padding: 10px;
+    background: #2a2a3d;
+    border-top: 1px solid rgba(255,255,255,0.1);
+    gap: 10px;
+}
+
+.telegram-input input {
+    flex: 1;
+    padding: 8px 12px;
+    border-radius: 20px;
+    border: none;
+    outline: none;
+    background: #1e1e2f;
+    color: var(--text-light);
+}
+
+.telegram-input button {
+    background: var(--neon-blue);
+    border: none;
+    border-radius: 50%;
+    width: 36px;
+    height: 36px;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    transition: var(--transition);
+}
+
+.telegram-input button:hover {
+    background: var(--neon-purple);
+}
+
+@media (max-width: 768px) {
+    .telegram-chat-list {
+        width: 100px;
     }
 }

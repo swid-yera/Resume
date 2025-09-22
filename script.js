@@ -41,94 +41,106 @@ document.addEventListener('DOMContentLoaded', () => {
     // -----------------------
     // 2. Перетаскивание файлов
     // -----------------------
-    function setupFileDragging(file) {
-        let isDragging = false, startX, startY, offsetX, offsetY;
-        let hasMoved = false, startTarget = null, isProcessing = false;
+function setupFileDragging(file) {
+    let isDragging = false, startX, startY, offsetX, offsetY;
+    let hasMoved = false, startTarget = null, isProcessing = false;
 
-        const startDrag = (e) => {
-            if (isMobile && !e.target.closest('.file-icon')) return;
-            const targetFile = e.target.closest('.file');
-            if (!targetFile || isProcessing) return;
-            e.preventDefault();
-            startTarget = targetFile;
-            isDragging = true;
-            hasMoved = false;
-            const rect = file.getBoundingClientRect();
-            const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-            const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-            offsetX = clientX - rect.left;
-            offsetY = clientY - rect.top;
-            file.classList.add('dragging');
-            file.style.position = 'absolute';
-            file.style.zIndex = '30';
-        };
+    const startDrag = (e) => {
+        // Перемещаем только те элементы, у которых data-draggable="true"
+        if (file.dataset.draggable !== 'true') return;
 
-        const moveDrag = (e) => {
-            if (!isDragging) return;
-            e.preventDefault();
-            hasMoved = true;
-            const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-            const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
-            let newX = clientX - offsetX;
-            let newY = clientY - offsetY;
-            newX = Math.max(PADDING, Math.min(newX, window.innerWidth - file.offsetWidth - PADDING));
-            newY = Math.max(PADDING + (isMobile ? 40 : 50), Math.min(newY, window.innerHeight - file.offsetHeight - PADDING - (isMobile ? 100 : 80)));
-            file.style.left = `${newX}px`;
-            file.style.top = `${newY}px`;
-        };
+        if (isMobile && !e.target.closest('.file-icon')) return;
 
-        const endDrag = (e) => {
-            if (isDragging) {
-                isDragging = false;
-                file.classList.remove('dragging');
-                file.style.zIndex = '20';
-            }
-            if (!hasMoved && startTarget && startTarget === e.target.closest('.file') && !isProcessing) {
+        e.preventDefault();
+        startTarget = file;
+        isDragging = true;
+        hasMoved = false;
+
+        const rect = file.getBoundingClientRect();
+        const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+        offsetX = clientX - rect.left;
+        offsetY = clientY - rect.top;
+
+        file.classList.add('dragging');
+        file.style.position = 'absolute';
+        file.style.zIndex = '30';
+    };
+
+    const moveDrag = (e) => {
+        if (!isDragging) return;
+        e.preventDefault();
+        hasMoved = true;
+
+        const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
+        const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+
+        let newX = clientX - offsetX;
+        let newY = clientY - offsetY;
+
+        newX = Math.max(PADDING, Math.min(newX, window.innerWidth - file.offsetWidth - PADDING));
+        newY = Math.max(PADDING + (isMobile ? 40 : 50), Math.min(newY, window.innerHeight - file.offsetHeight - PADDING - (isMobile ? 100 : 80)));
+
+        file.style.left = `${newX}px`;
+        file.style.top = `${newY}px`;
+    };
+
+    const endDrag = (e) => {
+        if (isDragging) {
+            isDragging = false;
+            file.classList.remove('dragging');
+            file.style.zIndex = '20';
+        }
+
+        if (!hasMoved && startTarget && startTarget === file && !isProcessing) {
+            isProcessing = true;
+            openWindow(file.dataset.type);
+            setTimeout(() => { isProcessing = false; }, 100);
+        }
+
+        startTarget = null;
+    };
+
+    if (isMobile) {
+        file.addEventListener('touchstart', startDrag, { passive: false });
+        file.addEventListener('touchmove', moveDrag, { passive: false });
+        file.addEventListener('touchend', endDrag, { passive: true });
+        file.addEventListener('touchcancel', endDrag, { passive: true });
+    } else {
+        file.addEventListener('mousedown', (e) => {
+            startDrag(e);
+            const moveHandler = (ev) => moveDrag(ev);
+            const upHandler = (ev) => {
+                endDrag(ev);
+                document.removeEventListener('mousemove', moveHandler);
+                document.removeEventListener('mouseup', upHandler);
+            };
+            document.addEventListener('mousemove', moveHandler);
+            document.addEventListener('mouseup', upHandler);
+        });
+
+        file.addEventListener('click', (e) => {
+            if (!hasMoved && !isDragging && !isProcessing) {
                 isProcessing = true;
                 openWindow(file.dataset.type);
                 setTimeout(() => { isProcessing = false; }, 100);
             }
-            startTarget = null;
-        };
+        });
+    }           
+}
+const startYDesktop = 50; // отступ сверху для первого элемента
+const gap = 150;          // вертикальный отступ между элементами
 
-        if (isMobile) {
-            file.addEventListener('touchstart', startDrag, { passive: false });
-            file.addEventListener('touchmove', moveDrag, { passive: false });
-            file.addEventListener('touchend', endDrag, { passive: true });
-            file.addEventListener('touchcancel', endDrag, { passive: true });
-        } else {
-            file.addEventListener('mousedown', (e) => {
-                startDrag(e);
-                const moveHandler = (ev) => moveDrag(ev);
-                const upHandler = (ev) => {
-                    endDrag(ev);
-                    document.removeEventListener('mousemove', moveHandler);
-                    document.removeEventListener('mouseup', upHandler);
-                };
-                document.addEventListener('mousemove', moveHandler);
-                document.addEventListener('mouseup', upHandler);
-            });
-            file.addEventListener('click', (e) => {
-                if (!hasMoved && !isDragging && !isProcessing) {
-                    isProcessing = true;
-                    openWindow(file.dataset.type);
-                    setTimeout(() => { isProcessing = false; }, 100);
-                }
-            });
-        }
-    }
+files.forEach((file, index) => {
+    file.style.position = 'absolute';
+    file.style.left = '20px';                     // фиксированная позиция слева
+    file.style.top = `${startYDesktop + index * gap}px`;
 
-    files.forEach(file => {
+    // Только текстовые файлы можно двигать
+    if (file.dataset.draggable === 'true') {
         setupFileDragging(file);
-        if (isMobile) {
-            switch (file.dataset.type) {
-                case 'projects': file.style.left = '20px'; file.style.top = '40px'; break;
-                case 'photos': file.style.left = '20px'; file.style.top = '160px'; break;
-                case 'text': file.style.left = '20px'; file.style.top = '280px'; break;
-            }
-            file.style.position = 'absolute';
-        }
-    });
+    }
+});
 
     // -----------------------
     // 3. Перетаскивание окна
@@ -197,11 +209,13 @@ document.addEventListener('DOMContentLoaded', () => {
     // 5. Док-бар
     // -----------------------
     dockItems.forEach(item => {
-        item.addEventListener(isMobile ? 'touchend' : 'click', (e) => {
-            e.stopPropagation();
-            if (!['telegram','instagram'].includes(item.dataset.type)) openWindow(item.dataset.type);
-        }, { passive: true });
-    });
+    item.addEventListener(isMobile ? 'touchend' : 'click', (e) => {
+        e.stopPropagation();
+        // Всегда открываем окно для всех dock items
+        openWindow(item.dataset.type);
+    }, { passive: true });
+});
+
 
     // -----------------------
     // 6. Открытие окна
@@ -219,6 +233,7 @@ document.addEventListener('DOMContentLoaded', () => {
         else if (type === 'calls') renderCalls();
         else if (type === 'notes') renderNotes();
         else if (type === 'github') loadGitHubProfile();
+        else if(type === 'telegram') renderTelegram();
     }
 
     // -----------------------
@@ -309,16 +324,16 @@ document.addEventListener('DOMContentLoaded', () => {
 function loadGitHubProfile() {
     windowContent.innerHTML = `
         <div class="github-profile">
-            <!-- Header -->
-            <div class="gh-header" id="github-header">Loading...</div>
-
-            <!-- Основная часть: левый и правый блоки -->
             <div class="gh-body">
-                <!-- Левая колонка: аватар + имя + followers/following -->
-                <div id="github-left"></div>
+                <!-- Левая колонка -->
+                <div class="gh-left-column">
+                    <img id="gh-avatar" class="gh-avatar" src="" alt="Avatar" />
+                    <h2 id="gh-name">Loading...</h2>
+                    <p id="gh-followers">Loading...</p>
+                </div>
 
-                <!-- Правая колонка: README сверху, Repos снизу -->
-                <div style="display:flex; flex-direction:column; gap:15px;">
+                <!-- Правая колонка -->
+                <div class="gh-right-column">
                     <div class="gh-readme" id="github-readme">Loading README...</div>
                     <div class="gh-repos">
                         <h3>Popular repositories</h3>
@@ -333,16 +348,14 @@ function loadGitHubProfile() {
     fetch("https://api.github.com/users/swid-yera")
         .then(res => res.json())
         .then(user => {
-            let leftHTML = `
-                <img src="${user.avatar_url}" class="gh-avatar" />
-                <h2>${user.name || user.login}</h2>
-            `;
-            if (user.followers !== undefined && user.following !== undefined) {
-                leftHTML += `<p>${user.followers} followers · ${user.following} following</p>`;
-            }
-            document.getElementById("github-left").innerHTML = leftHTML;
+            document.getElementById("gh-avatar").src = user.avatar_url;
+            document.getElementById("gh-name").textContent = user.name || user.login;
+            document.getElementById("gh-followers").textContent = `${user.followers} followers · ${user.following} following`;
         })
-        .catch(() => document.getElementById("github-left").textContent = "Failed to load profile.");
+        .catch(() => {
+            document.getElementById("gh-name").textContent = "Failed to load";
+            document.getElementById("gh-followers").textContent = "";
+        });
 
     // Популярные репозитории
     fetch("https://api.github.com/users/swid-yera/repos?sort=updated&per_page=5")
@@ -371,4 +384,73 @@ function loadGitHubProfile() {
     const style = document.createElement('style');
     style.innerHTML = `@keyframes window-minimize { to { transform: scale(0.3); opacity: 0; } }`;
     document.head.appendChild(style);
+
+    // -----------------------
+    // 9. Telegram
+    // -----------------------
+    function renderTelegram() {
+    windowContent.innerHTML = `
+        <div class="telegram-window">
+            <div class="telegram-header">Telegram</div>
+            <div style="display:flex; flex:1; overflow:hidden;">
+                <div class="telegram-chat-list" id="telegram-chat-list"></div>
+                <div class="telegram-messages" id="telegram-messages"></div>
+            </div>
+            <div class="telegram-input">
+                <input type="text" id="telegram-input" placeholder="Type a message...">
+                <button id="telegram-send">&#9658;</button>
+            </div>
+        </div>
+    `;
+
+    const chatList = document.getElementById('telegram-chat-list');
+    const messagesContainer = document.getElementById('telegram-messages');
+    const input = document.getElementById('telegram-input');
+    const sendBtn = document.getElementById('telegram-send');
+
+    const chats = [
+        { id: 1, name: 'Alice', avatar: 'photos/photo1.jpg', messages: [{type:'received', text:'Hi there!'}] },
+        { id: 2, name: 'Bob', avatar: 'photos/photo2.jpg', messages: [{type:'received', text:'Hello!'}] },
+    ];
+
+    let activeChatId = chats[0].id;
+
+    function renderChatList() {
+        chatList.innerHTML = chats.map(chat => `
+            <div class="telegram-chat-item" data-id="${chat.id}">
+                <img src="${chat.avatar}" alt="${chat.name}">
+                <span>${chat.name}</span>
+            </div>
+        `).join('');
+    }
+
+    function renderMessages() {
+        const chat = chats.find(c => c.id === activeChatId);
+        messagesContainer.innerHTML = chat.messages.map(msg => `
+            <div class="telegram-message ${msg.type}">${msg.text}</div>
+        `).join('');
+        messagesContainer.scrollTop = messagesContainer.scrollHeight;
+    }
+
+    chatList.addEventListener('click', e => {
+        const item = e.target.closest('.telegram-chat-item');
+        if(!item) return;
+        activeChatId = parseInt(item.dataset.id);
+        renderMessages();
+    });
+
+    sendBtn.addEventListener('click', () => {
+        const text = input.value.trim();
+        if(!text) return;
+        const chat = chats.find(c => c.id === activeChatId);
+        chat.messages.push({type:'sent', text});
+        input.value = '';
+        renderMessages();
+    });
+
+    input.addEventListener('keydown', e => { if(e.key === 'Enter') sendBtn.click(); });
+
+    renderChatList();
+    renderMessages();
+}
 });
