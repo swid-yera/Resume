@@ -9,6 +9,7 @@
     --border-radius: 12px;
     --transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     --font: 'Source Code Pro', monospace;
+    --clock-font: 'Alumni Sans Pinstripe', cursive;
 }
 
 /* ==== Lock Screen ==== */
@@ -33,33 +34,65 @@
     text-align: center;
 }
 
-.unlock-button {
-    width: 120px;
-    height: 120px;
+.lock-content {
+    width: 170px;
+    height: 130px;
     background: rgba(255, 255, 255, 0.95);
     border-radius: 20px;
     display: flex;
+    flex-direction: column;
     align-items: center;
     justify-content: center;
-    cursor: pointer;
-    transition: all 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+    transition: all 0.25s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
     border: 2px solid rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(10px);
     z-index: 10001;
     position: relative;
     pointer-events: auto;
+    padding: 15px 10px;
 }
 
-.unlock-button:hover {
-    transform: scale(1.05);
-    background: rgba(255, 255, 255, 1);
-    box-shadow: 0 15px 40px rgba(0, 0, 0, 0.3);
+.lock-time {
+    font-family: var(--clock-font);
+    font-size: 40px;
+    font-weight: 400;
+    color: #333;
+    letter-spacing: 1px;
+    line-height: 1;
+    margin-bottom: 8px;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
 }
 
-.unlock-button:active {
-    transform: scale(0.95);
-    transition: transform 0.05s ease;
+.lock-date {
+    font-family: var(--font);
+    font-size: 16px;
+    font-weight: 500;
+    color: #666;
+    letter-spacing: 0.5px;
+    text-transform: lowercase;
+    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
+}
+
+.lock-time {
+    font-family: var(--clock-font);
+    font-size: 40px;
+    font-weight: 400;
+    color: #333;
+    margin-bottom: 8px;
+    text-align: center;
+    letter-spacing: 1px;
+    transition: all 0.25s ease;
+}
+
+.lock-date {
+    font-family: var(--body-font);
+    font-size: 16px;
+    font-weight: 300;
+    color: #666;
+    text-align: center;
+    letter-spacing: 0.5px;
+    transition: all 0.25s ease;
 }
 
 .lock-screen.hide {
@@ -69,9 +102,19 @@
 }
 
 @media (max-width: 768px) {
-    .unlock-button {
-        width: 100px;
-        height: 100px;
+    .lock-content {
+        width: 150px;
+        height: 110px;
+        padding: 12px 8px;
+    }
+    
+    .lock-time {
+        font-size: 32px;
+        margin-bottom: 6px;
+    }
+    
+    .lock-date {
+        font-size: 14px;
     }
 }
 

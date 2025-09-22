@@ -6,12 +6,13 @@ document.addEventListener('DOMContentLoaded', () => {
     const windowContent = document.getElementById('window-content');
     const closeButton = document.getElementById('close-window');
     const datetimeElement = document.getElementById('datetime');
+    const lockTimeElement = document.getElementById('lock-time');
+    const lockDateElement = document.getElementById('lock-date');
     const isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent);
     const PADDING = 20;
 
     // Lock Screen
     const lockScreen = document.getElementById('lock-screen');
-    const unlockButton = document.getElementById('unlock-button');
 
     // Unlock functionality
     function unlockScreen() {
@@ -22,31 +23,18 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Event listeners for unlock
-    unlockButton.addEventListener('click', (e) => {
+    // Click anywhere on lock screen to unlock
+    lockScreen.addEventListener('click', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log('Click detected');
+        console.log('Lock screen click detected');
         unlockScreen();
     });
     
-    unlockButton.addEventListener('touchend', (e) => {
+    lockScreen.addEventListener('touchend', (e) => {
         e.preventDefault();
         e.stopPropagation();
-        console.log('Touch detected');
-        unlockScreen();
-    });
-
-    // Also add mousedown for better responsiveness
-    unlockButton.addEventListener('mousedown', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log('Mouse down detected');
-        unlockScreen();
-    });
-
-    // Click anywhere on lock screen as backup
-    lockScreen.addEventListener('click', (e) => {
-        console.log('Lock screen clicked');
+        console.log('Lock screen touch detected');
         unlockScreen();
     });
 
@@ -73,8 +61,20 @@ document.addEventListener('DOMContentLoaded', () => {
     // -----------------------
     function updateDateTime() {
         const now = new Date();
+        
+        // Время и дата в lock screen
+        if (lockTimeElement && lockDateElement) {
+            const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false };
+            lockTimeElement.textContent = now.toLocaleTimeString('ru-RU', timeOptions);
+            
+            const dateOptions = { weekday: 'short', day: 'numeric', month: 'short' };
+            lockDateElement.textContent = now.toLocaleDateString('en-US', dateOptions);
+        }
+        
+        // Дата и время в меню
         const options = { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
         datetimeElement.textContent = now.toLocaleString('ru-RU', options).replace(',', '');
+        
         setTimeout(updateDateTime, 1000);
     }
     updateDateTime();
