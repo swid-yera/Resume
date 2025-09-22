@@ -6,7 +6,6 @@ document.addEventListener('DOMContentLoaded', () => {
     const windowContent = document.getElementById('window-content');
     const closeButton = document.getElementById('close-window');
     const datetimeElement = document.getElementById('datetime');
-    const dockItems = document.querySelectorAll('.dock-item');
     const isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent);
     const PADDING = 20;
 
@@ -23,17 +22,32 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Event listeners for unlock
-    unlockButton.addEventListener('click', unlockScreen);
+    unlockButton.addEventListener('click', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Click detected');
+        unlockScreen();
+    });
+    
     unlockButton.addEventListener('touchend', (e) => {
         e.preventDefault();
+        e.stopPropagation();
+        console.log('Touch detected');
         unlockScreen();
     });
 
-    // Optional: unlock with any key press
-    document.addEventListener('keydown', (e) => {
-        if (lockScreen.style.display !== 'none' && !lockScreen.classList.contains('hide')) {
-            unlockScreen();
-        }
+    // Also add mousedown for better responsiveness
+    unlockButton.addEventListener('mousedown', (e) => {
+        e.preventDefault();
+        e.stopPropagation();
+        console.log('Mouse down detected');
+        unlockScreen();
+    });
+
+    // Click anywhere on lock screen as backup
+    lockScreen.addEventListener('click', (e) => {
+        console.log('Lock screen clicked');
+        unlockScreen();
     });
 
     const folderContents = {

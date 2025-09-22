@@ -24,7 +24,6 @@
     justify-content: center;
     z-index: 9999;
     backdrop-filter: blur(20px);
-    animation: lock-screen-fade-in 0.5s ease;
 }
 
 .lock-content {
@@ -37,7 +36,7 @@
 .unlock-button {
     width: 120px;
     height: 120px;
-    background: rgba(255, 255, 255, 0.9);
+    background: rgba(255, 255, 255, 0.95);
     border-radius: 20px;
     display: flex;
     align-items: center;
@@ -45,8 +44,11 @@
     cursor: pointer;
     transition: all 0.15s cubic-bezier(0.25, 0.46, 0.45, 0.94);
     box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    border: 2px solid rgba(255, 255, 255, 0.3);
+    border: 2px solid rgba(255, 255, 255, 0.5);
     backdrop-filter: blur(10px);
+    z-index: 10001;
+    position: relative;
+    pointer-events: auto;
 }
 
 .unlock-button:hover {
@@ -64,15 +66,6 @@
     opacity: 0;
     pointer-events: none;
     transition: opacity 0.2s ease;
-}
-
-@keyframes lock-screen-fade-in {
-    from {
-        opacity: 0;
-    }
-    to {
-        opacity: 1;
-    }
 }
 
 @media (max-width: 768px) {
@@ -102,7 +95,21 @@ body {
     padding: 0;
 }
 
+/* Desktop обычно видимый */
+.desktop {
+    width: 100%;
+    height: 100%;
+    padding: 50px 20px 80px 20px;
+    position: fixed;
+    top: 0;
+    left: 0;
+    background: linear-gradient(180deg, #87CEEB 0%, #6BB6FF 30%, #FFB6C1 70%, #FF9FB3 100%);
+    z-index: 10;
+    overflow: hidden;
+    touch-action: none;
+}
 
+/* Меню-бар обычно видимый */
 .menu-bar {
     position: fixed;
     top: 0;
@@ -169,19 +176,6 @@ body {
 .datetime {
     padding: 4px 12px;
     border-radius: 6px;
-}
-
-.desktop {
-    width: 100%;
-    height: 100%;
-    padding: 50px 20px 80px 20px;
-    position: fixed;
-    top: 0;
-    left: 0;
-    background: linear-gradient(180deg, #87CEEB 0%, #6BB6FF 30%, #FFB6C1 70%, #FF9FB3 100%);
-    z-index: 10;
-    overflow: hidden;
-    touch-action: none;
 }
 
 .file {
