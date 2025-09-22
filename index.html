@@ -11,6 +11,7 @@
     <div class="menu-bar">
         <div class="datetime" id="datetime"></div>
     </div>
+
     <div class="desktop" id="desktop">
         <div class="file folder" data-type="projects">
             <div class="file-icon">
@@ -31,6 +32,7 @@
             <span>About.txt</span>
         </div>
     </div>
+
     <div class="window" id="window">
         <div class="window-header">
             <div class="window-controls">
@@ -43,7 +45,29 @@
             <span class="window-title">Desktop</span>
         </div>
         <div class="window-content" id="window-content"></div>
+
+        <!-- GitHub окно -->
+        <div class="window-content github-profile" id="github-profile" style="display:none;">
+            <div class="gh-header">
+                <img id="gh-avatar" class="gh-avatar" src="" alt="avatar">
+                <div>
+                    <h2 id="gh-username"></h2>
+                    <p id="gh-followers"></p>
+                </div>
+            </div>
+            <div class="gh-body">
+                <div class="gh-readme">
+                    <h3>README</h3>
+                    <div id="gh-readme">Loading...</div>
+                </div>
+                <div class="gh-repos">
+                    <h3>Popular Repositories</h3>
+                    <ul id="gh-repos">Loading...</ul>
+                </div>
+            </div>
+        </div>
     </div>
+
     <div class="dock">
         <div class="dock-item" data-type="calls">
             <img src="https://fsystem88.ru/icons/phone.png" alt="Calls" class="dock-icon">
@@ -71,6 +95,9 @@
             <span class="dock-tooltip">Trash</span>
         </div>
     </div>
+
+    <!-- подключаем библиотеки в самом конце -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>

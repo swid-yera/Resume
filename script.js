@@ -201,159 +201,140 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     });
 
-    function openWindow(type, fileIndex = null) {
-        windowElement.style.display = 'block';
-        windowElement.style.left = isMobile ? 'calc(50% - 45vw)' : 'calc(50% - 400px)';
-        windowElement.style.top = '50px';
-        windowContent.innerHTML = '';
-        setTimeout(() => {
-            if (fileIndex !== null && (type === 'photos' || type === 'projects' || type === 'trash')) {
-                const items = folderContents[type];
-                windowContent.innerHTML = `
-                    <div class="gallery" id="gallery-${type}">
-                        <div class="arrow left" data-direction="-1" data-type="${type}"><</div>
-                        <div class="gallery-container" id="gallery-container-${type}">
-                            ${items.map((item, index) => `
-                                <div class="gallery-item">
-                                    ${item.type === 'image' ? `<img src="${item.src}" alt="${item.name}">` : item.type === 'link' ? `<img src="${item.src}" alt="${item.name}" data-url="${item.url}" class="gallery-link">` : `
-                                        <video autoplay loop muted>
-                                            <source src="${item.src}" type="video/webm">
-                                        </video>
-                                    `}
+function openWindow(type, fileIndex = null) {
+    windowElement.style.display = 'block';
+    windowElement.style.left = isMobile ? 'calc(50% - 45vw)' : 'calc(50% - 400px)';
+    windowElement.style.top = '50px';
+    windowContent.innerHTML = '';
+
+    setTimeout(() => {
+        if (fileIndex !== null && (type === 'photos' || type === 'projects' || type === 'trash')) {
+            const items = folderContents[type];
+            windowContent.innerHTML = `
+                <div class="gallery" id="gallery-${type}">
+                    <div class="arrow left" data-direction="-1" data-type="${type}"><</div>
+                    <div class="gallery-container" id="gallery-container-${type}">
+                        ${items.map((item, index) => `
+                            <div class="gallery-item">
+                                ${item.type === 'image' ? `<img src="${item.src}" alt="${item.name}">` 
+                                  : item.type === 'link' ? `<img src="${item.src}" alt="${item.name}" data-url="${item.url}" class="gallery-link">` 
+                                  : `<video autoplay loop muted><source src="${item.src}" type="video/webm"></video>`}
+                            </div>
+                        `).join('')}
+                    </div>
+                    <div class="arrow right" data-direction="1" data-type="${type}">></div>
+                </div>
+            `;
+            setupGallery(type, fileIndex);
+        } else {
+            switch (type) {
+                case 'photos':
+                case 'projects':
+                case 'trash':
+                    windowContent.innerHTML = `
+                        <div class="folder-content">
+                            ${folderContents[type].map((item, index) => `
+                                <div class="folder-item" data-index="${index}" data-type="${type}">
+                                    <img src="${item.src}" alt="${item.name}">
+                                    <span>${item.name}</span>
                                 </div>
                             `).join('')}
                         </div>
-                        <div class="arrow right" data-direction="1" data-type="${type}">></div>
-                    </div>
-                `;
-                setupGallery(type, fileIndex);
-            } else {
-                switch (type) {
-                    case 'photos':
-                    case 'projects':
-                    case 'trash':
-                        windowContent.innerHTML = `
-                            <div class="folder-content">
-                                ${folderContents[type].map((item, index) => `
-                                    <div class="folder-item" data-index="${index}" data-type="${type}">
-                                        <img src="${item.src}" alt="${item.name}">
-                                        <span>${item.name}</span>
-                                    </div>
-                                `).join('')}
-                            </div>
-                        `;
-                        const folderItems = windowContent.querySelectorAll('.folder-item');
-                        folderItems.forEach(item => {
-                            let touchStartTime = 0;
-                            let touchStartX = 0;
-                            let touchStartY = 0;
-                            let isSwipingFolder = false;
-
-                            item.addEventListener('touchstart', (e) => {
-                                touchStartTime = Date.now();
-                                touchStartX = e.touches[0].clientX;
-                                touchStartY = e.touches[0].clientY;
-                                isSwipingFolder = false;
-                            }, { passive: true });
-
-                            item.addEventListener('touchmove', (e) => {
-                                const deltaX = Math.abs(e.touches[0].clientX - touchStartX);
-                                const deltaY = Math.abs(e.touches[0].clientY - touchStartY);
-                                if (deltaX > 10 || deltaY > 10) {
-                                    isSwipingFolder = true;
-                                }
-                            }, { passive: true });
-
-                            item.addEventListener('touchend', (e) => {
+                    `;
+                    const folderItems = windowContent.querySelectorAll('.folder-item');
+                    folderItems.forEach(item => {
+                        if (!isMobile) {
+                            item.addEventListener('click', (e) => {
                                 e.stopPropagation();
                                 e.preventDefault();
-                                const touchDuration = Date.now() - touchStartTime;
-                                if (!isSwipingFolder && touchDuration < 300) {
-                                    const index = parseInt(item.dataset.index);
-                                    if (type === 'projects') {
-                                        window.open(folderContents[type][index].url, '_blank');
-                                    } else {
-                                        openWindow(type, index);
-                                    }
+                                const index = parseInt(item.dataset.index);
+                                if (type === 'projects') {
+                                    window.open(folderContents[type][index].url, '_blank');
+                                } else {
+                                    openWindow(type, index);
                                 }
                             }, { passive: false });
+                        }
+                    });
+                    break;
 
-                            if (!isMobile) {
-                                item.addEventListener('click', (e) => {
-                                    e.stopPropagation();
-                                    e.preventDefault();
-                                    const index = parseInt(item.dataset.index);
-                                    if (type === 'projects') {
-                                        window.open(folderContents[type][index].url, '_blank');
-                                    } else {
-                                        openWindow(type, index);
-                                    }
-                                }, { passive: false });
-                            }
+                case 'text':
+                    windowContent.innerHTML = `
+                        <div class="text-content">
+                            <h2>About</h2>
+                            <p>This is a desktop interface template.</p>
+                        </div>
+                    `;
+                    break;
+
+                case 'calls':
+                    windowContent.innerHTML = `
+                        <div class="call-log">
+                            <p>No recent calls</p>
+                        </div>
+                    `;
+                    break;
+
+                case 'notes':
+                    windowContent.innerHTML = `
+                        <textarea class="notes-area" placeholder="Your notes..."></textarea>
+                    `;
+                    break;
+
+                case 'github':
+                    windowContent.innerHTML = `
+                        <div id="github-profile" style="padding: 15px; font-family: sans-serif; color: #fff;">
+                            <h2>GitHub Profile</h2>
+                            <div id="github-info">Loading...</div>
+                            <h3 style="margin-top:15px;">Popular repositories</h3>
+                            <ul id="github-repos" style="list-style:none; padding:0; margin-top:10px;"></ul>
+                            <h3 style="margin-top:15px;">README</h3>
+                            <div id="github-readme" style="margin-top:10px; background:#0d1117; padding:10px; border-radius:6px;"></div>
+                        </div>
+                    `;
+
+                    // Загружаем профиль
+                    fetch("https://api.github.com/users/swid-yera")
+                        .then(res => res.json())
+                        .then(user => {
+                            document.getElementById("github-info").innerHTML = `
+                                <img src="${user.avatar_url}" width="80" style="border-radius:50%; margin-bottom:10px;" />
+                                <p><b>${user.name || user.login}</b></p>
+                                <p>${user.bio || "No bio available"}</p>
+                                <p>${user.followers} followers · ${user.following} following</p>
+                                <a href="${user.html_url}" target="_blank" style="color:#58a6ff;">View on GitHub</a>
+                            `;
                         });
-                        break;
-                    case 'text':
-                        windowContent.innerHTML = `
-                            <div class="text-content">
-                                <h2>About</h2>
-                                <p>This is a desktop interface template.</p>
-                            </div>
-                        `;
-                        break;
-                    case 'calls':
-                        windowContent.innerHTML = `
-                            <div class="call-log">
-                                <p>No recent calls</p>
-                            </div>
-                        `;
-                        break;
-					case 'notes':
-						windowContent.innerHTML = `
-							<textarea class="notes-area" placeholder="Your notes..."></textarea>
-						`;
-						const notesArea = windowContent.querySelector('.notes-area');
-						let initialNotes = '';
-						let isWindowOpen = true;
 
-						// Notes functionality removed
-						break;
-case 'github':
-    windowContent.innerHTML = `
-        <div id="github-profile" style="padding: 15px; font-family: sans-serif; color: #fff;">
-            <h2>GitHub Profile</h2>
-            <div id="github-info">Loading...</div>
-            <ul id="github-repos" style="list-style:none; padding:0; margin-top:15px;"></ul>
-        </div>
-    `;
-    fetch("https://api.github.com/users/swid-yera")
-        .then(res => res.json())
-        .then(user => {
-            document.getElementById("github-info").innerHTML = `
-                <img src="${user.avatar_url}" width="80" style="border-radius:50%; margin-bottom:10px;" />
-                <p><b>${user.name || user.login}</b></p>
-                <p>${user.bio || "No bio available"}</p>
-                <a href="${user.html_url}" target="_blank" style="color:#58a6ff;">View on GitHub</a>
-            `;
-        });
-    fetch("https://api.github.com/users/swid-yera/repos?sort=updated&per_page=5")
-        .then(res => res.json())
-        .then(repos => {
-            let repoList = repos.map(repo => `
-                <li style="margin-bottom:10px;">
-                    <a href="${repo.html_url}" target="_blank" style="color:#58a6ff; text-decoration:none;">
-                    ${repo.name}
-                    </a>
-                    ⭐ ${repo.stargazers_count}
-                    </li>
-                    `).join("");
+                    // Репозитории
+                    fetch("https://api.github.com/users/swid-yera/repos?sort=updated&per_page=5")
+                        .then(res => res.json())
+                        .then(repos => {
+                            let repoList = repos.map(repo => `
+                                <li style="margin-bottom:10px;">
+                                    <a href="${repo.html_url}" target="_blank" style="color:#58a6ff; text-decoration:none;">
+                                        ${repo.name}
+                                    </a> ⭐ ${repo.stargazers_count}
+                                </li>
+                            `).join("");
+                            document.getElementById("github-repos").innerHTML = repoList;
+                        });
 
-            document.getElementById("github-repos").innerHTML = repoList;
-        });
-    break;
-                }
+                    // README
+                    fetch("https://raw.githubusercontent.com/swid-yera/swid-yera/main/README.md")
+                        .then(res => res.text())
+                        .then(readme => {
+                            document.getElementById("github-readme").innerHTML = marked.parse(readme);
+                        })
+                        .catch(() => {
+                            document.getElementById("github-readme").textContent = "No README found.";
+                        });
+                    break;
             }
-        }, 0);
-    }
+        }
+    });
+}
+
 
     let currentIndex = { photos: 0, projects: 0, trash: 0 };
     function setupGallery(type, startIndex = 0) {
