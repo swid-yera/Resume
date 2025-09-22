@@ -306,40 +306,63 @@ document.addEventListener('DOMContentLoaded', () => {
     // -----------------------
     // 8. GitHub профиль
     // -----------------------
-    function loadGitHubProfile() {
-        windowContent.innerHTML = `
-            <div id="github-profile" style="padding:15px; font-family:sans-serif; color:#fff;">
-                <h2>GitHub Profile</h2>
-                <div id="github-info">Loading...</div>
-                <h3 style="margin-top:15px;">Popular repositories</h3>
-                <ul id="github-repos" style="list-style:none; padding:0; margin-top:10px;"></ul>
-                <h3 style="margin-top:15px;">README</h3>
-                <div id="github-readme" style="margin-top:10px; background:#0d1117; padding:10px; border-radius:6px;"></div>
+function loadGitHubProfile() {
+    windowContent.innerHTML = `
+        <div class="github-profile">
+            <!-- Header с аватаром и инфой -->
+            <div class="gh-header" id="github-info">Loading...</div>
+
+            <!-- Основная часть: README и Repos -->
+            <div class="gh-body">
+                <!-- Левая колонка пустая, оставим только для будущего -->
+                <div></div>
+
+                <!-- Правая колонка -->
+                <div style="display:flex; flex-direction:column; gap:15px;">
+                    <div class="gh-readme" id="github-readme">Loading README...</div>
+                    <div class="gh-repos">
+                        <h3>Popular repositories</h3>
+                        <ul id="github-repos"></ul>
+                    </div>
+                </div>
             </div>
-        `;
+        </div>
+    `;
 
-        fetch("https://api.github.com/users/swid-yera").then(res=>res.json()).then(user=>{
+    // Получаем данные профиля
+    fetch("https://api.github.com/users/swid-yera")
+        .then(res => res.json())
+        .then(user => {
             document.getElementById("github-info").innerHTML = `
-                <img src="${user.avatar_url}" width="80" style="border-radius:50%; margin-bottom:10px;" />
-                <p><b>${user.name||user.login}</b></p>
-                <p>${user.bio||"No bio available"}</p>
-                <p>${user.followers} followers · ${user.following} following</p>
-                <a href="${user.html_url}" target="_blank" style="color:#58a6ff;">View on GitHub</a>
+                <img src="${user.avatar_url}" class="gh-avatar" />
+                <div>
+                    <h2>${user.name || user.login}</h2>
+                    <p>${user.followers} followers · ${user.following} following</p>
+                </div>
             `;
-        }).catch(()=>document.getElementById("github-info").textContent="Failed to load profile.");
+        })
+        .catch(() => document.getElementById("github-info").textContent = "Failed to load profile.");
 
-        fetch("https://api.github.com/users/swid-yera/repos?sort=updated&per_page=5").then(res=>res.json()).then(repos=>{
-            document.getElementById("github-repos").innerHTML = repos.map(repo=>`
-                <li style="margin-bottom:10px;">
-                    <a href="${repo.html_url}" target="_blank" style="color:#58a6ff; text-decoration:none;">${repo.name}</a> ⭐ ${repo.stargazers_count}
+    // Популярные репозитории
+    fetch("https://api.github.com/users/swid-yera/repos?sort=updated&per_page=5")
+        .then(res => res.json())
+        .then(repos => {
+            document.getElementById("github-repos").innerHTML = repos.map(repo => `
+                <li>
+                    <a href="${repo.html_url}" target="_blank">${repo.name}</a> ⭐ ${repo.stargazers_count}
                 </li>
             `).join("");
-        }).catch(()=>document.getElementById("github-repos").textContent="Failed to load repos.");
+        })
+        .catch(() => document.getElementById("github-repos").textContent = "Failed to load repos.");
 
-        fetch("https://raw.githubusercontent.com/swid-yera/swid-yera/main/README.md").then(res=>res.text()).then(readme=>{
+    // README
+    fetch("https://raw.githubusercontent.com/swid-yera/swid-yera/main/README.md")
+        .then(res => res.text())
+        .then(readme => {
             document.getElementById("github-readme").innerHTML = marked.parse(readme);
-        }).catch(()=>document.getElementById("github-readme").textContent="No README found.");
-    }
+        })
+        .catch(() => document.getElementById("github-readme").textContent = "No README found.");
+}
 
     // -----------------------
     // 9. Анимации
