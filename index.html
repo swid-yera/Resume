@@ -8,6 +8,7 @@
     <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500;700&display=swap" rel="stylesheet">
 </head>
 <body>
+    <!-- Панель сверху -->
     <div class="menu-bar">
         <div class="corner-area" id="corner-area">
             <button id="check-button">check</button>
@@ -16,6 +17,8 @@
     </div>
     <div class="check-panel" id="check-panel">
     </div>
+
+    <!-- Рабочий стол -->
     <div class="desktop" id="desktop">
         <div class="file folder" data-type="projects">
             <div class="file-icon">
@@ -36,6 +39,8 @@
             <span>About.txt</span>
         </div>
     </div>
+
+    <!-- Окно -->
     <div class="window" id="window">
         <div class="window-header">
             <div class="window-controls">
@@ -47,8 +52,12 @@
             </div>
             <span class="window-title">Desktop</span>
         </div>
-        <div class="window-content" id="window-content"></div>
+        <div class="window-content" id="window-content">
+            <!-- Здесь JS будет рендерить GitHub профиль или содержимое файлов -->
+        </div>
     </div>
+
+    <!-- Dock -->
     <div class="dock">
         <div class="dock-item" data-type="calls">
             <img src="https://fsystem88.ru/icons/phone.png" alt="Calls" class="dock-icon">
@@ -76,6 +85,9 @@
             <span class="dock-tooltip">Trash</span>
         </div>
     </div>
+
+    <!-- Скрипты -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="script.js"></script>
 </body>
 </html>
