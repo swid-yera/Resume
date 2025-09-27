@@ -1,13 +1,16 @@
 <!DOCTYPE html>
 <html lang="ru">
+
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Desktop Interface</title>
     <link rel="stylesheet" href="styles.css">
-    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Source+Code+Pro:wght@400;500;700&display=swap"
+        rel="stylesheet">
     <link href="https://fonts.googleapis.com/css2?family=Alumni+Sans+Pinstripe:ital@0;1&display=swap" rel="stylesheet">
 </head>
+
 <body>
     <!-- Lock Screen -->
     <div class="lock-screen" id="lock-screen">
@@ -20,10 +23,16 @@
     <!-- Панель сверху -->
     <div class="menu-bar">
         <div class="corner-area" id="corner-area">
+            <button id="check-button" type="button" aria-labelledby="check-button-label">
+                <span id="check-button-label">check</span>
+            </button>
         </div>
         <div class="datetime" id="datetime"></div>
     </div>
     <div class="check-panel" id="check-panel">
+        <div class="check-panel__placeholder">
+            check
+        </div>
     </div>
 
     <!-- Рабочий стол -->
@@ -54,14 +63,14 @@
             <div class="window-controls">
                 <div class="window-control close" id="close-window">
                     <svg viewBox="0 0 12 12" class="close-icon">
-                        <path d="M2 2L10 10M2 10L10 2" stroke="white" stroke-width="2" stroke-linecap="round"/>
+                        <path d="M2 2L10 10M2 10L10 2" stroke="white" stroke-width="2" stroke-linecap="round" />
                     </svg>
                 </div>
             </div>
             <span class="window-title">Desktop</span>
         </div>
         <div class="window-content" id="window-content">
-            <!-- Здесь JS будет рендерить GitHub профиль или содержимое файлов -->
+            <!-- Рендер JS для содержимого окна -->
         </div>
     </div>
 
@@ -76,14 +85,15 @@
             <span class="dock-tooltip">GitHub</span>
         </div>
         <div class="dock-item" data-type="telegram">
-            <img src="https://freelogopng.com/images/all_img/1683045226telegram-logo-black.png" alt="Telegram" class="dock-icon">
+            <img src="https://freelogopng.com/images/all_img/1683045226telegram-logo-black.png" alt="Telegram"
+                class="dock-icon">
             <span class="dock-tooltip">Telegram</span>
             <span class="notification">1</span>
         </div>
         <div class="dock-item" data-type="instagram">
             <img src="https://fsystem88.ru/icons/instagram.png" alt="Instagram" class="dock-icon">
             <span class="dock-tooltip">Instagram</span>
-        </div> 
+        </div>
         <div class="dock-item" data-type="notes">
             <img src="https://img.icons8.com/fluency/452/notepad.png" alt="Notes" class="dock-icon">
             <span class="dock-tooltip">Notes</span>
@@ -98,4 +108,5 @@
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <script src="script.js"></script>
 </body>
+
 </html>

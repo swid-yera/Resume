@@ -107,12 +107,12 @@
         height: 110px;
         padding: 12px 8px;
     }
-    
+
     .lock-time {
         font-size: 32px;
         margin-bottom: 6px;
     }
-    
+
     .lock-date {
         font-size: 14px;
     }
@@ -173,12 +173,14 @@ body {
 
 .corner-area {
     position: absolute;
-    right: 2em;
+    right: clamp(12px, 3vw, 32px);
     top: 50%;
     transform: translateY(-50%);
-    width: 75px;
-    height: 22px;
-    border-radius: 5px;
+    min-width: clamp(64px, 12vw, 120px);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
     cursor: pointer;
     transition: all 0.2s ease;
 }
@@ -191,29 +193,47 @@ body {
 
 .corner-area button {
     width: 100%;
-    height: 100%;
+    padding: 4px 10px;
     background: transparent;
     border: none;
     color: var(--text-light);
-    font-size: 12px;
+    font-size: 16px;
+    letter-spacing: 0.5px;
     cursor: pointer;
     font-family: var(--font);
+    text-transform: none;
+}
+
+#check-button:focus-visible {
+    outline: 2px solid var(--neon-blue);
+    outline-offset: 2px;
 }
 
 .check-panel {
     position: fixed;
-    top: 30px;
-    right: 2em;
-    width: 200px;
+    top: calc(28px + 10px);
+    right: clamp(12px, 3vw, 36px);
+    width: clamp(160px, 60vw, 240px);
+    max-width: 90vw;
     background: rgba(255, 255, 255, 0.95);
     backdrop-filter: blur(12px);
-    border-radius: 8px;
+    border-radius: 10px;
     box-shadow: var(--shadow);
-    padding: 15px;
+    padding: clamp(12px, 3vw, 18px);
     color: #333;
     display: none;
     z-index: 1001;
     border: 1px solid rgba(0, 0, 0, 0.1);
+}
+
+.check-panel__placeholder {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    min-height: 40px;
+    font-size: clamp(14px, 3vw, 18px);
+    text-transform: lowercase;
+    color: #222;
 }
 
 .datetime {
@@ -664,6 +684,7 @@ body {
         transform: scale(0.9) translateY(20px);
         opacity: 0;
     }
+
     to {
         transform: scale(1) translateY(0);
         opacity: 1;
@@ -702,12 +723,14 @@ body {
 @media (max-width: 768px) {
     .desktop {
         padding: 40px 15px 100px 15px;
-        display: block; /* Убираем flex для мобильной версии */
+        display: block;
+        /* Убираем flex для мобильной версии */
         background: linear-gradient(180deg, #87CEEB 0%, #6BB6FF 30%, #FFB6C1 70%, #FF9FB3 100%);
     }
 
     .file {
-        position: absolute; /* Все иконки абсолютно позиционированы */
+        position: absolute;
+        /* Все иконки абсолютно позиционированы */
     }
 
     .file[data-type="projects"] {
@@ -903,7 +926,8 @@ body {
 /* Сетка GitHub профиля */
 .gh-body {
     display: grid;
-    grid-template-columns: 130px 1fr; /* левая колонка фиксированная, правая гибкая */
+    grid-template-columns: 130px 1fr;
+    /* левая колонка фиксированная, правая гибкая */
     gap: 20px;
 }
 
@@ -913,13 +937,15 @@ body {
     flex-direction: column;
     align-items: center;
     gap: 12px;
-    padding-top: 60px; /* дополнительное место сверху */
+    padding-top: 60px;
+    /* дополнительное место сверху */
 }
 
 .gh-left-column img.gh-avatar {
     width: 120px;
     height: 120px;
-    border-radius: 50%; /* круглая */
+    border-radius: 50%;
+    /* круглая */
     border: 2px solid #30363d;
 }
 
@@ -949,7 +975,7 @@ body {
     background: #161b22;
     padding: 16px;
     border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
 }
 
 .gh-readme {
@@ -970,7 +996,7 @@ body {
 }
 
 .gh-repos li:hover {
-    background: rgba(88,166,255,0.1);
+    background: rgba(88, 166, 255, 0.1);
     border-radius: 4px;
 }
 
@@ -989,9 +1015,28 @@ body {
     color: #1f6feb;
 }
 
+.gh-profiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(360px, 1fr));
+    gap: 24px;
+}
+
+.gh-profile {
+    background: rgba(13, 17, 23, 0.9);
+    border: 1px solid #21262d;
+    border-radius: 12px;
+    padding: 20px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
+    backdrop-filter: blur(6px);
+}
+
+.gh-profile .gh-body {
+    margin-top: 12px;
+}
+
 /* Стилизация markdown из README */
-.gh-readme h1, 
-.gh-readme h2, 
+.gh-readme h1,
+.gh-readme h2,
 .gh-readme h3 {
     color: #fff;
     margin-bottom: 10px;
@@ -1024,6 +1069,10 @@ body {
     .gh-body {
         grid-template-columns: 1fr;
     }
+
+    .gh-profiles {
+        grid-template-columns: 1fr;
+    }
 }
 
 /* ==== Telegram Window ==== */
@@ -1043,14 +1092,14 @@ body {
     font-weight: 700;
     font-size: 16px;
     color: var(--neon-blue);
-    border-bottom: 1px solid rgba(255,255,255,0.1);
+    border-bottom: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .telegram-chat-list {
     width: 200px;
     background: #252538;
     overflow-y: auto;
-    border-right: 1px solid rgba(255,255,255,0.1);
+    border-right: 1px solid rgba(255, 255, 255, 0.1);
 }
 
 .telegram-chat-list::-webkit-scrollbar {
@@ -1098,7 +1147,7 @@ body {
     max-width: 70%;
     padding: 8px 12px;
     border-radius: 12px;
-    background: rgba(0,0,0,0.3);
+    background: rgba(0, 0, 0, 0.3);
     line-height: 1.4;
 }
 
@@ -1110,14 +1159,14 @@ body {
 
 .telegram-message.received {
     align-self: flex-start;
-    background: rgba(255,255,255,0.1);
+    background: rgba(255, 255, 255, 0.1);
 }
 
 .telegram-input {
     display: flex;
     padding: 10px;
     background: #2a2a3d;
-    border-top: 1px solid rgba(255,255,255,0.1);
+    border-top: 1px solid rgba(255, 255, 255, 0.1);
     gap: 10px;
 }
 
