@@ -1,6 +1,5 @@
 // script.js
 document.addEventListener('DOMContentLoaded', () => {
-    const desktop = document.getElementById('desktop');
     const files = document.querySelectorAll('.file');
     const windowElement = document.getElementById('window');
     const windowContent = document.getElementById('window-content');
@@ -11,38 +10,68 @@ document.addEventListener('DOMContentLoaded', () => {
     const isMobile = /Mobi|Android|iPhone|iPad|iPod/.test(navigator.userAgent);
     const PADDING = 20;
 
+    const DATE_FORMATTERS = {
+        lockTime: new Intl.DateTimeFormat('ru-RU', {
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        }),
+        lockDate: new Intl.DateTimeFormat('en-US', {
+            weekday: 'short',
+            day: 'numeric',
+            month: 'short'
+        }),
+        menu: new Intl.DateTimeFormat('ru-RU', {
+            weekday: 'short',
+            month: 'short',
+            day: 'numeric',
+            hour: '2-digit',
+            minute: '2-digit',
+            hour12: false
+        })
+    };
+
+    let dateTimerId = null;
+
     // Lock Screen
     const lockScreen = document.getElementById('lock-screen');
 
     // Unlock functionality
     function unlockScreen() {
+        if (!lockScreen || lockScreen.classList.contains('hide')) return;
         lockScreen.classList.add('hide');
-        setTimeout(() => {
-            lockScreen.style.display = 'none';
-        }, 200);
+        lockScreen.addEventListener('transitionend', () => {
+            lockScreen.classList.add('hidden');
+        }, { once: true });
     }
 
     // Event listeners for unlock
-    // Click anywhere on lock screen to unlock
-    lockScreen.addEventListener('click', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log('Lock screen click detected');
-        unlockScreen();
-    });
+    if (lockScreen) {
+        const handleUnlock = (e) => {
+            e.preventDefault();
+            e.stopPropagation();
+            unlockScreen();
+        };
 
-    lockScreen.addEventListener('touchend', (e) => {
-        e.preventDefault();
-        e.stopPropagation();
-        console.log('Lock screen touch detected');
-        unlockScreen();
-    });
+        ['click', 'touchend'].forEach((eventName) => {
+            lockScreen.addEventListener(eventName, handleUnlock, { passive: false });
+        });
+
+        const handleUnlockKey = (e) => {
+            if (e.code !== 'Space' && e.key !== ' ') return;
+            if (lockScreen.classList.contains('hide')) return;
+            e.preventDefault();
+            unlockScreen();
+        };
+
+        document.addEventListener('keydown', handleUnlockKey, { passive: false });
+    }
 
     const folderContents = {
         photos: [
-            { src: 'photos/photo1.jpg', name: 'Photo 1' },
-            { src: 'photos/photo2.jpg', name: 'Photo 2' },
-            { src: 'photos/photo3.jpg', name: 'Photo 3' }
+            { src: 'photos/photo1.png', name: 'Photo 1' },
+            { src: 'photos/photo2.png', name: 'Photo 2' },
+            { src: 'photos/photo3.png', name: 'Photo 3' }
         ],
         projects: [
             { src: 'projects/project1.png', name: 'Project 1', url: 'https://example.com/project1' },
@@ -63,76 +92,91 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const githubDataCache = {};
 
+    const telegramState = {
+        chats: [
+            { id: 1, name: 'Alice', avatar: 'photos/photo1.jpg', messages: [{ type: 'received', text: 'Hi there!' }] },
+            { id: 2, name: 'Bob', avatar: 'photos/photo2.jpg', messages: [{ type: 'received', text: 'Hello!' }] }
+        ],
+        activeChatId: 1
+    };
+
     // -----------------------
     // 1. Дата и время
     // -----------------------
     function updateDateTime() {
         const now = new Date();
 
-        // Время и дата в lock screen
         if (lockTimeElement && lockDateElement) {
-            const timeOptions = { hour: '2-digit', minute: '2-digit', hour12: false };
-            lockTimeElement.textContent = now.toLocaleTimeString('ru-RU', timeOptions);
-
-            const dateOptions = { weekday: 'short', day: 'numeric', month: 'short' };
-            lockDateElement.textContent = now.toLocaleDateString('en-US', dateOptions);
+            lockTimeElement.textContent = DATE_FORMATTERS.lockTime.format(now);
+            lockDateElement.textContent = DATE_FORMATTERS.lockDate.format(now);
         }
 
-        // Дата и время в меню
-        const options = { weekday: 'short', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit', hour12: false };
-        datetimeElement.textContent = now.toLocaleString('ru-RU', options).replace(',', '');
-
-        setTimeout(updateDateTime, 1000);
+        if (datetimeElement) {
+            datetimeElement.textContent = DATE_FORMATTERS.menu.format(now).replace(',', '');
+        }
     }
-    updateDateTime();
+
+    function startDateTimeTicker() {
+        updateDateTime();
+        if (dateTimerId !== null) return;
+        dateTimerId = window.setInterval(updateDateTime, 1000);
+    }
+
+    startDateTimeTicker();
+
+    window.addEventListener('beforeunload', () => {
+        if (dateTimerId !== null) {
+            clearInterval(dateTimerId);
+            dateTimerId = null;
+        }
+    });
 
     // Check button functionality
     const checkButton = document.getElementById('check-button');
     const checkPanel = document.getElementById('check-panel');
 
-    if (checkButton) {
+    if (checkButton && checkPanel) {
+        const toggleCheckPanel = (forceState) => {
+            const shouldOpen = typeof forceState === 'boolean'
+                ? forceState
+                : !checkPanel.classList.contains('is-open');
+            checkPanel.classList.toggle('is-open', shouldOpen);
+        };
+
         checkButton.addEventListener('click', (e) => {
             e.stopPropagation();
-            if (checkPanel.style.display === 'block') {
-                checkPanel.style.display = 'none';
-            } else {
-                checkPanel.style.display = 'block';
+            toggleCheckPanel();
+        });
+
+        document.addEventListener('click', (e) => {
+            if (!e.target.closest('.corner-area') && !e.target.closest('.check-panel')) {
+                toggleCheckPanel(false);
             }
         });
 
-        // Close panel when clicking outside
-        document.addEventListener('click', (e) => {
-            if (!e.target.closest('.corner-area') && !e.target.closest('.check-panel')) {
-                checkPanel.style.display = 'none';
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape') {
+                toggleCheckPanel(false);
             }
         });
     }
-
-    // Инициализация начальных позиций иконок
-    files.forEach(file => {
-        if (isMobile) {
-            if (file.dataset.type === 'projects') {
-                file.style.position = 'absolute';
-                file.style.left = '20px';
-                file.style.top = '40px';
-            } else if (file.dataset.type === 'photos') {
-                file.style.position = 'absolute';
-                file.style.left = '20px';
-                file.style.top = '160px';
-            } else if (file.dataset.type === 'text') {
-                file.style.position = 'absolute';
-                file.style.left = '20px';
-                file.style.top = '280px';
-            }
-        }
-    });
 
     // -----------------------
     // 2. Перетаскивание файлов
     // -----------------------
     function setupFileDragging(file) {
-        let isDragging = false, startX, startY, offsetX, offsetY;
+        let isDragging = false, offsetX = 0, offsetY = 0;
         let hasMoved = false, startTarget = null, isProcessing = false;
+
+        const attemptOpenWindow = () => {
+            const { type } = file.dataset;
+            if (isProcessing || !type) return;
+            isProcessing = true;
+            openWindow(type);
+            window.setTimeout(() => {
+                isProcessing = false;
+            }, 100);
+        };
 
         const startDrag = (e) => {
             if (isMobile && !e.target.closest('.file-icon')) return;
@@ -149,8 +193,6 @@ document.addEventListener('DOMContentLoaded', () => {
             offsetY = clientY - rect.top;
 
             file.classList.add('dragging');
-            file.style.position = 'absolute';
-            file.style.zIndex = '30';
         };
 
         const moveDrag = (e) => {
@@ -175,13 +217,10 @@ document.addEventListener('DOMContentLoaded', () => {
             if (isDragging) {
                 isDragging = false;
                 file.classList.remove('dragging');
-                file.style.zIndex = '20';
             }
 
-            if (!hasMoved && startTarget && startTarget === file && !isProcessing) {
-                isProcessing = true;
-                openWindow(file.dataset.type);
-                setTimeout(() => { isProcessing = false; }, 100);
+            if (!hasMoved && startTarget && startTarget === file) {
+                attemptOpenWindow();
             }
 
             startTarget = null;
@@ -204,45 +243,32 @@ document.addEventListener('DOMContentLoaded', () => {
                 document.addEventListener('mousemove', moveHandler);
                 document.addEventListener('mouseup', upHandler);
             });
-            file.addEventListener('click', (e) => {
-                if (!hasMoved && !isDragging && !isProcessing) {
-                    isProcessing = true;
-                    openWindow(file.dataset.type);
-                    setTimeout(() => { isProcessing = false; }, 100);
+            file.addEventListener('click', () => {
+                if (!hasMoved && !isDragging) {
+                    attemptOpenWindow();
                 }
             });
         }
     }
 
-    const startYDesktop = 50; // отступ сверху для первого элемента
-    const gap = 150;          // вертикальный отступ между элементами
-
-    files.forEach((file, index) => {
-        file.style.position = 'absolute';
-        file.style.left = '20px';                     // фиксированная позиция слева
-        file.style.top = `${startYDesktop + index * gap}px`;
-
-        // Все файлы можно перетаскивать
-        setupFileDragging(file);
-    });
+    files.forEach(setupFileDragging);
 
     // -----------------------
-    // Dock items
+    // 5. Док-бар
     // -----------------------
     const dockItems = document.querySelectorAll('.dock-item');
     dockItems.forEach(item => {
+        const eventType = isMobile ? 'touchend' : 'click';
         const handler = (e) => {
             e.stopPropagation();
             openWindow(item.dataset.type);
         };
-        item.addEventListener(isMobile ? 'touchend' : 'click', handler, { passive: true });
 
-        // Add comments for calls
-        if (item.dataset.type === 'calls') {
+        item.addEventListener(eventType, handler, { passive: eventType === 'touchend' });
+
+        if (!isMobile && item.dataset.type === 'calls') {
             item.addEventListener('mouseenter', () => {
-                if (!isMobile) {
-                    item.setAttribute('title', 'Звонки - История вызовов');
-                }
+                item.setAttribute('title', 'Звонки - История вызовов');
             });
         }
     });
@@ -251,33 +277,54 @@ document.addEventListener('DOMContentLoaded', () => {
     // 3. Перетаскивание окна
     // -----------------------
     (function setupWindowDragging() {
-        let isDraggingWindow = false, startX, startY, initialX, initialY;
+        let isDraggingWindow = false;
+        let startX = 0;
+        let startY = 0;
+        let initialX = 0;
+        let initialY = 0;
         const windowHeader = windowElement.querySelector('.window-header');
 
         const startDragWindow = (e) => {
+            if (!windowElement.classList.contains('is-visible')) return;
             e.preventDefault();
-            isDraggingWindow = true;
-            startX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-            startY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+
+            const touchEvent = e.type.includes('touch');
+            startX = touchEvent ? e.touches[0].clientX : e.clientX;
+            startY = touchEvent ? e.touches[0].clientY : e.clientY;
+
             const rect = windowElement.getBoundingClientRect();
+            windowElement.classList.add('is-dragging');
+            windowElement.style.left = `${rect.left}px`;
+            windowElement.style.top = `${rect.top}px`;
+
             initialX = rect.left;
             initialY = rect.top;
+            isDraggingWindow = true;
         };
 
         const moveDragWindow = (e) => {
             if (!isDraggingWindow) return;
             e.preventDefault();
-            const clientX = e.type.includes('touch') ? e.touches[0].clientX : e.clientX;
-            const clientY = e.type.includes('touch') ? e.touches[0].clientY : e.clientY;
+
+            const touchEvent = e.type.includes('touch');
+            const clientX = touchEvent ? e.touches[0].clientX : e.clientX;
+            const clientY = touchEvent ? e.touches[0].clientY : e.clientY;
             const deltaX = clientX - startX;
             const deltaY = clientY - startY;
-            const newX = initialX + deltaX;
-            const newY = initialY + deltaY;
-            windowElement.style.left = `${Math.max(0, Math.min(newX, window.innerWidth - windowElement.offsetWidth))}px`;
-            windowElement.style.top = `${Math.max(0, Math.min(newY, window.innerHeight - windowElement.offsetHeight))}px`;
+
+            const maxX = window.innerWidth - windowElement.offsetWidth;
+            const maxY = window.innerHeight - windowElement.offsetHeight;
+
+            const newX = Math.max(0, Math.min(initialX + deltaX, Math.max(0, maxX)));
+            const newY = Math.max(0, Math.min(initialY + deltaY, Math.max(0, maxY)));
+
+            windowElement.style.left = `${newX}px`;
+            windowElement.style.top = `${newY}px`;
         };
 
-        const endDragWindow = () => { isDraggingWindow = false; };
+        const endDragWindow = () => {
+            isDraggingWindow = false;
+        };
 
         windowHeader.addEventListener('mousedown', startDragWindow);
         windowHeader.addEventListener('touchstart', startDragWindow, { passive: false });
@@ -290,15 +337,38 @@ document.addEventListener('DOMContentLoaded', () => {
     // -----------------------
     // 4. Закрытие окна
     // -----------------------
+    let closingAnimationHandler = null;
+
+    const resetWindowPosition = () => {
+        windowElement.classList.remove('is-dragging');
+        windowElement.style.left = '';
+        windowElement.style.top = '';
+    };
+
     function closeWindow() {
-        windowElement.style.animation = 'window-minimize 0.3s ease forwards';
-        setTimeout(() => {
-            windowElement.style.display = 'none';
-            windowElement.style.animation = '';
+        if (!windowElement.classList.contains('is-visible') || windowElement.classList.contains('is-closing')) {
+            return;
+        }
+
+        if (closingAnimationHandler) {
+            windowElement.removeEventListener('animationend', closingAnimationHandler);
+            closingAnimationHandler = null;
+        }
+
+        windowElement.classList.add('is-closing');
+
+        closingAnimationHandler = (event) => {
+            if (event.animationName !== 'window-minimize') return;
+
+            windowElement.classList.remove('is-visible', 'is-closing');
             windowContent.innerHTML = '';
-            windowElement.style.left = isMobile ? 'calc(50% - 45vw)' : 'calc(50% - 400px)';
-            windowElement.style.top = '50px';
-        }, 300);
+            resetWindowPosition();
+
+            windowElement.removeEventListener('animationend', closingAnimationHandler);
+            closingAnimationHandler = null;
+        };
+
+        windowElement.addEventListener('animationend', closingAnimationHandler);
     }
 
     closeButton.addEventListener(isMobile ? 'touchend' : 'click', (e) => {
@@ -307,38 +377,53 @@ document.addEventListener('DOMContentLoaded', () => {
     }, { passive: false });
 
     document.addEventListener('keydown', (e) => {
-        if (e.key === 'Escape' && windowElement.style.display === 'block') closeWindow();
+        if (e.key === 'Escape' && windowElement.classList.contains('is-visible')) {
+            closeWindow();
+        }
     });
-
-    // -----------------------
-    // 5. Док-бар
-    // -----------------------
-    dockItems.forEach(item => {
-        item.addEventListener(isMobile ? 'touchend' : 'click', (e) => {
-            e.stopPropagation();
-            // Всегда открываем окно для всех dock items
-            openWindow(item.dataset.type);
-        }, { passive: true });
-    });
-
 
     // -----------------------
     // 6. Открытие окна
     // -----------------------
+    const createFolderRenderer = (type) => (index) => renderFolderContent(type, index);
+
+    const WINDOW_RENDER_STRATEGIES = {
+        photos: createFolderRenderer('photos'),
+        projects: createFolderRenderer('projects'),
+        trash: createFolderRenderer('trash'),
+        text: () => renderTextFile(),
+        calls: () => renderCalls(),
+        notes: () => renderNotes(),
+        github: () => loadGitHubProfile(),
+        telegram: () => renderTelegram()
+    };
+
     function openWindow(type, fileIndex = null) {
-        windowElement.style.display = 'block';
-        windowElement.style.left = isMobile ? 'calc(50% - 45vw)' : 'calc(50% - 400px)';
-        windowElement.style.top = '50px';
+        if (!type) return;
+
+        const wasHidden = !windowElement.classList.contains('is-visible');
+
+        if (closingAnimationHandler) {
+            windowElement.removeEventListener('animationend', closingAnimationHandler);
+            closingAnimationHandler = null;
+        }
+
+        windowElement.classList.remove('is-closing');
+
+        if (wasHidden) {
+            resetWindowPosition();
+        }
+
+        windowElement.classList.add('is-visible');
         windowContent.innerHTML = '';
 
-        if (['photos', 'projects', 'trash'].includes(type)) {
-            if (fileIndex !== null) renderGallery(type, fileIndex);
-            else renderFolder(type);
-        } else if (type === 'text') renderTextFile();
-        else if (type === 'calls') renderCalls();
-        else if (type === 'notes') renderNotes();
-        else if (type === 'github') loadGitHubProfile();
-        else if (type === 'telegram') renderTelegram();
+        const render = WINDOW_RENDER_STRATEGIES[type];
+
+        if (render) {
+            render(fileIndex);
+        } else {
+            console.warn(`No renderer configured for window type: ${type}`);
+        }
     }
 
     // -----------------------
@@ -357,16 +442,47 @@ document.addEventListener('DOMContentLoaded', () => {
             </div>
         `;
         const folderItems = windowContent.querySelectorAll('.folder-item');
-        folderItems.forEach(item => {
-            if (!isMobile) {
-                item.addEventListener('click', (e) => {
-                    e.stopPropagation();
-                    const index = parseInt(item.dataset.index);
-                    if (type === 'projects') window.open(folderContents[type][index].url, '_blank');
-                    else openWindow(type, index);
-                }, { passive: false });
-            }
+        const selectEvent = isMobile ? 'touchend' : 'click';
+
+        folderItems.forEach((item) => {
+            const handleSelection = (e) => {
+                e.stopPropagation();
+                e.preventDefault();
+
+                const index = Number.parseInt(item.dataset.index, 10);
+                if (Number.isNaN(index)) return;
+
+                if (type === 'projects') {
+                    const project = folderContents[type][index];
+                    if (project && project.url) {
+                        window.open(project.url, '_blank', 'noopener');
+                    }
+                } else {
+                    openWindow(type, index);
+                }
+            };
+
+            item.addEventListener(selectEvent, handleSelection, { passive: false });
         });
+    }
+
+    function renderFolderContent(type, fileIndex) {
+        const items = folderContents[type] || [];
+
+        if (!items.length) {
+            windowContent.innerHTML = `
+                <div class="folder-content">
+                    <p>Папка пока пуста.</p>
+                </div>
+            `;
+            return;
+        }
+
+        if (Number.isInteger(fileIndex) && items[fileIndex]) {
+            renderGallery(type, fileIndex);
+        } else {
+            renderFolder(type);
+        }
     }
 
     function renderTextFile() {
@@ -395,7 +511,7 @@ document.addEventListener('DOMContentLoaded', () => {
                 <div class="arrow left">&#10094;</div>
                 <div class="gallery-container">
                     ${items.map(item => `
-                        <div class="gallery-item">
+                        <div class="gallery-item${type === 'projects' ? ' gallery-item--link' : ''}">
                             <img src="${item.src}" alt="${item.name}">
                         </div>
                     `).join('')}
@@ -416,8 +532,7 @@ document.addEventListener('DOMContentLoaded', () => {
         updateGallery();
 
         if (type === 'projects') {
-            windowContent.querySelectorAll('.gallery-item img').forEach((img, index) => {
-                img.style.cursor = 'pointer';
+            windowContent.querySelectorAll('.gallery-item--link img').forEach((img, index) => {
                 img.addEventListener('click', () => window.open(items[index].url, '_blank'));
             });
         }
@@ -575,20 +690,13 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 
     // -----------------------
-    // 9. Анимации
-    // -----------------------
-    const style = document.createElement('style');
-    style.innerHTML = `@keyframes window-minimize { to { transform: scale(0.3); opacity: 0; } }`;
-    document.head.appendChild(style);
-
-    // -----------------------
-    // 10. Telegram
+    // 9. Telegram
     // -----------------------
     function renderTelegram() {
         windowContent.innerHTML = `
             <div class="telegram-window">
                 <div class="telegram-header">Telegram</div>
-                <div style="display:flex; flex:1; overflow:hidden;">
+                <div class="telegram-body">
                     <div class="telegram-chat-list" id="telegram-chat-list"></div>
                     <div class="telegram-messages" id="telegram-messages"></div>
                 </div>
@@ -604,47 +712,71 @@ document.addEventListener('DOMContentLoaded', () => {
         const input = document.getElementById('telegram-input');
         const sendBtn = document.getElementById('telegram-send');
 
-        const chats = [
-            { id: 1, name: 'Alice', avatar: 'photos/photo1.jpg', messages: [{ type: 'received', text: 'Hi there!' }] },
-            { id: 2, name: 'Bob', avatar: 'photos/photo2.jpg', messages: [{ type: 'received', text: 'Hello!' }] },
-        ];
+        if (!telegramState.chats.length) {
+            telegramState.chats.push({
+                id: Date.now(),
+                name: 'New chat',
+                avatar: 'photos/photo1.jpg',
+                messages: []
+            });
+        }
 
-        let activeChatId = chats[0].id;
+        if (!telegramState.activeChatId) {
+            telegramState.activeChatId = telegramState.chats[0].id;
+        }
 
-        function renderChatList() {
-            chatList.innerHTML = chats.map(chat => `
-                <div class="telegram-chat-item" data-id="${chat.id}">
+        const findChat = (id) => telegramState.chats.find((chat) => chat.id === id);
+
+        const renderChatList = () => {
+            chatList.innerHTML = telegramState.chats.map(chat => `
+                <div class="telegram-chat-item${chat.id === telegramState.activeChatId ? ' is-active' : ''}" data-id="${chat.id}">
                     <img src="${chat.avatar}" alt="${chat.name}">
                     <span>${chat.name}</span>
                 </div>
             `).join('');
-        }
+        };
 
-        function renderMessages() {
-            const chat = chats.find(c => c.id === activeChatId);
+        const renderMessages = () => {
+            const chat = findChat(telegramState.activeChatId);
+            if (!chat) return;
+
             messagesContainer.innerHTML = chat.messages.map(msg => `
                 <div class="telegram-message ${msg.type}">${msg.text}</div>
             `).join('');
-            messagesContainer.scrollTop = messagesContainer.scrollHeight;
-        }
 
-        chatList.addEventListener('click', e => {
+            messagesContainer.scrollTop = messagesContainer.scrollHeight;
+        };
+
+        chatList.addEventListener('click', (e) => {
             const item = e.target.closest('.telegram-chat-item');
             if (!item) return;
-            activeChatId = parseInt(item.dataset.id);
+
+            const nextId = Number.parseInt(item.dataset.id, 10);
+            if (Number.isNaN(nextId)) return;
+
+            telegramState.activeChatId = nextId;
+            renderChatList();
             renderMessages();
         });
 
         sendBtn.addEventListener('click', () => {
             const text = input.value.trim();
             if (!text) return;
-            const chat = chats.find(c => c.id === activeChatId);
+
+            const chat = findChat(telegramState.activeChatId);
+            if (!chat) return;
+
             chat.messages.push({ type: 'sent', text });
             input.value = '';
             renderMessages();
         });
 
-        input.addEventListener('keydown', e => { if (e.key === 'Enter') sendBtn.click(); });
+        input.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                e.preventDefault();
+                sendBtn.click();
+            }
+        });
 
         renderChatList();
         renderMessages();
