@@ -1,4 +1,4 @@
-/* styles.css  */
+/* Переменные */
 :root {
     --code-bg: #1E1E1E;
     --neon-blue: #00DDEB;
@@ -11,92 +11,10 @@
     --font: 'Source Code Pro', monospace;
     --clock-font: 'Alumni Sans Pinstripe', cursive;
     --sky-gradient: linear-gradient(180deg, #87CEEB 0%, #6BB6FF 30%, #FFB6C1 70%, #FF9FB3 100%);
-}
-
-.hidden {
-    display: none !important;
-}
-
-/* ==== Lock Screen ==== */
-.lock-screen {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100vw;
-    height: 100vh;
-    background: var(--sky-gradient);
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 9999;
-    backdrop-filter: blur(20px);
-    transition: opacity 0.2s ease;
-}
-
-.lock-content {
-    width: 170px;
-    height: 130px;
-    background: rgba(255, 255, 255, 0.95);
-    border-radius: 5px;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    transition: all 0.1s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
-    border: 40px solid rgba(255, 255, 255, 0.5);
-    backdrop-filter: blur(10px);
-    z-index: 10001;
-    position: relative;
-    pointer-events: auto;
-    padding: 15px 10px;
-    transform: translateY(-75px);
-}
-
-.lock-time {
-    font-family: var(--clock-font);
-    font-size: 40px;
-    font-weight: 400;
-    color: #333;
-    letter-spacing: 1px;
-    line-height: 1;
-    margin-bottom: 8px;
-    text-align: center;
-    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.lock-date {
-    font-family: var(--font);
-    font-size: 16px;
-    font-weight: 500;
-    color: #666;
-    letter-spacing: 0.5px;
-    text-transform: lowercase;
-    text-align: center;
-    transition: all 0.3s cubic-bezier(0.25, 0.46, 0.45, 0.94);
-}
-
-.lock-screen.hide {
-    opacity: 0;
-    pointer-events: none;
-    visibility: hidden;
-}
-
-@media (max-width: 768px) {
-    .lock-content {
-        width: 150px;
-        height: 110px;
-        padding: 12px 8px;
-    }
-
-    .lock-time {
-        font-size: 32px;
-        margin-bottom: 6px;
-    }
-
-    .lock-date {
-        font-size: 14px;
-    }
+    --menu-height: 28px;
+    --dock-icon-size: 50px;
+    --file-icon-size: 100px;
+    --spacing: 20px;
 }
 
 * {
@@ -115,15 +33,70 @@ body {
     overflow: hidden;
     position: fixed;
     touch-action: manipulation;
-    margin: 0;
-    padding: 0;
 }
 
-/* Desktop обычно видимый */
+.hidden {
+    display: none !important;
+}
+
+/* Скроллбары */
+.window-content::-webkit-scrollbar,
+.text-content::-webkit-scrollbar,
+.github-profile::-webkit-scrollbar,
+.call-log::-webkit-scrollbar,
+.notes-area::-webkit-scrollbar {
+    width: 8px;
+}
+
+.window-content::-webkit-scrollbar-track,
+.text-content::-webkit-scrollbar-track,
+.github-profile::-webkit-scrollbar-track,
+.call-log::-webkit-scrollbar-track,
+.notes-area::-webkit-scrollbar-track {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 4px;
+}
+
+.window-content::-webkit-scrollbar-thumb,
+.text-content::-webkit-scrollbar-thumb,
+.github-profile::-webkit-scrollbar-thumb,
+.call-log::-webkit-scrollbar-thumb,
+.notes-area::-webkit-scrollbar-thumb {
+    background: var(--neon-blue);
+    border-radius: 4px;
+}
+
+.window-content::-webkit-scrollbar-thumb:hover,
+.text-content::-webkit-scrollbar-thumb:hover,
+.github-profile::-webkit-scrollbar-thumb:hover,
+.call-log::-webkit-scrollbar-thumb:hover,
+.notes-area::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-purple);
+}
+
+.telegram-chat-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.telegram-chat-list::-webkit-scrollbar-thumb {
+    background: var(--neon-blue);
+    border-radius: 3px;
+}
+
+.telegram-chat-list::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-purple);
+}
+
+/* Lock Screen отключил, ибо мешает пока */
+.lock-screen {
+    display: none !important;
+}
+
+/* Desktop */
 .desktop {
     width: 100%;
     height: 100%;
-    padding: 50px 20px 80px 20px;
+    padding: 50px var(--spacing) 80px var(--spacing);
     position: fixed;
     top: 0;
     left: 0;
@@ -177,13 +150,13 @@ body {
     mix-blend-mode: screen;
 }
 
-/* Меню-бар обычно видимый */
+/* Меню */
 .menu-bar {
     position: fixed;
     top: 0;
     left: 0;
     width: 100%;
-    height: 28px;
+    height: var(--menu-height);
     background: rgba(0, 0, 0, 0.5);
     backdrop-filter: blur(10px);
     display: flex;
@@ -194,6 +167,11 @@ body {
     font-size: 14px;
     font-weight: 500;
     text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
+}
+
+.datetime {
+    padding: 4px 12px;
+    border-radius: 6px;
 }
 
 .corner-area {
@@ -212,8 +190,6 @@ body {
 
 .corner-area:hover {
     background-color: rgba(255, 255, 255, 0.1);
-    border-radius: 5px;
-    transition: all 0.2s ease;
 }
 
 .corner-area button {
@@ -226,7 +202,6 @@ body {
     letter-spacing: 0.5px;
     cursor: pointer;
     font-family: var(--font);
-    text-transform: none;
 }
 
 #check-button:focus-visible {
@@ -236,7 +211,7 @@ body {
 
 .check-panel {
     position: fixed;
-    top: calc(28px + 10px);
+    top: calc(var(--menu-height) + 10px);
     right: clamp(12px, 3vw, 36px);
     width: clamp(160px, 60vw, 240px);
     max-width: 90vw;
@@ -272,11 +247,7 @@ body {
     color: #222;
 }
 
-.datetime {
-    padding: 4px 12px;
-    border-radius: 6px;
-}
-
+/* Файлы на рабочем столе */
 .file {
     display: flex;
     flex-direction: column;
@@ -296,18 +267,16 @@ body {
     z-index: 30;
 }
 
-
 .file-icon {
     position: relative;
-    width: 100px;
-    height: 100px;
+    width: var(--file-icon-size);
+    height: var(--file-icon-size);
     border-radius: var(--border-radius);
     overflow: hidden;
     box-shadow: var(--shadow);
     background: var(--code-bg);
     transition: var(--transition);
 }
-
 
 .file-icon img,
 .file-icon video,
@@ -342,6 +311,7 @@ body {
     transition: var(--transition);
 }
 
+/* Окна */
 .window {
     position: absolute;
     top: 50px;
@@ -377,7 +347,7 @@ body {
 
 .window-header {
     background: var(--code-bg);
-    padding: 12px 20px;
+    padding: 12px var(--spacing);
     display: flex;
     align-items: center;
     justify-content: flex-start;
@@ -418,11 +388,11 @@ body {
     color: var(--neon-green);
     font-weight: 700;
     letter-spacing: 1px;
-    margin-left: 20px;
+    margin-left: var(--spacing);
 }
 
 .window-content {
-    padding: 20px;
+    padding: var(--spacing);
     height: calc(100% - 50px);
     color: var(--text-light);
     font-size: 16px;
@@ -430,29 +400,6 @@ body {
     touch-action: pan-y;
     background: var(--code-bg);
     overflow-y: auto;
-}
-
-
-.window-content::-webkit-scrollbar,
-.text-content::-webkit-scrollbar {
-    width: 8px;
-}
-
-.window-content::-webkit-scrollbar-track,
-.text-content::-webkit-scrollbar-track {
-    background: rgba(255, 255, 255, 0.1);
-    border-radius: 4px;
-}
-
-.window-content::-webkit-scrollbar-thumb,
-.text-content::-webkit-scrollbar-thumb {
-    background: var(--neon-blue);
-    border-radius: 4px;
-}
-
-.window-content::-webkit-scrollbar-thumb:hover,
-.text-content::-webkit-scrollbar-thumb:hover {
-    background: var(--neon-purple);
 }
 
 .window-content img,
@@ -469,10 +416,11 @@ body {
     display: none;
 }
 
+/* Папки */
 .folder-content {
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
-    gap: 20px;
+    gap: var(--spacing);
     background: var(--code-bg);
 }
 
@@ -506,6 +454,7 @@ body {
     text-align: center;
 }
 
+/* Звонки */
 .call-log {
     display: flex;
     flex-direction: column;
@@ -550,11 +499,11 @@ body {
     opacity: 0.7;
 }
 
+/* Текстовые файлы */
 .text-content {
     overflow-y: auto;
     max-height: 100%;
 }
-
 
 .text-content p {
     margin-bottom: 15px;
@@ -562,11 +511,12 @@ body {
 }
 
 .text-content h2 {
-    margin-bottom: 20px;
+    margin-bottom: var(--spacing);
     font-size: 18px;
     font-weight: 700;
 }
 
+/* Заметки */
 .notes-area {
     width: 100%;
     height: 100%;
@@ -587,6 +537,7 @@ body {
     box-shadow: 0 0 0 2px var(--neon-blue);
 }
 
+/* Галерея */
 .gallery {
     position: relative;
     width: 100%;
@@ -656,6 +607,7 @@ body {
     right: 15px;
 }
 
+/* Dock */
 .dock {
     position: fixed;
     bottom: 15px;
@@ -678,8 +630,8 @@ body {
 }
 
 .dock-icon {
-    width: 50px;
-    height: 50px;
+    width: var(--dock-icon-size);
+    height: var(--dock-icon-size);
     filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5));
     border-radius: 10px;
 }
@@ -725,12 +677,12 @@ body {
     box-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
 }
 
+/* Анимации */
 @keyframes window-open {
     from {
         transform: translateX(var(--window-translate-x)) scale(0.9) translateY(20px);
         opacity: 0;
     }
-
     to {
         transform: translateX(var(--window-translate-x)) scale(1) translateY(0);
         opacity: 1;
@@ -744,212 +696,11 @@ body {
     }
 }
 
-@media (min-width: 769px) {
-    .desktop {
-        display: flex;
-        flex-direction: row;
-        align-items: flex-start;
-        justify-content: flex-start;
-        padding: 50px 20px 80px 20px;
-        background: var(--sky-gradient);
-    }
-
-    .file[data-type="projects"] {
-        position: absolute;
-        left: 80px;
-        top: 80px;
-    }
-
-    .file[data-type="photos"] {
-        position: absolute;
-        left: 220px;
-        top: 80px;
-    }
-
-    .file[data-type="text"] {
-        position: absolute;
-        left: 360px;
-        top: 80px;
-    }
-}
-
-@media (max-width: 768px) {
-    .desktop {
-        padding: 40px 15px 100px 15px;
-        display: block;
-        /* Убираем flex для мобильной версии */
-        background: var(--sky-gradient);
-    }
-
-    .file {
-        position: absolute;
-        /* Все иконки абсолютно позиционированы */
-    }
-
-    .file[data-type="projects"] {
-        left: 20px;
-        top: 40px;
-    }
-
-    .file[data-type="photos"] {
-        left: 20px;
-        top: 160px;
-    }
-
-    .file[data-type="text"] {
-        left: 20px;
-        top: 280px;
-    }
-
-
-    .file-icon {
-        width: 80px;
-        height: 80px;
-    }
-
-    .file span {
-        font-size: 13px;
-    }
-
-    .window {
-        width: 90vw;
-        max-height: 500px;
-    }
-
-    .window-content {
-        padding: 12px;
-        font-size: 14px;
-    }
-
-    .text-content p {
-        font-size: 13px;
-        margin-bottom: 12px;
-    }
-
-    .text-content h2 {
-        font-size: 18px;
-    }
-
-    .dock {
-        padding: 8px;
-        gap: 12px;
-    }
-
-    .dock-icon {
-        width: 45px;
-        height: 45px;
-    }
-
-    .menu-bar {
-        font-size: 13px;
-        height: 24px;
-    }
-
-    .arrow {
-        width: 30px;
-        height: 30px;
-        font-size: 16px;
-    }
-
-    .notification {
-        width: 15px;
-        height: 15px;
-        font-size: 10px;
-    }
-}
-
-@media (max-width: 480px) {
-    .window {
-        max-height: 450px;
-    }
-
-    .desktop {
-        padding: 30px 10px 90px 10px;
-        background: var(--sky-gradient);
-    }
-
-    .file-icon {
-        width: 70px;
-        height: 70px;
-    }
-
-    .file span {
-        font-size: 12px;
-        padding: 4px 8px;
-    }
-
-    .window-content {
-        padding: 10px;
-        font-size: 13px;
-    }
-
-
-    .dock {
-        padding: 6px;
-        gap: 10px;
-    }
-
-    .dock-icon {
-        width: 40px;
-        height: 40px;
-    }
-
-    .menu-bar {
-        font-size: 12px;
-        height: 22px;
-    }
-
-    .arrow {
-        width: 28px;
-        height: 28px;
-        font-size: 14px;
-    }
-
-    .window-header {
-        padding: 10px 15px;
-    }
-
-    .window-title {
-        font-size: 13px;
-    }
-
-    .window-control {
-        width: 12px;
-        height: 12px;
-    }
-
-    .close-icon {
-        width: 7px;
-        height: 7px;
-    }
-
-    .notification {
-        width: 14px;
-        height: 14px;
-        font-size: 9px;
-    }
-
-    .call-item img {
-        width: 35px;
-        height: 35px;
-    }
-
-    .folder-item img,
-    .folder-item video {
-        width: 80px;
-        height: 80px;
-    }
-
-    .folder-item span {
-        font-size: 12px;
-    }
-}
-
-/* ==== GitHub Profile Window ==== */
+/* GitHub */
 .github-profile {
     display: flex;
     flex-direction: column;
-    font-family: "Source Code Pro", monospace;
+    font-family: var(--font);
     color: #ddd;
     padding: 16px;
     height: 100%;
@@ -957,47 +708,24 @@ body {
     background: #0d1117;
 }
 
-.github-profile::-webkit-scrollbar {
-    width: 8px;
-}
-
-.github-profile::-webkit-scrollbar-track {
-    background: #161b22;
-    border-radius: 4px;
-}
-
-.github-profile::-webkit-scrollbar-thumb {
-    background: #58a6ff;
-    border-radius: 4px;
-}
-
-.github-profile::-webkit-scrollbar-thumb:hover {
-    background: #1f6feb;
-}
-
-/* Сетка GitHub профиля */
 .gh-body {
     display: grid;
     grid-template-columns: 130px 1fr;
-    /* левая колонка фиксированная, правая гибкая */
-    gap: 20px;
+    gap: var(--spacing);
 }
 
-/* Левая колонка: аватар + followers/following */
 .gh-left-column {
     display: flex;
     flex-direction: column;
     align-items: center;
     gap: 12px;
     padding-top: 60px;
-    /* дополнительное место сверху */
 }
 
 .gh-left-column img.gh-avatar {
     width: 120px;
     height: 120px;
     border-radius: 50%;
-    /* круглая */
     border: 2px solid #30363d;
 }
 
@@ -1015,7 +743,6 @@ body {
     text-align: center;
 }
 
-/* Правая колонка: README + repos */
 .gh-right-column {
     display: flex;
     flex-direction: column;
@@ -1077,7 +804,7 @@ body {
     background: rgba(13, 17, 23, 0.9);
     border: 1px solid #21262d;
     border-radius: 12px;
-    padding: 20px;
+    padding: var(--spacing);
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
     backdrop-filter: blur(6px);
 }
@@ -1086,7 +813,6 @@ body {
     margin-top: 12px;
 }
 
-/* Стилизация markdown из README */
 .gh-readme h1,
 .gh-readme h2,
 .gh-readme h3 {
@@ -1116,18 +842,7 @@ body {
     margin-bottom: 15px;
 }
 
-/* ===== Адаптив ===== */
-@media (max-width: 768px) {
-    .gh-body {
-        grid-template-columns: 1fr;
-    }
-
-    .gh-profiles {
-        grid-template-columns: 1fr;
-    }
-}
-
-/* ==== Telegram Window ==== */
+/* Telegram */
 .telegram-window {
     display: flex;
     flex-direction: column;
@@ -1140,7 +855,7 @@ body {
 
 .telegram-header {
     background: #2a2a3d;
-    padding: 12px 20px;
+    padding: 12px var(--spacing);
     font-weight: 700;
     font-size: 16px;
     color: var(--neon-blue);
@@ -1158,19 +873,6 @@ body {
     background: #252538;
     overflow-y: auto;
     border-right: 1px solid rgba(255, 255, 255, 0.1);
-}
-
-.telegram-chat-list::-webkit-scrollbar {
-    width: 6px;
-}
-
-.telegram-chat-list::-webkit-scrollbar-thumb {
-    background: var(--neon-blue);
-    border-radius: 3px;
-}
-
-.telegram-chat-list::-webkit-scrollbar-thumb:hover {
-    background: var(--neon-purple);
 }
 
 .telegram-chat-item {
@@ -1261,8 +963,160 @@ body {
     background: var(--neon-purple);
 }
 
+/* Адаптив для десктопа */
+@media (min-width: 769px) {
+    .file[data-type="projects"] {
+        left: 80px;
+        top: 80px;
+    }
+    .file[data-type="photos"] {
+        left: 220px;
+        top: 80px;
+    }
+    .file[data-type="text"] {
+        left: 360px;
+        top: 80px;
+    }
+}
+
+/* Адаптив для планшетов */
 @media (max-width: 768px) {
+    .desktop {
+        padding: 40px 15px 100px 15px;
+    }
+    .file[data-type="projects"] {
+        left: 20px;
+        top: 40px;
+    }
+    .file[data-type="photos"] {
+        left: 20px;
+        top: 160px;
+    }
+    .file[data-type="text"] {
+        left: 20px;
+        top: 280px;
+    }
+    .file-icon {
+        width: 80px;
+        height: 80px;
+    }
+    .file span {
+        font-size: 13px;
+    }
+    .window {
+        width: 90vw;
+        max-height: 500px;
+    }
+    .window-content {
+        padding: 12px;
+        font-size: 14px;
+    }
+    .text-content p {
+        font-size: 13px;
+        margin-bottom: 12px;
+    }
+    .text-content h2 {
+        font-size: 18px;
+    }
+    .dock {
+        padding: 8px;
+        gap: 12px;
+    }
+    .dock-icon {
+        width: 45px;
+        height: 45px;
+    }
+    .menu-bar {
+        font-size: 13px;
+        height: 24px;
+    }
+    .arrow {
+        width: 30px;
+        height: 30px;
+        font-size: 16px;
+    }
+    .notification {
+        width: 15px;
+        height: 15px;
+        font-size: 10px;
+    }
+    .gh-body {
+        grid-template-columns: 1fr;
+    }
+    .gh-profiles {
+        grid-template-columns: 1fr;
+    }
     .telegram-chat-list {
         width: 100px;
+    }
+}
+
+/* Адаптив для мобильных */
+@media (max-width: 480px) {
+    .window {
+        max-height: 450px;
+    }
+    .desktop {
+        padding: 30px 10px 90px 10px;
+    }
+    .file-icon {
+        width: 70px;
+        height: 70px;
+    }
+    .file span {
+        font-size: 12px;
+        padding: 4px 8px;
+    }
+    .window-content {
+        padding: 10px;
+        font-size: 13px;
+    }
+    .dock {
+        padding: 6px;
+        gap: 10px;
+    }
+    .dock-icon {
+        width: 40px;
+        height: 40px;
+    }
+    .menu-bar {
+        font-size: 12px;
+        height: 22px;
+    }
+    .arrow {
+        width: 28px;
+        height: 28px;
+        font-size: 14px;
+    }
+    .window-header {
+        padding: 10px 15px;
+    }
+    .window-title {
+        font-size: 13px;
+    }
+    .window-control {
+        width: 12px;
+        height: 12px;
+    }
+    .close-icon {
+        width: 7px;
+        height: 7px;
+    }
+    .notification {
+        width: 14px;
+        height: 14px;
+        font-size: 9px;
+    }
+    .call-item img {
+        width: 35px;
+        height: 35px;
+    }
+    .folder-item img,
+    .folder-item video {
+        width: 80px;
+        height: 80px;
+    }
+    .folder-item span {
+        font-size: 12px;
     }
 }

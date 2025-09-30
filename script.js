@@ -91,6 +91,59 @@ document.addEventListener('DOMContentLoaded', () => {
     ];
 
     const githubDataCache = {};
+    const GITHUB_CACHE_PREFIX = 'github-profile-cache:';
+    const GITHUB_CACHE_TTL = 1000 * 60 * 30; // 30 минут
+    const GITHUB_RATE_LIMIT_MESSAGE = 'Превышен лимит GitHub API. Попробуйте снова через несколько минут или откройте профиль напрямую.';
+    const GITHUB_REQUEST_HEADERS = {
+        'Accept': 'application/vnd.github+json',
+        'X-GitHub-Api-Version': '2022-11-28'
+    };
+
+    const isLocalStorageAvailable = (() => {
+        try {
+            const testKey = '__gh_cache_test__';
+            localStorage.setItem(testKey, '1');
+            localStorage.removeItem(testKey);
+            return true;
+        } catch (error) {
+            console.warn('LocalStorage недоступен, кэш GitHub отключен.', error);
+            return false;
+        }
+    })();
+
+    const buildGitHubCacheKey = (username) => `${GITHUB_CACHE_PREFIX}${username}`;
+
+    function readGitHubCache(username) {
+        if (!isLocalStorageAvailable) return null;
+        try {
+            const raw = localStorage.getItem(buildGitHubCacheKey(username));
+            if (!raw) return null;
+            const parsed = JSON.parse(raw);
+            if (!parsed || typeof parsed !== 'object') return null;
+            const { timestamp, data } = parsed;
+            if (!timestamp || !data) return null;
+            if (Date.now() - timestamp > GITHUB_CACHE_TTL) {
+                localStorage.removeItem(buildGitHubCacheKey(username));
+                return null;
+            }
+            return data;
+        } catch (error) {
+            console.warn('Не удалось прочитать кэш GitHub.', error);
+            return null;
+        }
+    }
+
+    function writeGitHubCache(username, data) {
+        if (!isLocalStorageAvailable) return;
+        try {
+            localStorage.setItem(buildGitHubCacheKey(username), JSON.stringify({
+                timestamp: Date.now(),
+                data
+            }));
+        } catch (error) {
+            console.warn('Не удалось записать кэш GitHub.', error);
+        }
+    }
 
     const telegramState = {
         chats: [
@@ -617,45 +670,133 @@ document.addEventListener('DOMContentLoaded', () => {
                     }
                 }
             })
-            .catch(() => {
-                if (name) name.textContent = "Failed to load";
-                if (followers) followers.textContent = "";
-                if (reposList) reposList.textContent = "Failed to load repos.";
-                if (readmeContainer) readmeContainer.textContent = "No README found.";
+            .catch((error) => {
+                const isRateLimit = Boolean(error?.isRateLimit);
+
+                if (name) {
+                    name.textContent = isRateLimit ? 'Лимит GitHub API' : 'Failed to load';
+                }
+
+                if (followers) {
+                    followers.textContent = '';
+                }
+
+                if (reposList) {
+                    if (isRateLimit) {
+                        reposList.innerHTML = `
+                            <li>
+                                <span>${GITHUB_RATE_LIMIT_MESSAGE}</span><br>
+                                <a href="https://github.com/${username}" target="_blank" rel="noopener">Открыть профиль ${username}</a>
+                            </li>
+                        `;
+                    } else {
+                        reposList.textContent = 'Failed to load repos.';
+                    }
+                }
+
+                if (readmeContainer) {
+                    if (isRateLimit) {
+                        readmeContainer.textContent = GITHUB_RATE_LIMIT_MESSAGE;
+                    } else {
+                        readmeContainer.textContent = 'No README found.';
+                    }
+                }
             });
     }
 
     function fetchGitHubData(username) {
         if (!githubDataCache[username]) {
-            githubDataCache[username] = Promise.all([
-                fetchGitHubUser(username),
-                fetchGitHubRepos(username).catch(() => []),
-                fetchUserReadme(username).catch(() => null)
-            ])
-                .then(([user, repos, readme]) => ({ user, repos, readme }))
-                .catch(error => {
-                    delete githubDataCache[username];
-                    throw error;
-                });
+            const cached = readGitHubCache(username);
+
+            if (cached) {
+                githubDataCache[username] = Promise.resolve(cached);
+
+                refreshGitHubData(username)
+                    .then((freshData) => {
+                        githubDataCache[username] = Promise.resolve(freshData);
+                    })
+                    .catch((error) => {
+                        if (error?.isRateLimit) {
+                            console.info(`GitHub rate limit while refreshing ${username}: ${error.message}`);
+                        } else {
+                            console.warn(`Не удалось обновить данные GitHub для ${username}`, error);
+                        }
+                    });
+            } else {
+                githubDataCache[username] = refreshGitHubData(username);
+            }
         }
 
         return githubDataCache[username];
     }
 
-    function fetchGitHubUser(username) {
-        return fetch(`https://api.github.com/users/${username}`)
-            .then(res => {
-                if (!res.ok) throw new Error(res.statusText);
-                return res.json();
+    function refreshGitHubData(username) {
+        return Promise.all([
+            fetchGitHubUser(username),
+            fetchGitHubRepos(username).catch((error) => {
+                if (error?.isRateLimit) throw error;
+                return [];
+            }),
+            fetchUserReadme(username).catch((error) => {
+                if (error?.isRateLimit) throw error;
+                return null;
+            })
+        ])
+            .then(([user, repos, readme]) => {
+                const payload = { user, repos, readme };
+                writeGitHubCache(username, payload);
+                return payload;
+            })
+            .catch((error) => {
+                delete githubDataCache[username];
+                throw error;
             });
     }
 
+    async function fetchGitHubResource(url, { responseType = 'json' } = {}) {
+        const response = await fetch(url, { headers: GITHUB_REQUEST_HEADERS });
+
+        if (response.status === 403) {
+            let message = 'GitHub API rate limit exceeded';
+            try {
+                const body = await response.json();
+                if (body?.message) {
+                    message = body.message;
+                }
+            } catch (error) {
+                console.warn('Не удалось разобрать тело ответа GitHub при 403.', error);
+            }
+
+            const rateLimitError = new Error(message);
+            rateLimitError.isRateLimit = true;
+            rateLimitError.status = 403;
+            throw rateLimitError;
+        }
+
+        if (!response.ok) {
+            const text = await response.text().catch(() => '');
+            const error = new Error(text || response.statusText);
+            error.status = response.status;
+            throw error;
+        }
+
+        if (responseType === 'text') {
+            return response.text();
+        }
+
+        if (responseType === 'json') {
+            return response.json();
+        }
+
+        return response;
+    }
+
+    function fetchGitHubUser(username) {
+        return fetchGitHubResource(`https://api.github.com/users/${username}`);
+    }
+
     function fetchGitHubRepos(username) {
-        return fetch(`https://api.github.com/users/${username}/repos?sort=updated&per_page=5`)
-            .then(res => {
-                if (!res.ok) throw new Error(res.statusText);
-                return res.json();
-            })
+        return fetchGitHubResource(`https://api.github.com/users/${username}/repos?sort=updated&per_page=5`)
             .then(repos => {
                 if (!Array.isArray(repos)) throw new Error("Invalid repos response");
                 return repos;
@@ -669,26 +810,33 @@ document.addEventListener('DOMContentLoaded', () => {
             `https://raw.githubusercontent.com/${username}/profile/main/README.md`
         ];
 
-        const tryFetch = (index = 0) => {
+        const tryFetch = async (index = 0) => {
             if (index >= readmePaths.length) {
-                return Promise.reject(new Error("README not found"));
+                throw new Error("README not found");
             }
 
-            return fetch(readmePaths[index])
-                .then(res => {
-                    if (!res.ok) throw new Error("Not found");
-                    return res.text();
-                })
-                .catch(() => tryFetch(index + 1));
+            try {
+                const response = await fetch(readmePaths[index]);
+                if (response.status === 403) {
+                    const rateLimitError = new Error('GitHub raw rate limit');
+                    rateLimitError.isRateLimit = true;
+                    rateLimitError.status = 403;
+                    throw rateLimitError;
+                }
+
+                if (!response.ok) {
+                    throw new Error("Not found");
+                }
+
+                return await response.text();
+            } catch (error) {
+                if (error?.isRateLimit) throw error;
+                return tryFetch(index + 1);
+            }
         };
 
         return tryFetch();
     }
-
-    GITHUB_PROFILES.forEach(({ username }) => {
-        fetchGitHubData(username).catch(() => { /* данная ошибка отобразится при открытии окна */ });
-    });
-
     // -----------------------
     // 9. Telegram
     // -----------------------
