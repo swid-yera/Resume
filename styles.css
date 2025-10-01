@@ -87,9 +87,17 @@ body {
     background: var(--neon-purple);
 }
 
-/* Lock Screen отключил, ибо мешает пока */
-.lock-screen {
-    display: none !important;
+/* Focus styles for accessibility */
+*:focus-visible {
+    outline: 2px solid var(--neon-blue);
+    outline-offset: 2px;
+}
+
+button:focus-visible,
+.dock-item:focus-visible,
+.file:focus-visible {
+    outline: 3px solid var(--neon-blue);
+    outline-offset: 3px;
 }
 
 /* Desktop */
@@ -202,11 +210,6 @@ body {
     letter-spacing: 0.5px;
     cursor: pointer;
     font-family: var(--font);
-}
-
-#check-button:focus-visible {
-    outline: 2px solid var(--neon-blue);
-    outline-offset: 2px;
 }
 
 .check-panel {
@@ -371,6 +374,8 @@ body {
     justify-content: center;
     transition: var(--transition);
     cursor: pointer;
+    border: none;
+    padding: 0;
 }
 
 .close-icon {
@@ -416,6 +421,17 @@ body {
     display: none;
 }
 
+/* Error content */
+.error-content {
+    padding: 20px;
+    text-align: center;
+}
+
+.error-content p {
+    color: #ff5555;
+    font-size: 16px;
+}
+
 /* Папки */
 .folder-content {
     display: grid;
@@ -431,11 +447,12 @@ body {
     cursor: pointer;
     padding: 10px;
     transition: var(--transition);
+    border-radius: 8px;
 }
 
-.folder-item:hover {
+.folder-item:hover,
+.folder-item:focus {
     background: rgba(255, 255, 255, 0.1);
-    border-radius: 8px;
 }
 
 .folder-item img,
@@ -593,10 +610,17 @@ body {
     border-radius: 50%;
     z-index: 1001;
     transition: var(--transition);
+    border: none;
 }
 
-.arrow:hover {
+.arrow:hover,
+.arrow:focus {
     background: rgba(0, 0, 0, 0.7);
+}
+
+.arrow[aria-disabled="true"] {
+    opacity: 0.3;
+    cursor: not-allowed;
 }
 
 .arrow.left {
@@ -627,6 +651,9 @@ body {
     position: relative;
     cursor: pointer;
     transition: var(--transition);
+    background: transparent;
+    border: none;
+    padding: 0;
 }
 
 .dock-icon {
@@ -636,11 +663,13 @@ body {
     border-radius: 10px;
 }
 
-.dock-item:hover {
+.dock-item:hover,
+.dock-item:focus {
     transform: scale(1.4) translateY(-8px);
 }
 
-.dock-item:hover .dock-tooltip {
+.dock-item:hover .dock-tooltip,
+.dock-item:focus .dock-tooltip {
     opacity: 1;
     transform: translateY(-10px);
 }
@@ -658,6 +687,7 @@ body {
     opacity: 0;
     transition: var(--transition);
     white-space: nowrap;
+    pointer-events: none;
 }
 
 .notification {
@@ -790,8 +820,10 @@ body {
     transition: color 0.2s;
 }
 
-.gh-repos a:hover {
+.gh-repos a:hover,
+.gh-repos a:focus {
     color: #1f6feb;
+    text-decoration: underline;
 }
 
 .gh-profiles {
@@ -884,7 +916,8 @@ body {
     transition: var(--transition);
 }
 
-.telegram-chat-item:hover {
+.telegram-chat-item:hover,
+.telegram-chat-item:focus {
     background: rgba(88, 221, 235, 0.1);
 }
 
@@ -945,6 +978,10 @@ body {
     color: var(--text-light);
 }
 
+.telegram-input input:focus {
+    box-shadow: 0 0 0 2px var(--neon-blue);
+}
+
 .telegram-input button {
     background: var(--neon-blue);
     border: none;
@@ -959,7 +996,8 @@ body {
     transition: var(--transition);
 }
 
-.telegram-input button:hover {
+.telegram-input button:hover,
+.telegram-input button:focus {
     background: var(--neon-purple);
 }
 

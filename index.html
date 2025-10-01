@@ -12,100 +12,92 @@
 </head>
 
 <body>
-    <!-- Lock Screen -->
-    <div class="lock-screen" id="lock-screen">
-        <div class="lock-content">
-            <div class="lock-time" id="lock-time">12:00</div>
-            <div class="lock-date" id="lock-date">пн, 22 сен</div>
-        </div>
-    </div>
-
     <!-- Панель сверху -->
-    <div class="menu-bar">
+    <div class="menu-bar" role="banner">
         <div class="corner-area" id="corner-area">
-            <button id="check-button" type="button" aria-labelledby="check-button-label">
-                <span id="check-button-label">check</span>
+            <button id="check-button" type="button" aria-label="Open check panel" aria-expanded="false" aria-controls="check-panel">
+                <span>check</span>
             </button>
         </div>
-        <div class="datetime" id="datetime"></div>
+        <div class="datetime" id="datetime" role="timer" aria-live="off"></div>
     </div>
-    <div class="check-panel" id="check-panel">
+    <div class="check-panel" id="check-panel" role="menu" aria-hidden="true">
         <div class="check-panel__placeholder">
             check
         </div>
     </div>
 
     <!-- Рабочий стол -->
-    <div class="desktop" id="desktop">
-        <div class="file folder" data-type="projects">
+    <main class="desktop" id="desktop" role="main" aria-label="Desktop">
+        <div class="file folder" data-type="projects" tabindex="0" role="button" aria-label="Open Projects folder">
             <div class="file-icon">
-                <img src="icons/folder-icon.png" alt="Projects" class="folder-icon">
+                <img src="icons/folder-icon.png" alt="" aria-hidden="true" class="folder-icon">
             </div>
             <span>Projects</span>
         </div>
-        <div class="file folder" data-type="photos">
+        <div class="file folder" data-type="photos" tabindex="0" role="button" aria-label="Open Photos folder">
             <div class="file-icon">
-                <img src="icons/folder-icon.png" alt="Photos" class="folder-icon">
+                <img src="icons/folder-icon.png" alt="" aria-hidden="true" class="folder-icon">
             </div>
             <span>Photos</span>
         </div>
-        <div class="file" data-type="text">
+        <div class="file" data-type="text" tabindex="0" role="button" aria-label="Open About.txt file">
             <div class="file-icon">
-                <img src="icons/icon-text.png" alt="About" class="text-icon">
+                <img src="icons/icon-text.png" alt="" aria-hidden="true" class="text-icon">
             </div>
             <span>About.txt</span>
         </div>
-    </div>
+    </main>
 
     <!-- Окно -->
-    <div class="window" id="window">
+    <div class="window" id="window" role="dialog" aria-modal="true" aria-labelledby="window-title">
         <div class="window-header">
             <div class="window-controls">
-                <div class="window-control close" id="close-window">
-                    <svg viewBox="0 0 12 12" class="close-icon">
+                <button class="window-control close" id="close-window" aria-label="Close window" type="button">
+                    <svg viewBox="0 0 12 12" class="close-icon" aria-hidden="true">
                         <path d="M2 2L10 10M2 10L10 2" stroke="white" stroke-width="2" stroke-linecap="round" />
                     </svg>
-                </div>
+                </button>
             </div>
-            <span class="window-title">Desktop</span>
+            <span class="window-title" id="window-title">Desktop</span>
         </div>
-        <div class="window-content" id="window-content">
+        <div class="window-content" id="window-content" role="document">
             <!-- Рендер JS для содержимого окна -->
         </div>
     </div>
 
     <!-- Dock -->
-    <div class="dock">
-        <div class="dock-item" data-type="calls">
-            <img src="https://fsystem88.ru/icons/phone.png" alt="Calls" class="dock-icon">
+    <nav class="dock" role="navigation" aria-label="Application dock">
+        <button class="dock-item" data-type="calls" aria-label="Open Recent Calls">
+            <img src="https://fsystem88.ru/icons/phone.png" alt="" aria-hidden="true" class="dock-icon">
             <span class="dock-tooltip">Recent Calls</span>
-        </div>
-        <div class="dock-item" data-type="github">
-            <img src="https://pngimg.com/uploads/github/github_PNG40.png" alt="GitHub" class="dock-icon">
+        </button>
+        <button class="dock-item" data-type="github" aria-label="Open GitHub">
+            <img src="https://pngimg.com/uploads/github/github_PNG40.png" alt="" aria-hidden="true" class="dock-icon">
             <span class="dock-tooltip">GitHub</span>
-        </div>
-        <div class="dock-item" data-type="telegram">
-            <img src="https://freelogopng.com/images/all_img/1683045226telegram-logo-black.png" alt="Telegram"
-                class="dock-icon">
+        </button>
+        <button class="dock-item" data-type="telegram" aria-label="Open Telegram">
+            <img src="https://freelogopng.com/images/all_img/1683045226telegram-logo-black.png" alt="" aria-hidden="true" class="dock-icon">
             <span class="dock-tooltip">Telegram</span>
-            <span class="notification">1</span>
-        </div>
-        <div class="dock-item" data-type="instagram">
-            <img src="https://fsystem88.ru/icons/instagram.png" alt="Instagram" class="dock-icon">
+            <span class="notification" aria-label="1 new message">1</span>
+        </button>
+        <button class="dock-item" data-type="instagram" aria-label="Open Instagram">
+            <img src="https://fsystem88.ru/icons/instagram.png" alt="" aria-hidden="true" class="dock-icon">
             <span class="dock-tooltip">Instagram</span>
-        </div>
-        <div class="dock-item" data-type="notes">
-            <img src="https://img.icons8.com/fluency/452/notepad.png" alt="Notes" class="dock-icon">
+        </button>
+        <button class="dock-item" data-type="notes" aria-label="Open Notes">
+            <img src="https://img.icons8.com/fluency/452/notepad.png" alt="" aria-hidden="true" class="dock-icon">
             <span class="dock-tooltip">Notes</span>
-        </div>
-        <div class="dock-item" data-type="trash">
-            <img src="https://vectorified.com/images/recycle-bin-icon-9.png" alt="Trash" class="dock-icon">
+        </button>
+        <button class="dock-item" data-type="trash" aria-label="Open Trash">
+            <img src="https://vectorified.com/images/recycle-bin-icon-9.png" alt="" aria-hidden="true" class="dock-icon">
             <span class="dock-tooltip">Trash</span>
-        </div>
-    </div>
+        </button>
+    </nav>
 
     <!-- Скрипты -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
     <script src="script.js"></script>
 </body>
 
