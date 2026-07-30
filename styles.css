@@ -51,7 +51,6 @@ body {
 
 /* Скроллбары */
 .window-content::-webkit-scrollbar,
-.text-content::-webkit-scrollbar,
 .github-profile::-webkit-scrollbar,
 .call-log::-webkit-scrollbar,
 .notes-area::-webkit-scrollbar {
@@ -59,7 +58,6 @@ body {
 }
 
 .window-content::-webkit-scrollbar-track,
-.text-content::-webkit-scrollbar-track,
 .github-profile::-webkit-scrollbar-track,
 .call-log::-webkit-scrollbar-track,
 .notes-area::-webkit-scrollbar-track {
@@ -68,7 +66,6 @@ body {
 }
 
 .window-content::-webkit-scrollbar-thumb,
-.text-content::-webkit-scrollbar-thumb,
 .github-profile::-webkit-scrollbar-thumb,
 .call-log::-webkit-scrollbar-thumb,
 .notes-area::-webkit-scrollbar-thumb {
@@ -77,7 +74,6 @@ body {
 }
 
 .window-content::-webkit-scrollbar-thumb:hover,
-.text-content::-webkit-scrollbar-thumb:hover,
 .github-profile::-webkit-scrollbar-thumb:hover,
 .call-log::-webkit-scrollbar-thumb:hover,
 .notes-area::-webkit-scrollbar-thumb:hover {
@@ -97,16 +93,40 @@ body {
     background: var(--neon-purple);
 }
 
+/* В DOM есть, на экране нет. Именно clip, а не display:none: display:none
+   выкидывает узел и из озвучки скринридером. */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+.noscript-fallback {
+    position: relative;
+    z-index: 1;
+    max-width: 40rem;
+    margin: 0 auto;
+    padding: var(--spacing);
+    color: var(--text-primary);
+}
+
 /* Focus styles for accessibility */
 *:focus-visible {
-    outline: 2px solid var(--electric-blue);
+    outline: 2px solid var(--accent);
     outline-offset: 2px;
 }
 
 button:focus-visible,
 .dock-item:focus-visible,
 .file:focus-visible {
-    outline: 3px solid var(--electric-blue);
+    outline: 3px solid var(--accent);
     outline-offset: 3px;
 }
 
@@ -175,26 +195,54 @@ button:focus-visible,
     color: var(--text-light);
     font-size: 14px;
     font-weight: 500;
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.8);
 }
 
 /* Меню приложений (слева) */
 .menu-bar__items {
     display: flex;
     align-items: center;
-    gap: 18px;
+    gap: var(--space-1);
     font-size: 13px;
     font-weight: 400;
-    color: rgba(228, 240, 246, 0.55);
-}
-
-.menu-bar__items span {
-    cursor: default;
+    color: var(--fg-subtle);
 }
 
 .menu-bar__active {
-    color: rgba(228, 240, 246, 0.85);
-    font-weight: 500;
+    color: var(--fg);
+    font-weight: var(--w-semibold);
+    padding: 0 var(--space-2);
+    cursor: default;
+}
+
+/* Пустое место слева, где раньше был значок системы */
+.menu-bar__spacer {
+    width: 14px;
+    height: 14px;
+    margin-right: var(--space-1);
+    flex: none;
+}
+
+.menu-bar__item {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    padding: 3px var(--space-2);
+    border-radius: var(--radius-sm);
+    cursor: default;
+    transition: background var(--dur-fast) var(--ease-standard),
+                color var(--dur-fast) var(--ease-standard);
+}
+
+.menu-bar__item:hover {
+    background: var(--frost-fill);
+    color: var(--fg);
+}
+
+.menu-bar__item.is-open {
+    background: var(--accent);
+    color: var(--accent-contrast);
 }
 
 .datetime {
@@ -212,6 +260,8 @@ button:focus-visible,
     align-items: center;
     text-align: center;
     cursor: pointer;
+    text-decoration: none;
+    color: inherit;
     transition: transform 0.1s cubic-bezier(0.23, 1, 0.32, 1);
     z-index: var(--z-file);
     touch-action: none;
@@ -261,7 +311,7 @@ button:focus-visible,
     margin-top: 10px;
     font-size: 14px;
     color: var(--text-light);
-    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.8);
+    text-shadow: var(--shadow-text);
     font-weight: 500;
     background: rgba(0, 0, 0, 0.4);
     padding: 4px 8px;
@@ -436,7 +486,6 @@ button:focus-visible,
     max-width: 100%;
     max-height: 80%;
     border-radius: 8px;
-    box-shadow: var(--shadow);
     margin: 0 auto;
     display: block;
 }
@@ -485,7 +534,6 @@ button:focus-visible,
     height: 100px;
     object-fit: cover;
     border-radius: 8px;
-    box-shadow: var(--shadow);
 }
 
 .folder-item span {
@@ -540,21 +588,67 @@ button:focus-visible,
     opacity: 0.7;
 }
 
-/* Текстовые файлы */
-.text-content {
-    overflow-y: auto;
-    max-height: 100%;
+/* Подсказка у заголовка: кружок «i», по наведению или фокусу разворачивается
+   в пояснение. Фокус, а не только ховер - иначе на тач-экране не открыть. */
+.hint {
+    position: relative;
+    display: inline-flex;
+    vertical-align: middle;
+    margin-left: var(--space-2);
 }
 
-.text-content p {
-    margin-bottom: 15px;
-    font-size: 14px;
+.hint__btn {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--frost-fill);
+    border: 1px solid var(--frost-line);
+    border-radius: 50%;
+    color: var(--fg-muted);
+    font: italic 600 11px/1 Georgia, serif;
+    cursor: help;
 }
 
-.text-content h2 {
-    margin-bottom: var(--spacing);
-    font-size: 18px;
-    font-weight: 700;
+.hint__btn:hover,
+.hint__btn:focus {
+    color: var(--fg);
+    border-color: var(--accent);
+    outline: none;
+}
+
+.hint__bubble {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 1;
+    width: max-content;
+    max-width: min(24rem, 70vw);
+    padding: var(--space-2) var(--space-3);
+    background: var(--abyss-700);
+    border: 1px solid var(--frost-line);
+    border-radius: var(--radius-md);
+    color: var(--fg-muted);
+    font-size: var(--text-12);
+    font-weight: 400;
+    line-height: 1.5;
+    text-align: left;
+    white-space: normal;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-4px);
+    transition: opacity var(--dur-fast) var(--ease-standard),
+                transform var(--dur-fast) var(--ease-standard),
+                visibility var(--dur-fast);
+}
+
+.hint__btn:hover + .hint__bubble,
+.hint__btn:focus + .hint__bubble {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
 }
 
 /* Заметки */
@@ -575,7 +669,7 @@ button:focus-visible,
 
 .notes-area:focus {
     outline: none;
-    box-shadow: 0 0 0 2px var(--electric-blue);
+    box-shadow: 0 0 0 2px var(--accent);
 }
 
 /* Галерея */
@@ -611,7 +705,6 @@ button:focus-visible,
     max-width: 90%;
     max-height: 70%;
     border-radius: 8px;
-    box-shadow: var(--shadow);
 }
 
 .gallery-item--link img {
@@ -682,7 +775,7 @@ button:focus-visible,
 .dock-icon {
     width: var(--dock-icon-size);
     height: var(--dock-icon-size);
-    filter: drop-shadow(0 3px 6px rgba(0, 0, 0, 0.5));
+    filter: var(--shadow-icon);
     border-radius: 10px;
 }
 
@@ -715,7 +808,7 @@ button:focus-visible,
     transform: translateX(-50%);
     backdrop-filter: blur(3px);
     color: var(--text-light);
-    text-shadow: 0 1px 3px rgba(0, 0, 0, 0.9);
+    text-shadow: var(--shadow-text-hi);
     padding: 6px 12px;
     border-radius: 6px;
     font-size: 12px;
@@ -734,7 +827,6 @@ button:focus-visible,
     height: 4px;
     border-radius: 50%;
     background: var(--frost);
-    box-shadow: 0 0 6px rgba(228, 240, 246, 0.6);
     opacity: 0;
     transform: translateX(-50%) translateY(4px);
     transition: opacity 0.3s cubic-bezier(0.4, 0, 0.2, 1),
@@ -746,7 +838,6 @@ button:focus-visible,
     opacity: 1;
     transform: translateX(-50%) translateY(0);
 }
-
 
 /* Анимации */
 @keyframes window-open {
@@ -826,7 +917,7 @@ button:focus-visible,
     background: #161b22;
     padding: 16px;
     border-radius: 8px;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.4);
+    border: 1px solid #21262d;
 }
 
 .gh-readme {
@@ -879,7 +970,6 @@ button:focus-visible,
     border: 1px solid #21262d;
     border-radius: 12px;
     padding: var(--spacing);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.35);
     backdrop-filter: blur(6px);
 }
 
@@ -1026,6 +1116,7 @@ button:focus-visible,
 
 .telegram-input button {
     background: var(--electric-blue);
+    color: var(--accent-contrast);
     border: none;
     border-radius: 50%;
     width: 36px;
@@ -1090,13 +1181,6 @@ button:focus-visible,
     .window-content {
         font-size: 14px;
     }
-    .text-content p {
-        font-size: 13px;
-        margin-bottom: 12px;
-    }
-    .text-content h2 {
-        font-size: 18px;
-    }
     .dock {
         padding: 8px;
         gap: 12px;
@@ -1160,13 +1244,6 @@ button:focus-visible,
         height: 40px;
     }
     .menu-bar {
-        font-size: 12px;
-        height: 32px;
-    }
-    .menu-bar__items span:not(.menu-bar__active) {
-        display: none;
-    }
-    .datetime {
         font-size: 17px;
     }
     .arrow {
@@ -1195,5 +1272,2412 @@ button:focus-visible,
     }
     .folder-item span {
         font-size: 12px;
+    }
+}
+
+/* ============================================================
+   Terminal (console)
+   ============================================================ */
+.console {
+    /* Палитра терминала: тёмная база со светлым текстом; синий/оранжевый/красный
+       акценты. Зелёный и синий для листинга Get-ChildItem - как в PowerShell.
+       Терминал всегда тёмный, цвета зашиты напрямую, минуя тему. */
+    --term-bg:        #0c0e17; /* фон терминала */
+    --term-fg:        #e1e1f0; /* основной текст */
+    --term-muted-fg:  #c2c6d6; /* приглушённый текст - приглашение, операторы */
+    --term-primary:   #adc6ff; /* синий акцент - строки, заголовок окна */
+    --term-tertiary:  #ffb786; /* оранжевый - известная команда */
+    --term-error:     #ffb4ab; /* красный - ошибка / неизвестная команда */
+    --term-status-bg: #4d8eff; /* фон строки состояния */
+    --term-status-fg: #00285d; /* текст строки состояния */
+    --term-green:     #13a10e; /* шапка листинга ls и ярлыки */
+    --term-blue:      #0037da; /* плашка папки */
+    --term-row-gap:   3px;     /* ровный вертикальный зазор между строками */
+
+    font-family: var(--term-font);
+    font-size: var(--text-13);
+    line-height: 1.35;
+    color: var(--term-fg);
+    background: var(--term-bg);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    cursor: text;
+}
+
+/* Прокручиваемое тело терминала между таб-строкой и статус-баром. */
+.console-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--space-3);
+}
+
+/* Единый вертикальный зазор между всеми строками вывода: и между блоками, и
+   между строками внутри блока, и между рядами грида - ритм одинаковый. */
+.console-out,
+.console-block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--term-row-gap);
+}
+
+/* Текстовый блок вывода: моноширинные строки с переносами как в терминале. */
+.console-block {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Отбивка между группами «команда + её вывод»: воздух перед новым приглашением
+   (кроме самого первого). */
+.console-echo:not(:first-child) {
+    margin-top: 0.6em;
+}
+
+/* Грид-вывод (help / ls / dir): колонки держит CSS grid, а не добивка пробелами -
+   поэтому выравнивание не зависит от метрик шрифта. */
+.console-grid {
+    display: grid;
+    column-gap: 2ch;
+    row-gap: var(--term-row-gap);
+    align-items: baseline;
+}
+
+.console-cell {
+    min-width: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Правая колонка (Length / размер) - по правому краю, как в PowerShell. */
+.console-cell.cell-r {
+    text-align: right;
+}
+
+/* ---- Статус-бар ---- */
+.console-status {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 24px;
+    padding: 0 var(--space-3);
+    /* Яркая синяя полоса с тёмным текстом, как статус-бар редактора. */
+    background: var(--term-status-bg);
+    border-top: 1px solid rgba(0, 0, 0, 0.2);
+    font-family: var(--font-sans);
+    font-size: 11px;
+    color: var(--term-status-fg);
+    user-select: none;
+}
+
+.console-status-left,
+.console-status-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.console-status-left { font-weight: 600; }
+
+/* Позиции справа - декоративные (UTF-8, Ln/Col, LF), но подсвечиваем ховером:
+   тёмный текст на светлой синей плашке. */
+.console-status-right span {
+    padding: 0 4px;
+    border-radius: 3px;
+    transition: background 0.15s, color 0.15s;
+}
+
+.console-status-right span:hover {
+    background: var(--term-primary);
+    color: #002e6a;
+}
+
+.console-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--term-primary);
+    animation: console-status-pulse 2s ease-in-out infinite;
+}
+
+@keyframes console-status-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.console-status-pos { font-variant-numeric: tabular-nums; }
+
+.console-echo {
+    color: var(--term-fg);
+}
+
+.console-line {
+    display: flex;
+    gap: var(--space-2);
+    align-items: baseline;
+    margin-top: 0.55em;
+}
+
+.console-ps1 {
+    white-space: nowrap;
+}
+
+/* Поле ввода в обёртке, поверх которой рисуются подсветка и блочный курсор. */
+.console-field {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+}
+
+.console-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    /* Текст рисует цветной слой .console-ink поверх; сам input прозрачный, но
+       остаётся полем ввода (каретка, выделение, клики). */
+    color: transparent;
+    font: inherit;
+    caret-color: transparent;
+}
+
+/* Цветной слой поверх input: подсветка ввода в духе PSReadLine. */
+.console-ink {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    white-space: pre;
+    overflow: hidden;
+    pointer-events: none;
+    color: var(--term-fg);
+}
+
+/* Скрытый измеритель: повторяет текст до каретки, чтобы узнать её X. */
+.console-measure {
+    position: absolute;
+    left: 0;
+    top: 0;
+    visibility: hidden;
+    white-space: pre;
+    pointer-events: none;
+}
+
+/* Блочный курсор - прямоугольник в ширину символа. */
+.console-cursor {
+    position: absolute;
+    top: 0.15em;
+    width: 0.6em;
+    height: 1.1em;
+    background: var(--term-fg);
+    pointer-events: none;
+    mix-blend-mode: difference;
+}
+
+.console-field:focus-within .console-cursor {
+    animation: console-blink 1s steps(1) infinite;
+}
+
+/* Без фокуса курсор пустой (только рамка) и не мигает - как в терминале. */
+.console-field:not(:focus-within) .console-cursor {
+    background: transparent;
+    box-shadow: inset 0 0 0 1px var(--term-fg);
+    mix-blend-mode: normal;
+}
+
+@keyframes console-blink {
+    0%, 50% { opacity: 1; }
+    50.01%, 100% { opacity: 0; }
+}
+
+/* ---- Цветовые классы вывода и подсветки (ключи задаёт console.js) ---- */
+.console .t-def     { color: var(--term-fg); }
+.console .t-ps      { color: var(--term-muted-fg); }
+.console .t-cmd     { color: var(--term-tertiary); }
+.console .t-cmd-bad { color: var(--term-error); }
+.console .t-param   { color: var(--term-muted-fg); }
+.console .t-op      { color: var(--term-muted-fg); }
+.console .t-string  { color: var(--term-primary); }
+.console .t-num     { color: var(--term-fg); }
+.console .t-err     { color: var(--term-error); }
+.console .t-app     { color: var(--term-green); }
+.console .t-muted   { color: var(--term-muted-fg); }
+
+/* Заголовки таблицы Get-ChildItem: зелёные, часть колонок курсивом - как pwsh
+   красит TableHeader (\e[32;1m) и CustomTableHeaderLabel (\e[32;1;3m). */
+.console .t-th      { color: var(--term-green); }
+.console .t-thi     { color: var(--term-green); font-style: italic; }
+
+/* Папка: синий фон + светлый текст - как $PSStyle.FileInfo.Directory (\e[44;1m).
+   Небольшой паддинг и скругление превращают имя в аккуратный чип. */
+.console .t-dir {
+    color: #fff;
+    background: var(--term-blue);
+    padding: 0 3px;
+    border-radius: 2px;
+}
+
+/* ============================================================
+   Browser
+   ============================================================ */
+.browser {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--abyss-800);
+    color: var(--frost);
+    font-family: var(--font-sans);
+    font-size: var(--text-14);
+}
+
+.browser-toolbar {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    padding: var(--space-2);
+    background: var(--abyss-700);
+    border-bottom: 1px solid var(--border);
+}
+
+.browser-nav {
+    background: var(--frost-fill);
+    border: none;
+    color: var(--frost);
+    width: 30px;
+    height: 30px;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+    font-size: 14px;
+    flex: 0 0 auto;
+}
+
+.browser-nav:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.browser-omnibox-form {
+    flex: 1;
+    display: flex;
+}
+
+.browser-omnibox {
+    flex: 1;
+    min-width: 0;
+    background: var(--abyss-900);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-pill);
+    color: var(--frost);
+    padding: 7px 14px;
+    font: inherit;
+    outline: none;
+}
+
+.browser-omnibox:focus {
+    border-color: var(--accent);
+}
+
+.browser-view {
+    flex: 1;
+    overflow-y: auto;
+    background: var(--abyss);
+}
+
+/* Files / breadcrumb */
+.browser-breadcrumb {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    padding: var(--space-2) var(--space-4);
+    background: var(--abyss-700);
+    border-bottom: 1px solid var(--border);
+    font-size: var(--text-12);
+    flex-wrap: wrap;
+}
+
+.browser-breadcrumb .bc {
+    color: var(--link);
+    cursor: pointer;
+}
+
+.browser-breadcrumb .bc:hover {
+    color: var(--link-hover);
+    text-decoration: underline;
+}
+
+.bc-sep {
+    color: var(--fg-subtle);
+}
+
+.browser-files {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+    gap: var(--space-3);
+    padding: var(--space-4);
+}
+
+.browser-fileitem {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    background: transparent;
+    border: 1px solid transparent;
+    border-radius: var(--radius-md);
+    padding: var(--space-3);
+    cursor: pointer;
+    color: var(--frost);
+}
+
+.browser-fileitem:hover {
+    background: var(--frost-fill);
+    border-color: var(--border);
+}
+
+.browser-fileicon {
+    font-size: 32px;
+    line-height: 1;
+}
+
+.browser-filelabel {
+    font-size: var(--text-12);
+    text-align: center;
+    word-break: break-word;
+}
+
+.browser-empty {
+    padding: var(--space-6);
+    color: var(--fg-muted);
+    text-align: center;
+}
+
+.browser-file {
+    padding: var(--space-4);
+}
+
+.browser-file-name {
+    font-family: var(--font-mono);
+    color: var(--fg-muted);
+    margin-bottom: var(--space-2);
+}
+
+.browser-file-body {
+    white-space: pre-wrap;
+    word-break: break-word;
+    font-family: var(--font-mono);
+    font-size: var(--text-13);
+    background: var(--abyss-900);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    padding: var(--space-4);
+    color: var(--frost);
+    margin: 0;
+}
+
+/* Web / video frame */
+.browser-frame {
+    width: 100%;
+    height: 100%;
+    border: 0;
+    background: #fff;
+    display: block;
+}
+
+/* Search */
+.browser-search {
+    padding: var(--space-4);
+}
+
+.browser-search-head {
+    color: var(--fg-muted);
+    margin-bottom: var(--space-3);
+}
+
+.browser-result {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    width: 100%;
+    background: transparent;
+    border: none;
+    border-bottom: 1px solid var(--border);
+    padding: var(--space-3);
+    cursor: pointer;
+    color: var(--frost);
+    text-align: left;
+}
+
+.browser-result:hover {
+    background: var(--frost-fill);
+}
+
+.browser-result .browser-fileicon {
+    font-size: 20px;
+}
+
+.browser-result-path {
+    margin-left: auto;
+    color: var(--fg-subtle);
+    font-size: var(--text-12);
+    font-family: var(--font-mono);
+}
+/* ============================================================
+   Меню — общий примитив для menu bar и контекстного меню
+   ============================================================ */
+
+.menu-layer {
+    position: fixed;
+    inset: 0;
+    z-index: calc(var(--z-window) + 100);
+    pointer-events: none;
+}
+
+.menu {
+    position: fixed;
+    min-width: 180px;
+    max-width: 280px;
+    padding: var(--space-1);
+    background: var(--glass-strong);
+    backdrop-filter: blur(var(--blur-glass));
+    border: 1px solid var(--frost-line);
+    border-radius: var(--radius-md);
+    box-shadow: var(--shadow-deep);
+    pointer-events: auto;
+    animation: menu-in var(--dur-fast) var(--ease-snap);
+}
+
+@keyframes menu-in {
+    from { opacity: 0; transform: translateY(-4px); }
+    to   { opacity: 1; transform: translateY(0); }
+}
+
+.menu__list {
+    list-style: none;
+    margin: 0;
+    padding: 0;
+}
+
+.menu__item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    height: 28px;
+    padding: 0 var(--space-3) 0 var(--space-1);
+    border-radius: var(--radius-sm);
+    color: var(--fg);
+    font-size: var(--text-13);
+    line-height: 1;
+    cursor: default;
+    outline: none;
+}
+
+.menu__item:hover,
+.menu__item:focus-visible {
+    background: var(--accent);
+    color: var(--accent-contrast);
+}
+
+.menu__item.is-disabled {
+    color: var(--fg-subtle);
+    pointer-events: none;
+}
+
+.menu__check {
+    width: 14px;
+    flex: none;
+    font-size: var(--text-12);
+    text-align: center;
+}
+
+.menu__swatch {
+    width: 10px;
+    height: 10px;
+    border-radius: var(--radius-pill);
+    flex: none;
+    box-shadow: 0 0 0 1px var(--frost-line);
+}
+
+.menu__label {
+    flex: 1;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.menu__arrow {
+    flex: none;
+    opacity: 0.6;
+    font-size: var(--text-14);
+}
+
+.menu__shortcut {
+    flex: none;
+    color: var(--fg-subtle);
+    font-size: var(--text-12);
+}
+
+.menu__item:hover .menu__shortcut,
+.menu__item:focus-visible .menu__shortcut {
+    color: rgba(228, 240, 246, 0.7);
+}
+
+.menu__separator {
+    height: 1px;
+    margin: var(--space-1) var(--space-2);
+    background: var(--frost-line);
+}
+
+.menu__section {
+    padding: var(--space-2) var(--space-3) var(--space-1);
+    color: var(--fg-subtle);
+    font-size: 10px;
+    font-weight: var(--w-semibold);
+    letter-spacing: var(--track-caps);
+    text-transform: uppercase;
+}
+
+/* ============================================================
+   Projects — вертикальный стек тайлов во всю ширину
+   ============================================================ */
+
+.projects {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    padding: var(--space-4);
+}
+
+.projects__empty {
+    margin: 0;
+    padding: var(--space-4);
+    color: var(--fg-muted);
+    font-size: var(--text-14);
+}
+
+.project-tile {
+    position: relative;
+    display: grid;
+    grid-template-columns: 160px 1fr auto;
+    align-items: center;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    background: var(--frost-fill);
+    border: 1px solid var(--frost-line);
+    border-radius: var(--radius-md);
+    cursor: pointer;
+    outline: none;
+    transition: background var(--dur-fast) var(--ease-standard),
+                border-color var(--dur-fast) var(--ease-standard),
+                transform var(--dur-fast) var(--ease-standard);
+}
+
+.project-tile:hover,
+.project-tile:focus-visible {
+    background: rgba(228, 240, 246, 0.1);
+    border-color: var(--accent);
+    transform: translateY(-1px);
+}
+
+.project-tile__preview {
+    width: 160px;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    border-radius: var(--radius-sm);
+    background: var(--abyss-700);
+    display: block;
+}
+
+.project-tile__preview--empty {
+    border: 1px solid var(--frost-line);
+}
+
+.project-tile__body {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.project-tile__name {
+    margin: 0;
+    font-size: var(--text-18);
+    font-weight: var(--w-semibold);
+    color: var(--fg);
+    letter-spacing: var(--track-tight);
+}
+
+.project-tile__desc {
+    margin: 0;
+    font-size: var(--text-14);
+    line-height: var(--lh-snug);
+    color: var(--fg-muted);
+}
+
+.project-tile__chips {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.project-tile__chip {
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--space-2);
+    background: var(--frost-fill);
+    border: 1px solid var(--frost-line);
+    border-radius: var(--radius-pill);
+    color: var(--fg-muted);
+    font-size: var(--text-12);
+    white-space: nowrap;
+}
+
+.project-tile__meta {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: var(--space-2);
+    align-self: flex-start;
+}
+
+.project-tile__status {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--fg-muted);
+    font-size: var(--text-12);
+    white-space: nowrap;
+}
+
+.project-tile__status::before {
+    content: "";
+    width: 6px;
+    height: 6px;
+    border-radius: var(--radius-pill);
+    background: var(--fg-subtle);
+}
+
+.project-tile__status.is-live::before {
+    background: var(--success);
+}
+
+.project-tile__year {
+    color: var(--fg-subtle);
+    font-size: var(--text-12);
+}
+
+/* Кнопки появляются на наведении и не занимают место в покое */
+.project-tile__actions {
+    position: absolute;
+    right: var(--space-4);
+    bottom: var(--space-4);
+    display: flex;
+    gap: var(--space-2);
+    opacity: 0;
+    transform: translateY(2px);
+    transition: opacity var(--dur-fast) var(--ease-standard),
+                transform var(--dur-fast) var(--ease-standard);
+}
+
+.project-tile:hover .project-tile__actions,
+.project-tile:focus-visible .project-tile__actions,
+.project-tile__actions:focus-within {
+    opacity: 1;
+    transform: translateY(0);
+}
+
+.project-tile__btn {
+    appearance: none;
+    padding: var(--space-1) var(--space-3);
+    background: transparent;
+    border: 1px solid var(--frost-line);
+    border-radius: var(--radius-sm);
+    color: var(--fg-muted);
+    font-family: var(--font-sans);
+    font-size: var(--text-12);
+    font-weight: var(--w-medium);
+    cursor: pointer;
+    transition: background var(--dur-fast) var(--ease-standard),
+                color var(--dur-fast) var(--ease-standard);
+}
+
+.project-tile__btn:hover {
+    background: var(--frost-fill);
+    color: var(--fg);
+}
+
+.project-tile__btn--primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-contrast);
+}
+
+.project-tile__btn--primary:hover {
+    background: var(--accent-hover);
+    border-color: var(--accent-hover);
+    color: var(--abyss);
+}
+
+/* Узкое окно: мета уходит под описание, тайл не ломается */
+@media (max-width: 640px) {
+    .project-tile {
+        grid-template-columns: 96px 1fr;
+    }
+
+    .project-tile__meta {
+        grid-column: 2;
+        flex-direction: row;
+        align-items: center;
+    }
+
+    .project-tile__preview {
+        width: 96px;
+    }
+
+    .project-tile__actions {
+        position: static;
+        opacity: 1;
+        transform: none;
+        grid-column: 1 / -1;
+    }
+}
+
+/* ============================================================
+   Свёрнутое и развёрнутое окно
+   ============================================================ */
+
+/* Папка проектов - вертикальный список, а не холст: окно уже и ниже обычного,
+   но высоты должно хватать на две карточки целиком, иначе список открывается
+   уже проскроленным. 320px тут стояло со времён единственного проекта. */
+.window[data-type="projects"] {
+    width: 880px;
+    height: 560px;
+}
+
+.window.is-minimized {
+    display: none;
+}
+
+.window.is-maximized {
+    left: var(--space-2) !important;
+    top: calc(var(--menu-height) + var(--space-2)) !important;
+    width: calc(100vw - var(--space-4)) !important;
+    height: calc(100vh - var(--menu-height) - var(--desktop-padding-bottom) - var(--space-2)) !important;
+}
+
+/* ============================================================
+   Проводник
+
+   Раскладка и плотность взяты с макета Stitch (Projects File Explorer,
+   светлый и тёмный варианты): панель 220px, строка 28px, статус-бар 24px.
+   Всё на токенах, поэтому оба оформления работают от одних правил.
+   ============================================================ */
+
+.explorer {
+    display: flex;
+    height: 100%;
+    font-size: var(--text-13);
+    color: var(--fg);
+    background: var(--surface);
+    user-select: none;
+}
+
+.ex-nav {
+    width: 220px;
+    flex: none;
+    padding: var(--space-2) var(--space-1);
+    background: var(--surface-2);
+    border-right: 1px solid var(--frost-line);
+    overflow-y: auto;
+}
+
+.ex-nav-group + .ex-nav-group {
+    margin-top: var(--space-4);
+}
+
+.ex-nav-label {
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-12);
+    font-weight: var(--w-bold);
+    letter-spacing: var(--track-caps);
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+}
+
+.ex-nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    height: 28px;
+    padding: 0 var(--space-3);
+    border: none;
+    border-radius: var(--radius-xs);
+    background: transparent;
+    color: var(--fg-muted);
+    font-size: var(--text-13);
+    text-align: left;
+    cursor: default;
+}
+
+.ex-nav-item:hover {
+    background: var(--frost-fill);
+    color: var(--fg);
+}
+
+/* Текущая папка: заливка акцентом и рельс слева. Подпись остаётся тёмной -
+   на светлом белый текст по бледной заливке не читался бы. */
+.ex-nav-item.is-current {
+    background: var(--accent-fill);
+    color: var(--fg);
+    font-weight: var(--w-semibold);
+}
+
+.ex-nav-item.is-current::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    border-radius: var(--radius-pill);
+    background: var(--accent);
+}
+
+.ex-nav-icon {
+    font-size: var(--text-14);
+    line-height: 1;
+}
+
+.ex-tree-row {
+    display: flex;
+    align-items: center;
+    padding-left: calc(var(--depth) * 14px);
+}
+
+.ex-twisty {
+    width: 16px;
+    flex: none;
+    border: none;
+    background: transparent;
+    color: var(--fg-subtle);
+    font-size: var(--text-12);
+    cursor: pointer;
+    transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.ex-twisty.is-open {
+    transform: rotate(90deg);
+}
+
+.ex-main {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+}
+
+.ex-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--frost-line);
+    background: var(--surface);
+}
+
+.ex-nav-buttons {
+    display: flex;
+    gap: 2px;
+}
+
+.ex-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: var(--radius-xs);
+    background: transparent;
+    color: var(--fg-muted);
+    font-size: var(--text-12);
+    cursor: pointer;
+}
+
+.ex-btn:hover:not(:disabled) {
+    background: var(--frost-fill);
+    color: var(--fg);
+}
+
+.ex-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.ex-btn.is-active {
+    background: var(--accent-fill);
+    color: var(--fg);
+}
+
+.ex-address {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    align-items: center;
+    height: 28px;
+    padding: 0 var(--space-2);
+    border: 1px solid var(--frost-line);
+    border-radius: var(--radius-xs);
+    background: var(--surface-2);
+    cursor: text;
+}
+
+/* Длинный путь обрезается слева, а не справа: текущая папка нужнее корня.
+   Прокрутку в конец делает drawCrumbs, полосу прячем - она тут лишняя. */
+.ex-crumbs {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+}
+
+.ex-crumbs::-webkit-scrollbar {
+    display: none;
+}
+
+.ex-crumb {
+    flex: none;
+}
+
+.ex-crumb {
+    padding: 2px var(--space-1);
+    border: none;
+    border-radius: var(--radius-xs);
+    background: transparent;
+    color: var(--fg-muted);
+    font-size: var(--text-12);
+    cursor: pointer;
+}
+
+.ex-crumb:hover {
+    background: var(--frost-fill);
+    color: var(--fg);
+}
+
+.ex-crumb.is-last {
+    color: var(--fg);
+    font-weight: var(--w-medium);
+}
+
+.ex-crumb-sep {
+    color: var(--fg-subtle);
+    font-size: var(--text-12);
+}
+
+.ex-address-input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: var(--text-12);
+    user-select: text;
+}
+
+.ex-address-input.is-bad {
+    color: var(--danger);
+}
+
+.ex-search {
+    width: 200px;
+    flex: none;
+    height: 28px;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--frost-line);
+    border-radius: var(--radius-xs);
+    outline: none;
+    background: var(--surface-2);
+    color: var(--fg);
+    font-size: var(--text-12);
+    user-select: text;
+}
+
+.ex-search:focus {
+    border-color: var(--accent);
+}
+
+.ex-view {
+    flex: 1;
+    overflow: auto;
+    min-height: 0;
+}
+
+.ex-empty {
+    padding: var(--space-8);
+    color: var(--fg-subtle);
+    text-align: center;
+}
+
+/* Details: сетка одна на шапку и строки, иначе колонки разъезжаются */
+.ex-table {
+    --ex-grid: minmax(160px, 1fr) 150px 130px 90px;
+}
+
+.ex-head,
+.ex-row {
+    display: grid;
+    grid-template-columns: var(--ex-grid);
+    align-items: center;
+}
+
+.ex-head {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--frost-line);
+    backdrop-filter: blur(var(--blur-soft));
+}
+
+.ex-col {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    height: 26px;
+    padding: 0 var(--space-3);
+    border: none;
+    border-right: 1px solid var(--frost-line);
+    background: transparent;
+    color: var(--fg-muted);
+    font-size: var(--text-12);
+    font-weight: var(--w-medium);
+    text-align: left;
+    cursor: pointer;
+}
+
+.ex-col:last-child {
+    border-right: none;
+}
+
+.ex-col:hover {
+    background: var(--frost-fill);
+    color: var(--fg);
+}
+
+.ex-col--size {
+    justify-content: flex-end;
+}
+
+.ex-caret {
+    font-size: 8px;
+    color: var(--accent);
+}
+
+.ex-row {
+    height: 28px;
+    cursor: default;
+}
+
+.ex-row:hover {
+    background: var(--frost-fill);
+}
+
+.ex-row.is-selected {
+    background: var(--accent-fill);
+}
+
+.ex-row:focus-visible {
+    outline: 1px solid var(--accent);
+    outline-offset: -1px;
+}
+
+.ex-cell {
+    padding: 0 var(--space-3);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--fg-muted);
+    font-size: var(--text-13);
+}
+
+.ex-col--name.ex-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--fg);
+}
+
+.ex-col--size.ex-cell {
+    text-align: right;
+}
+
+.ex-icon {
+    flex: none;
+    font-size: var(--text-14);
+}
+
+.ex-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+    gap: var(--space-2);
+    padding: var(--space-4);
+}
+
+.ex-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-2);
+    border-radius: var(--radius-sm);
+    cursor: default;
+}
+
+.ex-tile:hover {
+    background: var(--frost-fill);
+}
+
+.ex-tile.is-selected {
+    background: var(--accent-fill);
+}
+
+.ex-tile-icon {
+    font-size: 32px;
+}
+
+.ex-tile-name {
+    max-width: 100%;
+    overflow: hidden;
+    color: var(--fg);
+    font-size: var(--text-12);
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ex-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 24px;
+    flex: none;
+    padding: 0 var(--space-3);
+    border-top: 1px solid var(--frost-line);
+    background: var(--surface-2);
+    color: var(--fg-subtle);
+    font-size: var(--text-12);
+}
+
+.ex-view-toggle {
+    display: flex;
+    gap: 2px;
+}
+
+.window[data-type="explorer"] {
+    width: 940px;
+    height: 560px;
+}
+
+/* ============================================================
+   Ридер .md
+
+   Метрики с макета Stitch (Markdown Reader): тулбар 36px, колонка чтения
+   680px, панель оглавления 200px, статус-бар 24px.
+   ============================================================ */
+
+.md {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--surface);
+    color: var(--fg);
+}
+
+.md-toolbar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    height: 36px;
+    flex: none;
+    padding: 0 var(--space-3);
+    border-bottom: 1px solid var(--frost-line);
+    background: var(--surface-2);
+}
+
+.md-path {
+    overflow: hidden;
+    color: var(--fg-subtle);
+    font-family: var(--font-mono);
+    font-size: var(--text-12);
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.md-tools {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    flex: none;
+}
+
+.md-seg {
+    display: flex;
+    gap: 2px;
+    padding: 2px;
+    border: 1px solid var(--frost-line);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+}
+
+.md-seg button,
+.md-tool {
+    padding: 2px var(--space-2);
+    border: none;
+    border-radius: var(--radius-xs);
+    background: transparent;
+    color: var(--fg-muted);
+    font-size: var(--text-12);
+    cursor: pointer;
+}
+
+.md-tool {
+    border: 1px solid var(--frost-line);
+    padding: 3px var(--space-2);
+}
+
+.md-seg button:hover,
+.md-tool:hover {
+    background: var(--frost-fill);
+    color: var(--fg);
+}
+
+.md-seg button.is-active {
+    background: var(--accent);
+    color: var(--accent-contrast);
+}
+
+.md-body {
+    display: flex;
+    flex: 1;
+    min-height: 0;
+}
+
+.md-scroll {
+    flex: 1;
+    min-width: 0;
+    overflow-y: auto;
+    padding: var(--space-8) var(--space-8) var(--space-12);
+}
+
+.md-doc {
+    max-width: 680px;
+    margin: 0 auto;
+    line-height: var(--lh-base);
+    color: var(--fg-muted);
+    user-select: text;
+}
+
+.md-doc--empty {
+    color: var(--fg-subtle);
+    text-align: center;
+}
+
+.md--source .md-doc {
+    display: none;
+}
+
+.md-source {
+    display: none;
+    max-width: 680px;
+    margin: 0 auto;
+    color: var(--fg-muted);
+    font-family: var(--font-mono);
+    font-size: var(--text-12);
+    line-height: var(--lh-base);
+    white-space: pre-wrap;
+    user-select: text;
+}
+
+.md--source .md-source {
+    display: block;
+}
+
+/* Плашки из фронтматтера под заголовком */
+.md-meta {
+    margin: 0 0 var(--space-6);
+}
+
+.md-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+.md-pill {
+    padding: 2px var(--space-3);
+    border-radius: var(--radius-pill);
+    background: var(--surface-2);
+    border: 1px solid var(--frost-line);
+    color: var(--fg-muted);
+    font-size: var(--text-12);
+    text-transform: capitalize;
+}
+
+.md-pill.is-live {
+    color: var(--success);
+    border-color: color-mix(in srgb, var(--success) 40%, transparent);
+}
+
+.md-links {
+    display: flex;
+    gap: var(--space-2);
+    margin-top: var(--space-8);
+    padding-top: var(--space-5);
+    border-top: 1px solid var(--frost-line);
+}
+
+.md-link {
+    padding: 4px var(--space-3);
+    border: 1px solid var(--frost-line);
+    border-radius: var(--radius-sm);
+    color: var(--fg-muted);
+    font-size: var(--text-12);
+    text-decoration: none;
+}
+
+.md-link:hover {
+    border-color: var(--accent);
+    color: var(--fg);
+}
+
+.md-link--primary {
+    background: var(--accent);
+    border-color: var(--accent);
+    color: var(--accent-contrast);
+}
+
+/* Типографика документа */
+.md-doc h1,
+.md-doc h2,
+.md-doc h3 {
+    color: var(--fg);
+    letter-spacing: var(--track-tight);
+    line-height: var(--lh-snug);
+    scroll-margin-top: var(--space-4);
+}
+
+.md-doc h1 {
+    margin: 0 0 var(--space-3);
+    font-size: 2em;
+}
+
+.md-doc h2 {
+    margin: var(--space-8) 0 var(--space-3);
+    padding-bottom: var(--space-2);
+    border-bottom: 1px solid var(--frost-line);
+    font-size: 1.4em;
+}
+
+.md-doc h3 {
+    margin: var(--space-6) 0 var(--space-2);
+    font-size: 1.15em;
+}
+
+.md-doc p,
+.md-doc ul,
+.md-doc ol {
+    margin: 0 0 var(--space-4);
+}
+
+.md-doc ul,
+.md-doc ol {
+    padding-left: var(--space-5);
+}
+
+.md-doc li {
+    margin: var(--space-1) 0;
+}
+
+.md-doc a {
+    color: var(--accent);
+    text-decoration: none;
+}
+
+.md-doc a:hover {
+    text-decoration: underline;
+}
+
+/* Кнопки из фронтматтера лежат внутри .md-doc, поэтому правило для ссылок
+   документа их перебивало и текст на заливке становился невидимым. */
+.md-doc .md-link {
+    color: var(--fg-muted);
+}
+
+.md-doc .md-link:hover {
+    color: var(--fg);
+    text-decoration: none;
+}
+
+.md-doc .md-link--primary,
+.md-doc .md-link--primary:hover {
+    color: var(--accent-contrast);
+}
+
+.md-doc img {
+    display: block;
+    max-width: 100%;
+    height: auto;
+    margin: var(--space-5) 0;
+    border: 1px solid var(--frost-line);
+    border-radius: var(--radius-md);
+}
+
+.md-doc code {
+    padding: 0.15em 0.4em;
+    border-radius: var(--radius-xs);
+    background: var(--frost-fill);
+    font-family: var(--font-mono);
+    font-size: 0.88em;
+}
+
+.md-doc pre {
+    position: relative;
+    margin: var(--space-5) 0;
+    padding: var(--space-4);
+    border: 1px solid var(--frost-line);
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+    overflow-x: auto;
+}
+
+.md-doc pre code {
+    padding: 0;
+    background: none;
+    font-size: var(--text-12);
+    line-height: var(--lh-base);
+}
+
+.md-copy {
+    position: absolute;
+    top: var(--space-2);
+    right: var(--space-2);
+    padding: 2px var(--space-2);
+    border: 1px solid var(--frost-line);
+    border-radius: var(--radius-xs);
+    background: var(--surface);
+    color: var(--fg-subtle);
+    font-size: var(--text-12);
+    cursor: pointer;
+    opacity: 0;
+    transition: opacity var(--dur-fast) var(--ease-standard);
+}
+
+.md-doc pre:hover .md-copy,
+.md-copy:focus-visible {
+    opacity: 1;
+}
+
+.md-doc blockquote {
+    margin: var(--space-5) 0;
+    padding: var(--space-3) var(--space-4);
+    border-left: 3px solid var(--accent);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+    background: var(--surface-2);
+    color: var(--fg-muted);
+}
+
+.md-doc blockquote p:last-child {
+    margin-bottom: 0;
+}
+
+.md-doc table {
+    width: 100%;
+    margin: var(--space-5) 0;
+    border-collapse: collapse;
+    font-size: 0.95em;
+}
+
+.md-doc th,
+.md-doc td {
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--frost-line);
+    text-align: left;
+}
+
+.md-doc th {
+    background: var(--surface-2);
+    color: var(--fg);
+    font-weight: var(--w-semibold);
+}
+
+.md-doc hr {
+    margin: var(--space-8) 0;
+    border: none;
+    border-top: 1px solid var(--frost-line);
+}
+
+/* Оглавление */
+.md-outline {
+    width: 200px;
+    flex: none;
+    overflow-y: auto;
+    padding: var(--space-4) 0;
+    border-left: 1px solid var(--frost-line);
+    background: var(--surface-2);
+}
+
+.md--no-outline .md-outline {
+    display: none;
+}
+
+.md-outline__label {
+    padding: 0 var(--space-4) var(--space-2);
+    color: var(--fg-subtle);
+    font-size: var(--text-12);
+    font-weight: var(--w-semibold);
+    letter-spacing: var(--track-caps);
+    text-transform: uppercase;
+}
+
+.md-outline__list {
+    list-style: none;
+}
+
+.md-outline__item {
+    display: block;
+    padding: var(--space-1) var(--space-4);
+    padding-left: calc(var(--space-4) + var(--depth) * 12px);
+    border-left: 2px solid transparent;
+    color: var(--fg-muted);
+    font-size: var(--text-12);
+    text-decoration: none;
+}
+
+.md-outline__item:hover {
+    color: var(--fg);
+}
+
+.md-outline__item.is-active {
+    border-left-color: var(--accent);
+    color: var(--accent);
+    background: var(--accent-fill-soft);
+}
+
+.md-outline__empty {
+    padding: 0 var(--space-4);
+    color: var(--fg-subtle);
+    font-size: var(--text-12);
+    list-style: none;
+}
+
+.md-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 24px;
+    flex: none;
+    padding: 0 var(--space-3);
+    border-top: 1px solid var(--frost-line);
+    background: var(--surface-2);
+    color: var(--fg-subtle);
+    font-size: var(--text-12);
+}
+
+.window[data-type="markdown"] {
+    width: 900px;
+    height: 620px;
+}
+
+/* Имя файла на плитке проекта */
+.project-tile__file {
+    color: var(--fg-subtle);
+    font-family: var(--font-mono);
+    font-size: var(--text-12);
+}
+
+/* Окно настроек: раскладки у него не было вовсе - подписи липли к контролам,
+   а свотчи тем схлопывались в точки, потому что размер им никто не задавал. */
+.settings-window {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    padding: var(--space-6);
+    color: var(--fg);
+}
+
+.settings-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.settings-label {
+    color: var(--fg-muted);
+    font-size: var(--text-13);
+    font-weight: var(--w-medium);
+}
+
+.settings-slider {
+    width: 260px;
+    accent-color: var(--accent);
+}
+
+.settings-swatches {
+    display: flex;
+    gap: var(--space-3);
+}
+
+.settings-swatch {
+    width: 28px;
+    height: 28px;
+    border: 2px solid transparent;
+    border-radius: var(--radius-pill);
+    box-shadow: 0 0 0 1px var(--frost-line);
+    cursor: pointer;
+}
+
+.settings-swatch.is-active {
+    border-color: var(--fg);
+}
+
+/* Сегментный переключатель в настройках */
+.settings-seg-group {
+    align-self: flex-start;
+}
+
+.settings-seg-group {
+    display: inline-flex;
+    gap: 2px;
+    padding: 2px;
+    border: 1px solid var(--frost-line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+}
+
+.settings-seg {
+    padding: var(--space-1) var(--space-4);
+    border: none;
+    border-radius: var(--radius-xs);
+    background: transparent;
+    color: var(--fg-muted);
+    font-size: var(--text-13);
+    cursor: pointer;
+}
+
+.settings-seg:hover {
+    color: var(--fg);
+}
+
+.settings-seg.is-active {
+    background: var(--accent);
+    color: var(--accent-contrast);
+}
+
+@media (max-width: 768px) {
+    .ex-nav,
+    .md-outline {
+        display: none;
+    }
+
+    .ex-table {
+        --ex-grid: minmax(120px, 1fr) 90px;
+    }
+
+    .ex-col--modified,
+    .ex-col--kind {
+        display: none;
+    }
+
+    .md-scroll {
+        padding: var(--space-4);
+    }
+
+    /* Заданная ширина окна не должна переживать узкий экран: `.window` в
+       мобильной секции сжимается до 90vw, но правило с [data-type] у него
+       выигрывает по специфичности, и окно оставалось шире вьюпорта. */
+    .window[data-type="text"],
+    .window[data-type="markdown"],
+    .window[data-type="explorer"] {
+        width: 90vw;
+        height: 80vh;
+        max-height: 500px;
+    }
+}
+
+/* ============================================================
+   Светлое оформление: системный хром
+
+   Здесь только те правила, где цвет был зашит мимо токенов. Всё остальное
+   переворачивается само через :root[data-appearance="light"].
+   Значения - с макетов Stitch (дизайн-система Daylight Desktop).
+   ============================================================ */
+
+/* Обои: на светлом Stitch отказался от фотографии в пользу мягкого градиента
+   из трёх слоёв поверхностей. Фото тут дало бы грязь под белыми окнами. */
+:root[data-appearance="light"] .desktop {
+    background-image: linear-gradient(
+        135deg,
+        var(--surface-low) 0%,
+        var(--surface-lowest) 45%,
+        var(--surface-high) 100%
+    );
+}
+
+/* Сетка поверх обоев была белой на просвет - на светлом её видно не будет */
+:root[data-appearance="light"] .desktop::before {
+    background-image:
+        linear-gradient(0deg, rgba(26, 27, 37, 0.16) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(26, 27, 37, 0.12) 1px, transparent 1px),
+        linear-gradient(0deg, transparent 0 32px, rgba(26, 27, 37, 0.08) 32px 33px, transparent 33px),
+        linear-gradient(90deg, transparent 0 32px, rgba(26, 27, 37, 0.08) 32px 33px, transparent 33px);
+    opacity: 0.18;
+    mix-blend-mode: multiply;
+}
+
+:root[data-appearance="light"] .menu-bar {
+    background: var(--glass-strong);
+    border-bottom: 1px solid var(--frost-line);
+    color: var(--fg);
+}
+
+:root[data-appearance="light"] .dock {
+    background: var(--glass-strong);
+    border: 1px solid var(--frost-line);
+}
+
+/* Подпись под иконкой: тёмная плашка сменяется светлым гало */
+:root[data-appearance="light"] .file span {
+    background: var(--glass-strong);
+    color: var(--fg);
+}
+
+:root[data-appearance="light"] .window {
+    border: 1px solid var(--frost-line);
+}
+
+:root[data-appearance="light"] .window-header {
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--frost-line);
+}
+
+:root[data-appearance="light"] .window-content::-webkit-scrollbar-track,
+:root[data-appearance="light"] .call-log::-webkit-scrollbar-track,
+:root[data-appearance="light"] .notes-area::-webkit-scrollbar-track {
+    background: var(--frost-fill);
+}
+
+:root[data-appearance="light"] .arrow {
+    background: var(--glass-strong);
+    color: var(--fg);
+    box-shadow: var(--shadow-card);
+}
+
+:root[data-appearance="light"] .arrow:hover,
+:root[data-appearance="light"] .arrow:focus {
+    background: var(--surface-high);
+}
+
+/* Терминал остаётся тёмным и в светлом оформлении: светлый cmd - это уже
+   не терминал, а текстовый редактор. Цвета зашиты в .console напрямую,
+   тема их не трогает. */
+:root[data-appearance="light"] .console {
+    background: var(--term-bg);
+    color: var(--term-fg);
+}
+
+/* ============================================================
+   Окно консоли - компактная плавающая карточка с тёмной шапкой и заголовком
+   «› pwsh». Хром зашит напрямую, мимо темы: терминал всегда тёмный, поэтому
+   правила стоят после светлого блока и перекрывают его.
+   ============================================================ */
+.window[data-type="console"] {
+    --term-chrome: #1d1f29; /* фон шапки окна */
+    --term-chrome-line: rgba(255, 255, 255, 0.08);
+    --term-font: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+        "Liberation Mono", "Courier New", monospace;
+    /* Компактная карточка: тонкая светлая кромка, глубокая тень и белое кольцо
+       в 1px по краю - окно читается как отдельная панель. */
+    width: 920px;
+    height: 580px;
+    border: 1px solid #424754;
+    box-shadow: 0 24px 48px rgba(0, 0, 0, 0.6), 0 0 0 1px rgba(255, 255, 255, 0.05);
+}
+
+.window[data-type="console"] .window-header {
+    background: var(--term-chrome);
+    border-bottom: 1px solid var(--term-chrome-line);
+}
+
+/* Тело вплотную к кромке окна - без отступа window-content вокруг терминала. */
+.window[data-type="console"] .window-content {
+    padding: 0;
+    border-radius: 0;
+}
+
+/* Заголовок «pwsh» с шевроном приглашения, синим акцентом. */
+.window[data-type="console"] .window-title {
+    display: inline-flex;
+    align-items: center;
+    margin-left: var(--space-4);
+    font-family: var(--term-font);
+    font-size: var(--text-13);
+    font-weight: var(--w-medium);
+    letter-spacing: 0;
+    color: var(--term-primary);
+}
+
+.window[data-type="console"] .window-title::before {
+    content: "\203A";
+    margin-right: var(--space-2);
+    font-size: 1.25em;
+    opacity: 0.85;
+}
+
+/* ============================================================
+   Резюме (окно text)
+
+   Раскладку подобрал Stitch: проект antawkay-os-desktop, экраны
+   «Resume window» (Obsidian Desktop) и «Resume window, light»
+   (Daylight Desktop). Рейка 300px слева, колонка чтения 700px справа,
+   статус-бар 24px. Меру колонки Stitch и выбрал: прежнее окно About
+   гнало строку во всю ширину, на 1040px это 150 знаков.
+   ============================================================ */
+
+.resume {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--surface);
+    color: var(--fg);
+    font-size: var(--text-13);
+    line-height: var(--lh-base);
+}
+
+.resume-body {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+}
+
+/* ---------- Рейка: кто это и что знает ---------- */
+
+.resume-rail {
+    width: 300px;
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    padding: var(--space-6) var(--space-5);
+    border-right: 1px solid var(--border);
+    background: var(--surface-2);
+    overflow-y: auto;
+}
+
+.resume-id {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    text-align: center;
+}
+
+/* Фотографии нет, поэтому монограмма. Заливка акцентом, буквы на ней -
+   отдельный токен: на тёмном они с синим подтоном, на светлом белые. */
+.resume-mono {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: 50%;
+    border: 2px solid var(--border);
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: var(--text-24);
+    font-weight: var(--w-bold);
+    letter-spacing: var(--track-tight);
+}
+
+.resume-name {
+    margin: var(--space-2) 0 0;
+    font-size: var(--text-18);
+    font-weight: var(--w-semibold);
+    line-height: var(--lh-snug);
+}
+
+.resume-role {
+    margin: 0;
+    color: var(--fg-subtle);
+    font-size: var(--text-12);
+    line-height: var(--lh-snug);
+}
+
+.resume-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.resume-group__label {
+    margin: 0;
+    color: var(--fg-subtle);
+    font-size: 11px;
+    font-weight: var(--w-bold);
+    text-transform: uppercase;
+    letter-spacing: var(--track-caps);
+}
+
+/* ---------- Контакты ---------- */
+
+.resume-contacts {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.resume-contact {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    color: var(--fg-muted);
+    font-size: var(--text-12);
+    text-decoration: none;
+    transition: color var(--dur-fast) var(--ease-standard);
+}
+
+a.resume-contact:hover,
+a.resume-contact:focus-visible {
+    color: var(--accent-text);
+}
+
+.resume-contact__label {
+    color: var(--fg);
+    font-weight: var(--w-semibold);
+}
+
+.resume-contact__detail {
+    color: var(--fg-subtle);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* ---------- Стек ---------- */
+
+.resume-skills {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.resume-skills + .resume-skills {
+    margin-top: var(--space-3);
+}
+
+.resume-skills__label {
+    margin: 0;
+    color: var(--fg-subtle);
+    font-size: 10px;
+    font-weight: var(--w-bold);
+    text-transform: uppercase;
+    letter-spacing: var(--track-caps);
+}
+
+.resume-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* Плашка у Stitch не капсула, а прямоугольник с радиусом 4px: капсулы читаются
+   как теги-фильтры, а это перечисление. */
+.resume-pill {
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--space-2);
+    border: 1px solid var(--frost-line);
+    border-radius: var(--radius-xs);
+    background: var(--frost-fill);
+    color: var(--fg-muted);
+    font-size: 11px;
+    font-weight: var(--w-semibold);
+    white-space: nowrap;
+}
+
+/* ---------- Основная колонка ---------- */
+
+.resume-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-10);
+    padding: var(--space-8);
+    overflow-y: auto;
+}
+
+.resume-section {
+    max-width: 700px;
+}
+
+/* Подпись, за ней волосяная линия до края. Акцентное тире перед акцентной
+   подписью на белом читается как ссылка - Stitch это и переигрывал. */
+.resume-h {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-4);
+    color: var(--accent-text);
+    font-size: 11px;
+    font-weight: var(--w-bold);
+    text-transform: uppercase;
+    letter-spacing: var(--track-caps);
+}
+
+.resume-h::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
+/* ---------- Проза ---------- */
+
+.resume-prose {
+    color: var(--fg-muted);
+    font-size: var(--text-13);
+}
+
+.resume-prose > :first-child {
+    margin-top: 0;
+}
+
+.resume-prose > :last-child {
+    margin-bottom: 0;
+}
+
+.resume-prose p {
+    margin: 0 0 var(--space-4);
+}
+
+.resume-prose ul,
+.resume-prose ol {
+    margin: 0 0 var(--space-4);
+    padding-left: var(--space-5);
+}
+
+.resume-prose li {
+    margin-bottom: var(--space-2);
+}
+
+.resume-prose strong {
+    color: var(--fg);
+    font-weight: var(--w-semibold);
+}
+
+.resume-prose a {
+    color: var(--accent-text);
+}
+
+.resume-prose code {
+    padding: 1px var(--space-1);
+    border-radius: var(--radius-xs);
+    background: var(--frost-fill);
+    font-family: var(--font-mono);
+    font-size: var(--text-12);
+}
+
+/* Секции из тела about.md идут панелью: это принципы и пояснения, а не
+   данные резюме, и отделять их надо. */
+.resume-section--panel {
+    padding: var(--space-6);
+    border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+    border-radius: var(--radius-lg);
+    /* Заливка своя, а не --accent-fill-soft: у Stitch панель принципов держится
+       на рамке, а фон едва угадывается. На 12% она читалась синим блоком. */
+    background: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+
+/* ---------- Карточки проектов ---------- */
+
+.resume-cards {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.resume-card {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+    transition: border-color var(--dur-fast) var(--ease-standard);
+}
+
+.resume-card:hover {
+    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+/* Скриншот главной страницы проекта. Правила .window-content img тут сбиты
+   намеренно: там max-height 80% и автоцентр. */
+.resume-card__shot {
+    width: 100%;
+    max-height: none;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    object-position: top;
+    margin: 0;
+    border-radius: var(--radius-sm);
+    background: var(--abyss-700);
+    display: block;
+}
+
+.resume-card__shot--empty {
+    border: 1px solid var(--frost-line);
+}
+
+.resume-card__body {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.resume-card__head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.resume-card__name {
+    margin: 0;
+    font-size: var(--text-14);
+    font-weight: var(--w-semibold);
+    line-height: var(--lh-snug);
+}
+
+.resume-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    height: 18px;
+    padding: 0 var(--space-2);
+    border: 1px solid var(--frost-line);
+    border-radius: var(--radius-xs);
+    color: var(--fg-subtle);
+    font-size: 10px;
+    font-weight: var(--w-bold);
+    text-transform: uppercase;
+    letter-spacing: var(--track-loose);
+}
+
+.resume-badge.is-live {
+    border-color: color-mix(in srgb, var(--success) 40%, transparent);
+    background: color-mix(in srgb, var(--success) 12%, transparent);
+    color: var(--success);
+}
+
+.resume-badge.is-live::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: 50%;
+    background: var(--success);
+}
+
+.resume-card__meta {
+    margin: 0;
+    color: var(--fg-subtle);
+    font-family: var(--font-mono);
+    font-size: 11px;
+}
+
+.resume-card__desc {
+    margin: 0;
+    color: var(--fg-muted);
+    font-size: var(--text-12);
+    line-height: var(--lh-base);
+}
+
+.resume-card__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-1);
+}
+
+.resume-link {
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--frost-line);
+    border-radius: var(--radius-xs);
+    background: var(--frost-fill);
+    color: var(--fg-muted);
+    font-family: inherit;
+    font-size: 11px;
+    font-weight: var(--w-semibold);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color var(--dur-fast) var(--ease-standard),
+                border-color var(--dur-fast) var(--ease-standard);
+}
+
+.resume-link:hover,
+.resume-link:focus-visible {
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    color: var(--fg);
+}
+
+.resume-link--primary {
+    border-color: transparent;
+    background: var(--accent);
+    color: var(--accent-contrast);
+}
+
+.resume-link--primary:hover,
+.resume-link--primary:focus-visible {
+    border-color: transparent;
+    background: var(--accent-hover);
+    color: var(--accent-contrast);
+}
+
+/* ---------- Опыт и образование ---------- */
+
+.resume-tl {
+    margin: 0;
+    padding: var(--space-1) 0 var(--space-1) var(--space-5);
+    list-style: none;
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+}
+
+.resume-tl__item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: var(--space-4);
+}
+
+.resume-tl__item::before {
+    content: "";
+    position: absolute;
+    left: calc(-1 * var(--space-5) - 4px);
+    top: 6px;
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    background: var(--border);
+}
+
+.resume-tl__period {
+    margin: 0;
+    color: var(--fg-subtle);
+    font-family: var(--font-mono);
+    font-size: 11px;
+}
+
+.resume-tl__body {
+    min-width: 0;
+}
+
+.resume-tl__org {
+    margin: 0;
+    font-size: var(--text-13);
+    font-weight: var(--w-semibold);
+}
+
+.resume-tl__role {
+    margin: 0;
+    color: var(--fg-muted);
+    font-size: var(--text-12);
+}
+
+.resume-tl__summary {
+    margin: var(--space-1) 0 0;
+    color: var(--fg-subtle);
+    font-size: var(--text-12);
+}
+
+/* ---------- Статус-бар ---------- */
+
+.resume-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 24px;
+    flex: none;
+    padding: 0 var(--space-3);
+    border-top: 1px solid var(--frost-line);
+    background: var(--surface-2);
+    color: var(--fg-subtle);
+    font-size: var(--text-12);
+}
+
+.window[data-type="text"] {
+    width: 1040px;
+    height: 720px;
+}
+
+/* На светлом карточка почти белая: тональный слой на белом фоне не отделяет
+   её от страницы, отделяет рамка - она же подсвечивается по наведению. */
+:root[data-appearance="light"] .resume-card {
+    background: var(--surface-lowest);
+}
+
+/* Узкое окно и телефон: рейка уезжает наверх, карточка складывается. */
+@media (max-width: 860px) {
+    .resume-body {
+        display: block;
+        overflow-y: auto;
+    }
+
+    .resume-rail {
+        width: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        overflow: visible;
+    }
+
+    .resume-main {
+        gap: var(--space-8);
+        padding: var(--space-5);
+        overflow: visible;
+    }
+
+    .resume-card {
+        grid-template-columns: 1fr;
+    }
+
+    .resume-card__shot {
+        max-width: 320px;
+    }
+
+    .resume-tl__item {
+        grid-template-columns: 1fr;
+        gap: var(--space-1);
     }
 }
