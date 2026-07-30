@@ -2,28 +2,53 @@ import { CONSTANTS, WINDOW_TITLES } from "./constants.js";
 import { openWindows } from "./state.js";
 
 const windowTemplate = document.getElementById("window-template");
-const activeAppEl = document.getElementById("active-app");
 
 let topZ = 1000;
+const activeChangeCbs = new Set();
 
 // --- Focus & status ---
 
 export function raiseWindow(win) {
   win.el.style.zIndex = ++topZ;
-  updateActiveAppLabel();
+  notifyActiveChange();
 }
 
-function updateActiveAppLabel() {
-  if (!activeAppEl) return;
+function topWindow() {
   let top = null;
   for (const win of openWindows.values()) {
+    // Свёрнутое окно не активно: иначе menu bar показывал бы приложение,
+    // которого не видно на экране.
+    if (win.el.classList.contains("is-minimized")) continue;
     if (!top || Number(win.el.style.zIndex) >= Number(top.el.style.zIndex)) {
       top = win;
     }
   }
-  activeAppEl.textContent = top
-    ? (WINDOW_TITLES[top.type] || top.type).replace(".txt", "")
-    : "Finder";
+  return top;
+}
+
+export function activeWindowType() {
+  return topWindow()?.type ?? null;
+}
+
+// Подпись рисует menu-bar: он перестраивает панель целиком, и держать здесь
+// ссылку на #active-app нельзя - она бы отвалилась при первой перерисовке.
+// Подписчиков несколько: за активным окном следят и menu bar, и адресная строка.
+export function onActiveWindowChange(cb) {
+  activeChangeCbs.add(cb);
+  cb(activeWindowType());
+}
+
+function notifyActiveChange() {
+  const type = activeWindowType();
+  for (const cb of activeChangeCbs) cb(type);
+}
+
+// Проводник и ридер меняют заголовок на имя папки или файла, как настоящие.
+export function setWindowTitle(type, title) {
+  const win = openWindows.get(type);
+  if (!win || !title) return;
+  win.el.querySelector(".window-title").textContent = title;
+  win.el.setAttribute("aria-label", title);
 }
 
 function setDockIndicator(type, isRunning) {
@@ -146,6 +171,44 @@ function makeResizable(win) {
   });
 }
 
+// --- Minimize & zoom ---
+
+export function minimizeWindow(win) {
+  if (!win) return;
+  win.el.classList.add("is-minimized");
+  notifyActiveChange();
+}
+
+export function restoreWindow(win) {
+  if (!win?.el.classList.contains("is-minimized")) return;
+  win.el.classList.remove("is-minimized");
+  notifyActiveChange();
+}
+
+export function zoomWindow(win) {
+  if (!win) return;
+  const el = win.el;
+
+  if (el.classList.contains("is-maximized")) {
+    el.classList.remove("is-maximized");
+    // Возвращаем геометрию, которая была до разворота.
+    Object.assign(el.style, win.prevGeometry ?? {});
+    return;
+  }
+
+  win.prevGeometry = {
+    left: el.style.left,
+    top: el.style.top,
+    width: el.style.width,
+    height: el.style.height,
+  };
+  el.classList.add("is-maximized");
+  el.style.left = "";
+  el.style.top = "";
+  el.style.width = "";
+  el.style.height = "";
+}
+
 // --- Lifecycle ---
 
 export function closeWindow(win) {
@@ -157,7 +220,7 @@ export function closeWindow(win) {
     win.el.remove();
     openWindows.delete(win.type);
     setDockIndicator(win.type, false);
-    updateActiveAppLabel();
+    notifyActiveChange();
   };
   win.el.addEventListener("animationend", onEnd);
 }
@@ -170,11 +233,21 @@ export function createWindow(type) {
 
   el.querySelector(".window-title").textContent = title;
   el.setAttribute("aria-label", title);
+  // Нужен контекстному меню, чтобы по шапке найти окно.
+  el.dataset.type = type;
 
   el.addEventListener("pointerdown", () => raiseWindow(win));
   el.querySelector(".window-control.close").addEventListener("click", (e) => {
     e.stopPropagation();
     closeWindow(win);
+  });
+  el.querySelector(".window-control.minimize").addEventListener("click", (e) => {
+    e.stopPropagation();
+    minimizeWindow(win);
+  });
+  el.querySelector(".window-control.maximize").addEventListener("click", (e) => {
+    e.stopPropagation();
+    zoomWindow(win);
   });
   makeDraggable(win);
   makeResizable(win);
@@ -197,11 +270,6 @@ export function createWindow(type) {
 }
 
 export function closeTopWindow() {
-  let top = null;
-  for (const win of openWindows.values()) {
-    if (!top || Number(win.el.style.zIndex) >= Number(top.el.style.zIndex)) {
-      top = win;
-    }
-  }
+  const top = topWindow();
   if (top) closeWindow(top);
 }

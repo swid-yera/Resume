@@ -65,6 +65,14 @@ export function setupFileDragging() {
       hasMoved = false;
     };
 
+    // Иконки-ссылки ведут на статические страницы, чтобы их видел краулер.
+    // Обычный клик открывает окно, но ctrl/cmd и средняя кнопка работают как
+    // на любой ссылке - открывают страницу в новой вкладке.
+    file.addEventListener("click", (e) => {
+      if (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
+      e.preventDefault();
+    });
+
     file.addEventListener("pointerup", endInteraction);
     // On touch (notably iOS Safari) a tap after setPointerCapture can end with
     // pointercancel instead of pointerup, so open here too. The `opening`

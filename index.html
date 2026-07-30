@@ -1,18 +1,40 @@
 <!DOCTYPE html>
-<html lang="ru">
+<html lang="en">
 
 <head>
     <meta charset="UTF-8">
     <meta name="darkreader-lock">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="description" content="A portfolio in progress for two students">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <title>Arman Kungozhanov - Portfolio</title>
+    <meta name="description"
+        content="My portfolio, built as a desktop operating system in plain JavaScript: draggable windows, a file explorer, a terminal and a browser.">
+    <meta name="author" content="Arman Kungozhanov">
+    <link rel="canonical" href="https://antawkay.com/">
+    <meta name="theme-color" content="#0038ff">
+
+    <!-- Превью для соцсетей и мессенджеров -->
+    <meta property="og:type" content="website">
+    <meta property="og:site_name" content="Antawkay">
+    <meta property="og:url" content="https://antawkay.com/">
+    <meta property="og:title" content="Arman Kungozhanov - Portfolio">
+    <meta property="og:description"
+        content="My portfolio, built as a desktop operating system in plain JavaScript: draggable windows, a file explorer, a terminal and a browser.">
+    <meta property="og:image" content="https://antawkay.com/og-image.png">
+    <meta property="og:image:width" content="1200">
+    <meta property="og:image:height" content="630">
+    <meta property="og:image:alt" content="Arman Kungozhanov's portfolio - a desktop interface in the browser">
+    <meta property="og:locale" content="en_US">
+    <meta name="twitter:card" content="summary_large_image">
+    <meta name="twitter:title" content="Arman Kungozhanov - Portfolio">
+    <meta name="twitter:description"
+        content="My portfolio, built as a desktop operating system in plain JavaScript: draggable windows, a file explorer, a terminal and a browser.">
+    <meta name="twitter:image" content="https://antawkay.com/og-image.png">
+
     <link rel="icon" type="image/x-icon" href="/favicon/favicon.ico">
     <link rel="icon" type="image/png" sizes="16x16" href="/favicon/favicon-16x16.png">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
     <link rel="manifest" href="/favicon/site.webmanifest">
-    <link rel="canonical" href="https://antawkay.com/">
-    <title>Antawkay Portfolio</title>
     <link rel="stylesheet" href="colors_and_type.css">
     <link rel="stylesheet" href="styles.css">
 </head>
@@ -20,39 +42,64 @@
 <body>
     <div id="startup-overlay" aria-hidden="true"></div>
     <div id="brightness-overlay" aria-hidden="true"></div>
+
+    <!-- Заголовок страницы: на рабочем столе ему нет места, поэтому скрыт
+         визуально, но остаётся в DOM для скринридеров и поиска. -->
+    <header class="visually-hidden">
+        <h1>Arman Kungozhanov</h1>
+        <h2>Portfolio</h2>
+        <p>
+            My portfolio, built as a desktop operating system in plain JavaScript:
+            draggable and resizable windows, a file explorer, a terminal and a browser.
+        </p>
+    </header>
+
+    <!-- Без JS остаётся статичная версия: тексты и ссылки на страницы проектов. -->
+    <noscript>
+        <div class="noscript-fallback">
+            <h2>Arman Kungozhanov - Portfolio</h2>
+            <ul>
+                <li><a href="/about/">About</a></li>
+                <li><a href="/projects/">All projects</a></li>
+            </ul>
+            <p>
+                This site is an interactive desktop interface and needs JavaScript to run.
+                The project write-ups are available as regular pages.
+            </p>
+        </div>
+    </noscript>
+
     <!-- Панель сверху -->
     <div class="menu-bar" role="banner">
+        <!-- Содержимое рисует js/menu-bar.js: набор меню зависит от активного окна -->
         <nav class="menu-bar__items" aria-label="App menus">
             <span class="menu-bar__active" id="active-app">Finder</span>
-            <span>File</span>
-            <span>Edit</span>
-            <span>View</span>
-            <span>Window</span>
-            <span>Help</span>
         </nav>
         <div class="datetime" id="datetime" role="timer" aria-live="off"></div>
     </div>
 
     <!-- Рабочий стол -->
     <main class="desktop" id="desktop" role="main" aria-label="Desktop">
-        <div class="file folder" data-type="projects" tabindex="0" role="button" aria-label="Open Projects folder">
+        <!-- Ссылка, а не div: краулер по ней доходит до страниц проектов.
+             Клик перехватывает desktop.js и открывает окно. -->
+        <a class="file folder" href="/projects/" data-type="projects" aria-label="Open Projects folder">
             <div class="file-icon">
                 <img src="icons/folder-icon.webp" alt="" aria-hidden="true" class="folder-icon" fetchpriority="high">
             </div>
             <span>Projects</span>
-        </div>
+        </a>
         <div class="file folder" data-type="photos" tabindex="0" role="button" aria-label="Open Photos folder">
             <div class="file-icon">
                 <img src="icons/folder-icon.webp" alt="" aria-hidden="true" class="folder-icon" fetchpriority="high">
             </div>
             <span>Photos</span>
         </div>
-        <div class="file" data-type="text" tabindex="0" role="button" aria-label="Open About.txt file">
+        <a class="file" href="/about/" data-type="text" aria-label="Open Resume">
             <div class="file-icon">
                 <img src="icons/icon-text.webp" alt="" aria-hidden="true" class="text-icon" fetchpriority="high">
             </div>
-            <span>About.txt</span>
-        </div>
+            <span>Resume</span>
+        </a>
     </main>
 
     <!-- Окно — шаблон, клонируется JS на каждое открытое приложение -->
@@ -85,6 +132,11 @@
 
     <!-- Dock -->
     <nav class="dock" role="navigation" aria-label="Application dock">
+        <button class="dock-item" data-type="explorer" aria-label="Open File Explorer">
+            <img src="icons/folder-icon.webp" alt="" aria-hidden="true" class="dock-icon" fetchpriority="high">
+            <span class="dock-tooltip">File Explorer</span>
+            <span class="dock-indicator" aria-hidden="true"></span>
+        </button>
         <button class="dock-item" data-type="calls" aria-label="Open Recent Calls">
             <img src="icons/phone.webp" alt="" aria-hidden="true" class="dock-icon" fetchpriority="high">
             <span class="dock-tooltip">Recent Calls</span>
@@ -117,9 +169,39 @@
         </button>
     </nav>
 
+    <!-- Разметка для поиска: сайт и его автор. Тот же @id автора подставляют
+         страницы проектов из scripts/seo-pages.js. -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@graph": [
+            {
+                "@type": "WebSite",
+                "@id": "https://antawkay.com/#website",
+                "url": "https://antawkay.com/",
+                "name": "Arman Kungozhanov - Portfolio",
+                "alternateName": "Antawkay",
+                "description": "My portfolio, built as a desktop operating system in plain JavaScript: draggable windows, a file explorer, a terminal and a browser.",
+                "inLanguage": "en",
+                "author": { "@id": "https://antawkay.com/#antawq" }
+            },
+            {
+                "@type": "Person",
+                "@id": "https://antawkay.com/#antawq",
+                "name": "Arman Kungozhanov",
+                "alternateName": "Antawkay",
+                "jobTitle": "Full-stack developer",
+                "url": "https://antawkay.com/",
+                "sameAs": [
+                    "https://github.com/Antawq",
+                    "https://t.me/antawkay"
+                ]
+            }
+        ]
+    }
+    </script>
+
     <!-- Скрипты -->
-    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.0.6/dist/purify.min.js"></script>
     <script type="module" src="js/main.js"></script>
 </body>
 

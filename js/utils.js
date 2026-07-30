@@ -8,14 +8,20 @@ export function escapeHtml(str) {
     .replace(/'/g, "&#39;");
 }
 
-export const isLocalStorageAvailable = (() => {
+// Проверяем лениво, а не при импорте: модуль тянут и те файлы, что гоняются
+// в node --test, где трогать localStorage на старте незачем.
+let storageChecked = null;
+
+export function isLocalStorageAvailable() {
+  if (storageChecked !== null) return storageChecked;
   try {
     const k = "__gh_cache_test__";
     localStorage.setItem(k, "1");
     localStorage.removeItem(k);
-    return true;
+    storageChecked = true;
   } catch (e) {
     console.warn("LocalStorage недоступен.", e);
-    return false;
+    storageChecked = false;
   }
-})();
+  return storageChecked;
+}

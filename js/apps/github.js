@@ -1,3 +1,5 @@
+import { marked } from "marked";
+import DOMPurify from "dompurify";
 import { GITHUB_PROFILES } from "../constants.js";
 
 let githubDataPromise = null;
@@ -55,14 +57,10 @@ function hydrateGitHubProfile({ username, prefix }) {
         followers.textContent = `${user.followers} followers · ${user.following} following`;
 
       if (readmeEl) {
-        if (
-          readme &&
-          typeof DOMPurify !== "undefined" &&
-          typeof marked !== "undefined"
-        ) {
+        if (readme) {
           readmeEl.innerHTML = DOMPurify.sanitize(marked.parse(readme));
         } else {
-          readmeEl.textContent = readme || "No README found.";
+          readmeEl.textContent = "No README found.";
         }
       }
     })

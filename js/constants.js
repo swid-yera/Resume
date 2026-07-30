@@ -15,11 +15,11 @@ export const CONSTANTS = {
 export const THEME_PRESETS = [
   {
     id: "neon",
-    label: "Neon",
-    accent: "#0038ff",
-    purple: "#BB86FC",
+    label: "Frost",
+    accent: "#e4f0f6",
+    purple: "#ffffff",
     green: "#03DAC6",
-    swatch: "#0038ff",
+    swatch: "#e4f0f6",
   },
   {
     id: "rose",
@@ -55,10 +55,19 @@ export const THEME_PRESETS = [
   },
 ];
 
+// Оформление и акцентная тема независимы: любой акцент работает и в тёмном,
+// и в светлом. Светлую палитру подобрал Stitch (дизайн-система Daylight Desktop).
+export const APPEARANCES = [
+  { id: "dark", label: "Dark" },
+  { id: "light", label: "Light" },
+];
+
 export const WINDOW_TITLES = {
   projects: "Projects",
+  explorer: "File Explorer",
+  markdown: "Markdown",
   photos: "Photos",
-  text: "About.txt",
+  text: "Resume",
   calls: "Recent Calls",
   github: "GitHub",
   telegram: "Telegram",
@@ -66,6 +75,8 @@ export const WINDOW_TITLES = {
   notes: "Notes",
   trash: "Trash",
   settings: "Settings",
+  console: "Terminal",
+  browser: "Browser",
 };
 
 export const GITHUB_PROFILES = [

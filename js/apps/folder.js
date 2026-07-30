@@ -33,13 +33,7 @@ function renderFolder(windowContent, type) {
     if (!item) return;
     const index = parseInt(item.dataset.index, 10);
     if (isNaN(index)) return;
-    if (type === "projects") {
-      const project = folderContents[type][index];
-      if (project?.url)
-        window.open(project.url, "_blank", "noopener,noreferrer");
-    } else {
-      openWindow(type, index);
-    }
+    openWindow(type, index);
   };
 
   const folderContent = windowContent.querySelector(".folder-content");
@@ -81,8 +75,8 @@ function renderGallery(windowContent, type, startIndex) {
                     ${items
                       .map(
                         (item, idx) => `
-                        <div class="gallery-item${type === "projects" ? " gallery-item--link" : ""}"
-                             data-index="${idx}" role="img" aria-label="${escapeHtml(item.name)}">
+                        <div class="gallery-item" data-index="${idx}"
+                             role="img" aria-label="${escapeHtml(item.name)}">
                             <img src="${escapeHtml(item.src)}" alt="${escapeHtml(item.name)}">
                         </div>
                     `,
@@ -118,15 +112,4 @@ function renderGallery(windowContent, type, startIndex) {
   });
 
   updateGallery();
-
-  if (type === "projects") {
-    windowContent.querySelector(".gallery").addEventListener("click", (e) => {
-      const item = e.target.closest(".gallery-item--link");
-      if (!item) return;
-      const idx = parseInt(item.dataset.index, 10);
-      if (!isNaN(idx) && items[idx]?.url) {
-        window.open(items[idx].url, "_blank", "noopener,noreferrer");
-      }
-    });
-  }
 }
