@@ -1,5 +1,4 @@
 import photo1 from "../photos/photo1.webp";
-import photo2 from "../photos/photo2.webp";
 import photo3 from "../photos/photo3.webp";
 
 export const openWindows = new Map();
@@ -7,10 +6,9 @@ export const openWindows = new Map();
 export const folderContents = {
   photos: [
     { src: photo1, name: "Photo 1" },
-    { src: photo2, name: "Photo 2" },
     { src: photo3, name: "Photo 3" },
   ],
-  // наполняется из public/projects/projects.json при открытии папки
+  // наполняется из content/projects/*.md при открытии папки
   projects: [],
   trash: [],
 };
@@ -28,7 +26,7 @@ export const telegramState = {
     {
       id: 2,
       name: "Bob",
-      avatar: photo2,
+      avatar: photo3,
       messages: [{ type: "received", text: "Hello!" }],
     },
   ],
