@@ -10,6 +10,7 @@ export const CONSTANTS = {
   WINDOW_CASCADE_STEP: 32,
   WINDOW_MIN_WIDTH: 320,
   WINDOW_MIN_HEIGHT: 220,
+  FULLSCREEN_HINT_MS: 2500,
 };
 
 // Палитры тем живут в colors_and_type.css под :root[data-theme]. Здесь только
@@ -44,11 +45,15 @@ export const WINDOW_TITLES = {
   settings: "Settings",
   console: "Terminal",
   browser: "Browser",
+  player: "Now Playing",
 };
 
 export const GITHUB_PROFILES = [
   { username: "swid-yera", prefix: "gh-main" },
   { username: "Antawq", prefix: "gh-alt" },
 ];
+
+// Дежурный плейлист рабочего стола. Пустая строка выключает фоновую музыку.
+export const MUSIC_PLAYLIST = "PLFvZSmmKGRGk";
 
 export const SETTINGS_KEY = "desktop-settings";

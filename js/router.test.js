@@ -91,6 +91,19 @@ test("a type becomes a hash, an unknown type becomes an empty string", () => {
   assert.equal(hashForType("nope"), "");
 });
 
+test("the player has no address of its own and leaves an open one alone", () => {
+  assert.equal(hashForType("player"), "");
+  assert.equal(typeFromHash("#player"), null);
+
+  const win = fakeWindow("");
+  const onActive = fakeActiveChange();
+  setupRouter({ openWindow: () => {}, onActiveWindowChange: onActive, win });
+
+  onActive.fire("text");
+  onActive.fire("player");
+  assert.equal(win.location.hash, "#about");
+});
+
 test("round trip: type to hash and back", () => {
   for (const type of ["projects", "text", "console", "github", "settings"]) {
     assert.equal(typeFromHash(hashForType(type)), type);

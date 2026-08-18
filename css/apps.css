@@ -130,6 +130,8 @@
     font-weight: var(--w-regular);
     line-height: 1.5;
     text-align: left;
+    text-transform: none;
+    letter-spacing: normal;
     white-space: normal;
     opacity: 0;
     visibility: hidden;

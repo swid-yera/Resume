@@ -185,28 +185,76 @@ export function restoreWindow(win) {
   notifyActiveChange();
 }
 
+// Геометрию окна задают перетаскиванием, инлайновым стилем. Разворот её убирает,
+// поэтому перед этим её надо запомнить, а при возврате поставить обратно.
+function stashGeometry(win) {
+  const { left, top, width, height } = win.el.style;
+  win.prevGeometry = { left, top, width, height };
+}
+
+function dropGeometry(el) {
+  el.style.left = "";
+  el.style.top = "";
+  el.style.width = "";
+  el.style.height = "";
+}
+
+function restoreGeometry(win) {
+  Object.assign(win.el.style, win.prevGeometry ?? {});
+}
+
 export function zoomWindow(win) {
   if (!win) return;
   const el = win.el;
 
   if (el.classList.contains("is-maximized")) {
     el.classList.remove("is-maximized");
-    // Возвращаем геометрию, которая была до разворота.
-    Object.assign(el.style, win.prevGeometry ?? {});
+    restoreGeometry(win);
     return;
   }
 
-  win.prevGeometry = {
-    left: el.style.left,
-    top: el.style.top,
-    width: el.style.width,
-    height: el.style.height,
-  };
+  stashGeometry(win);
   el.classList.add("is-maximized");
-  el.style.left = "";
-  el.style.top = "";
-  el.style.width = "";
-  el.style.height = "";
+  dropGeometry(el);
+}
+
+// Подсказка живёт внутри окна: в полном экране всё, что снаружи него, не рисуется.
+// Нужна она потому, что панели с кнопками там нет, а F11 из чужого сайта до нас
+// не доходит - клавиши достаются его документу. Esc гасит полный экран сам.
+function showExitHint(el) {
+  const hint = document.createElement("div");
+  hint.className = "window-fullscreen-hint";
+  hint.setAttribute("role", "status");
+  hint.textContent = "Press Esc to exit fullscreen";
+  el.append(hint);
+  setTimeout(() => hint.remove(), CONSTANTS.FULLSCREEN_HINT_MS);
+}
+
+// F11 как в настоящем браузере: окно занимает весь экран целиком, без рабочего
+// стола и своей шапки.
+export function fullscreenTopWindow() {
+  if (document.fullscreenElement) {
+    document.exitFullscreen();
+    return;
+  }
+  const top = topWindow();
+  if (!top?.el.requestFullscreen) return;
+
+  stashGeometry(top);
+  top.el.requestFullscreen().then(
+    () => {
+      dropGeometry(top.el);
+      showExitHint(top.el);
+    },
+    () => restoreGeometry(top),
+  );
+  document.addEventListener(
+    "fullscreenchange",
+    () => {
+      if (!document.fullscreenElement) restoreGeometry(top);
+    },
+    { once: true },
+  );
 }
 
 // --- Lifecycle ---

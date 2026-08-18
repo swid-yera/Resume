@@ -13,6 +13,7 @@ import {
 import { bindResume } from "./apps/resume.js";
 import { renderConsole } from "./apps/console.js";
 import { renderBrowser } from "./apps/browser.js";
+import { renderPlayer } from "./apps/player.js";
 import { renderExplorer } from "./apps/explorer.js";
 import { renderMarkdown } from "./apps/markdown.js";
 import { renderSettings } from "./settings.js";
@@ -51,6 +52,7 @@ const WINDOW_RENDER_STRATEGIES = {
   instagram: (contentEl) => renderPlaceholder(contentEl, "Instagram"),
   console: (contentEl) => renderConsole(contentEl),
   browser: (contentEl, arg) => renderBrowser(contentEl, arg),
+  player: (contentEl) => renderPlayer(contentEl),
   settings: (contentEl) => renderSettings(contentEl),
 };
 

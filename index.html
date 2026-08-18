@@ -128,6 +128,34 @@
             <path d="M15 21v-8a1 1 0 0 0-1-1h-4a1 1 0 0 0-1 1v8" />
             <path d="M3 10a2 2 0 0 1 .709-1.528l7-6a2 2 0 0 1 2.582 0l7 6A2 2 0 0 1 21 10v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
         </symbol>
+        <symbol id="i-play" viewBox="0 0 24 24">
+            <path fill="currentColor" stroke="none" d="M8 5.14v13.72a1 1 0 0 0 1.52.85l11.14-6.86a1 1 0 0 0 0-1.7L9.52 4.29A1 1 0 0 0 8 5.14Z" />
+        </symbol>
+        <symbol id="i-pause" viewBox="0 0 24 24">
+            <path fill="currentColor" stroke="none" d="M7 4h3.5v16H7zM13.5 4H17v16h-3.5z" />
+        </symbol>
+        <symbol id="i-volume" viewBox="0 0 24 24">
+            <path d="M11 5 6.5 9H3v6h3.5L11 19z" />
+            <path d="M15.5 8.5a5 5 0 0 1 0 7 M18.5 5.5a9 9 0 0 1 0 13" />
+        </symbol>
+        <symbol id="i-volume-x" viewBox="0 0 24 24">
+            <path d="M11 5 6.5 9H3v6h3.5L11 19z" />
+            <path d="M16 10l5 4 M21 10l-5 4" />
+        </symbol>
+        <symbol id="i-volume-low" viewBox="0 0 24 24">
+            <path d="M11 5 6.5 9H3v6h3.5L11 19z" />
+            <path d="M15.5 8.5a5 5 0 0 1 0 7" />
+        </symbol>
+        <symbol id="i-skip-back" viewBox="0 0 24 24">
+            <path fill="currentColor" stroke="none"
+                  d="M19 5.7v12.6a1 1 0 0 1-1.53.85l-9.6-6.3a1 1 0 0 1 0-1.7l9.6-6.3A1 1 0 0 1 19 5.7Z" />
+            <path d="M6 5v14" stroke-linecap="round" />
+        </symbol>
+        <symbol id="i-skip-forward" viewBox="0 0 24 24">
+            <path fill="currentColor" stroke="none"
+                  d="M5 5.7v12.6a1 1 0 0 0 1.53.85l9.6-6.3a1 1 0 0 0 0-1.7l-9.6-6.3A1 1 0 0 0 5 5.7Z" />
+            <path d="M18 5v14" stroke-linecap="round" />
+        </symbol>
     </svg>
 
     <!-- Панель сверху -->
@@ -198,11 +226,6 @@
             <span class="dock-tooltip">File Explorer</span>
             <span class="dock-indicator" aria-hidden="true"></span>
         </button>
-        <button class="dock-item" data-type="browser" aria-label="Open Browser">
-            <img src="icons/browser.svg" alt="" aria-hidden="true" class="dock-icon" fetchpriority="high">
-            <span class="dock-tooltip">Browser</span>
-            <span class="dock-indicator" aria-hidden="true"></span>
-        </button>
         <button class="dock-item" data-type="console" aria-label="Open Terminal">
             <img src="icons/terminal.svg" alt="" aria-hidden="true" class="dock-icon" fetchpriority="high">
             <span class="dock-tooltip">Terminal</span>
@@ -211,6 +234,11 @@
         <button class="dock-item" data-type="calls" aria-label="Open Recent Calls">
             <img src="icons/phone.webp" alt="" aria-hidden="true" class="dock-icon" fetchpriority="high">
             <span class="dock-tooltip">Recent Calls</span>
+            <span class="dock-indicator" aria-hidden="true"></span>
+        </button>
+        <button class="dock-item" data-type="browser" aria-label="Open Browser">
+            <img src="icons/browser.svg" alt="" aria-hidden="true" class="dock-icon" fetchpriority="high">
+            <span class="dock-tooltip">Browser</span>
             <span class="dock-indicator" aria-hidden="true"></span>
         </button>
         <button class="dock-item" data-type="github" aria-label="Open GitHub">

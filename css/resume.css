@@ -82,12 +82,26 @@
 }
 
 .resume-group__label {
+    position: relative;
     margin: 0;
     color: var(--fg-subtle);
     font-size: var(--text-11);
     font-weight: var(--w-bold);
     text-transform: uppercase;
     letter-spacing: var(--track-caps);
+}
+
+/* Рейка узкая и со своим скроллом, поэтому пузырь подсказки тянем по всей
+   её ширине: от кнопки он уехал бы за край и обрезался. */
+.resume-group__label .hint {
+    position: static;
+}
+
+.resume-group__label .hint__bubble {
+    left: 0;
+    right: 0;
+    width: auto;
+    max-width: none;
 }
 
 /* Контакты */

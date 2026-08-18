@@ -4,6 +4,7 @@ import {
   externalUrl,
   hostOf,
   parseOmnibox,
+  playerErrorText,
   refusesEmbedding,
 } from "./browser-omnibox.js";
 import {
@@ -15,7 +16,18 @@ import {
   go,
   push,
 } from "./browser-history.js";
+import {
+  canStepBack,
+  canStepForward,
+  createTrack,
+  isInside,
+  observe,
+  step,
+} from "./browser-frame-track.js";
+import { attachPlayer, detachPlayer } from "./player-bridge.js";
 import { openWindow } from "../open-window.js";
+import loadingSticker from "../../icons/loading-sticker.webp";
+import blockedSticker from "../../icons/blocked-sticker.webp";
 import { escapeHtml } from "../utils.js";
 import { breadcrumbs, icon, iconFor, isImage } from "./explorer-model.js";
 
@@ -25,11 +37,16 @@ const HOME_ADDR = "about:home";
 let session = createHistory(HOME_ADDR);
 
 // Стартовая страница: витрина того, ради чего сюда вообще заходят. Ярлык
-// (data-open) открывает приложение, адрес (data-addr) остаётся внутри браузера.
+// (open) открывает приложение, адрес (addr) остаётся внутри браузера, ссылка
+// (href) уходит настоящей вкладкой.
+//
+// Гитхаб запрещает встраивание заголовком X-Frame-Options: deny, обойти это со
+// стороны страницы нельзя. Поэтому ведём на живой профиль - тот же, что в резюме
+// (content/about.md), - а офлайн-копия остаётся в приложении GitHub.
 const HOME_TILES = [
   { label: "Projects", icon: "i-folder", addr: "file:///C:/Users/antawkay/Documents/Projects" },
   { label: "Resume", icon: "i-file-text", open: "text" },
-  { label: "GitHub", icon: "i-shortcut", open: "github" },
+  { label: "GitHub", icon: "i-shortcut", href: "https://github.com/Antawq" },
   { label: "Terminal", icon: "i-terminal", open: "console" },
   { label: "This PC", icon: "i-pc", addr: "file:///" },
 ];
@@ -85,61 +102,125 @@ export function renderBrowser(windowContent, address) {
         `;
 
   const fs = getFs();
+  // Шаги внутри сайта во фрейме. Пусто, пока во вьюхе не фрейм, а свои страницы.
+  let track = null;
+  let watcher = 0;
   const omnibox = windowContent.querySelector(".browser-omnibox");
   const form = windowContent.querySelector(".browser-omnibox-form");
   const view = windowContent.querySelector(".browser-view");
   const navButtons = windowContent.querySelector(".browser-toolbar");
 
   const updateNav = () => {
-    navButtons.querySelector('[data-nav="back"]').disabled = !canGoBack(session);
-    navButtons.querySelector('[data-nav="forward"]').disabled = !canGoForward(session);
+    navButtons.querySelector('[data-nav="back"]').disabled = !(
+      (track && canStepBack(track)) || canGoBack(session)
+    );
+    navButtons.querySelector('[data-nav="forward"]').disabled = !(
+      (track && canStepForward(track)) || canGoForward(session)
+    );
   };
 
   const openExternal = windowContent.querySelector(".browser-external");
 
   // Показываем адрес и кнопку «открыть снаружи» для того, что сейчас во вьюхе.
+  // Внутри сайта остаётся один хост: путь чужой страницы не прочитать, а входной
+  // адрес там уже неверен. По клику в строку возвращаем полный адрес для правки.
   const showAddress = (addr) => {
-    omnibox.value = addr;
     const external = externalUrl(parseOmnibox(addr || HOME_ADDR));
+    const inside = Boolean(track && isInside(track));
+    if (document.activeElement !== omnibox) {
+      omnibox.value = inside ? hostOf(external || addr) + "/…" : addr;
+    }
+    omnibox.classList.toggle("is-inside", inside);
+    if (inside) {
+      omnibox.title =
+        "Somewhere inside this site — another origin does not share the exact "
+        + "address. Back and forward still walk its pages.";
+    } else {
+      omnibox.removeAttribute("title");
+    }
     openExternal.hidden = !external;
     if (external) openExternal.href = external;
   };
 
-  // Сайт внутри фрейма может увести себя на другой адрес. Свой источник читается,
-  // и переход встаёт в цепочку сам - без перерисовки, страница уже на экране.
-  // Чужой закрыт, и честнее пометить адрес устаревшим, чем выдавать его за действующий.
+  omnibox.addEventListener("focus", () => {
+    omnibox.value = current(session);
+  });
+  omnibox.addEventListener("blur", () => showAddress(current(session)));
+
+  // Свой источник отдаёт адрес: переход встаёт в цепочку сам, без перерисовки -
+  // страница уже на экране, и считать шаги вслепую больше не нужно.
   const onFrameNavigate = (href, loads) => {
-    if (!href || href === "about:blank") {
-      if (loads > 1) {
-        omnibox.classList.add("is-stale");
-        omnibox.title =
-          "The page navigated itself. Another site's address cannot be read from here.";
-      }
-      return;
-    }
+    if (!href || href === "about:blank") return;
     session = frameNavigated(session, href, loads);
-    omnibox.classList.remove("is-stale");
-    omnibox.removeAttribute("title");
+    track = createTrack(window.history.length);
     showAddress(current(session));
     updateNav();
   };
 
+  const stopWatching = () => {
+    clearInterval(watcher);
+    watcher = 0;
+    track = null;
+    detachPlayer();
+  };
+
+  // Переход внутри чужого сайта не даёт ни события, ни адреса - виден только рост
+  // общей истории вкладки. Событие на неё не подписаться, поэтому опрашиваем.
+  const watchFrame = () => {
+    stopWatching();
+    track = createTrack(window.history.length);
+    watcher = setInterval(() => {
+      if (!view.isConnected) return stopWatching();
+      const moved = observe(track, window.history.length);
+      if (moved === track) return;
+      track = moved;
+      showAddress(current(session));
+      updateNav();
+    }, 400);
+  };
+
+  // Шаг по истории самого сайта. Фрейм не перерисовываем: перерисовка вернула бы
+  // его на входную страницу, а не на предыдущую.
+  const stepInside = (delta) => {
+    track = step(track, delta);
+    window.history.go(delta);
+    showAddress(current(session));
+    updateNav();
+  };
+
+  // Перерисовка ставит во вьюху новый фрейм или свои страницы, поэтому счёт
+  // шагов начинается с нуля.
   const render = (addr) => {
-    omnibox.classList.remove("is-stale");
-    omnibox.removeAttribute("title");
+    stopWatching();
     showAddress(addr);
     const intent = parseOmnibox(addr || HOME_ADDR);
     const external = externalUrl(intent);
     switch (intent.kind) {
       case "file":
         return renderFiles(view, fs, intent.path);
-      case "youtube":
-        // Плеер листает ролики сам, и его внутренние переходы - не наша цепочка.
-        return renderFrame(view, intent.embedUrl, external);
+      case "youtube": {
+        // Плеер грузит ролики сам, и адреса не отдаёт: остаётся счёт шагов.
+        renderFrame(view, intent.embedUrl, external);
+        watchFrame();
+        const frame = view.querySelector(".browser-frame");
+        return attachPlayer(frame, {
+          onError: (code) => {
+            // Ошибка может прийти уже после перехода на другой адрес.
+            if (!frame.isConnected) return;
+            stopWatching();
+            updateNav();
+            renderRefusal(view, {
+              title: "YouTube will not play this here",
+              text: playerErrorText(code, Boolean(intent.playlistId)),
+              external,
+            });
+          },
+        });
+      }
       case "web":
-        return refusesEmbedding(intent.url)
-          ? renderBlocked(view, intent.url, external)
-          : renderFrame(view, intent.url, external, true, onFrameNavigate);
+        if (refusesEmbedding(intent.url)) return renderBlocked(view, intent.url, external);
+        renderFrame(view, intent.url, external, true, onFrameNavigate);
+        return watchFrame();
       case "search":
         return renderSearch(view, fs, intent.query);
       default:
@@ -163,6 +244,10 @@ export function renderBrowser(windowContent, address) {
     if (!nav) return;
     if (nav === "reload") return render(current(session));
     if (nav === "home") return navigate(HOME_ADDR);
+    // Внутри сайта назад и вперёд ходят по его страницам, и только на входной
+    // странице возвращаются к нашей цепочке адресов.
+    if (nav === "back" && track && canStepBack(track)) return stepInside(-1);
+    if (nav === "forward" && track && canStepForward(track)) return stepInside(1);
     if (nav === "back") session = go(session, -1);
     if (nav === "forward") session = go(session, 1);
     updateNav();
@@ -257,6 +342,20 @@ function renderFiles(view, fs, path) {
             </div>`;
 }
 
+function homeTile(tile) {
+  const face = `
+        <span class="browser-fileicon">${icon(tile.icon)}</span>
+        <span class="browser-filelabel">${escapeHtml(tile.label)}</span>`;
+  if (tile.href) {
+    return `<a class="browser-fileitem" href="${escapeHtml(tile.href)}"
+                target="_blank" rel="noopener noreferrer">${face}</a>`;
+  }
+  const attr = tile.open
+    ? `data-open="${escapeHtml(tile.open)}"`
+    : `data-addr="${escapeHtml(tile.addr)}"`;
+  return `<button class="browser-fileitem" ${attr}>${face}</button>`;
+}
+
 function renderHome(view) {
   view.innerHTML = `
             <div class="browser-home">
@@ -265,17 +364,7 @@ function renderHome(view) {
                     <p class="browser-home-sub">Start here, or type an address above.</p>
                 </div>
                 <div class="browser-files">
-                    ${HOME_TILES.map(
-                      (tile) => `
-                        <button class="browser-fileitem" ${
-                          tile.open
-                            ? `data-open="${escapeHtml(tile.open)}"`
-                            : `data-addr="${escapeHtml(tile.addr)}"`
-                        }>
-                            <span class="browser-fileicon">${icon(tile.icon)}</span>
-                            <span class="browser-filelabel">${escapeHtml(tile.label)}</span>
-                        </button>`,
-                    ).join("")}
+                    ${HOME_TILES.map(homeTile).join("")}
                 </div>
                 <p class="browser-home-hint">
                     The address bar takes <code>file:///C:/…</code> paths and real links;
@@ -284,15 +373,15 @@ function renderHome(view) {
             </div>`;
 }
 
-function renderBlocked(view, url, external) {
-  const hint = embedHint(url);
+// Одна заглушка на оба отказа: и на сайт, запретивший фрейм заголовком, и на
+// ролик, которого не пустил плеер. Читателю разница в механике не видна.
+function renderRefusal(view, { title, text, hint, external }) {
   view.innerHTML = `
             <div class="browser-blocked">
-                <div class="browser-blocked-title">${escapeHtml(hostOf(url))} refuses to be embedded</div>
-                <p class="browser-blocked-text">
-                    The site sends a header that forbids showing it inside another page,
-                    so this window has nothing to render.
-                </p>
+                <img class="browser-sticker" src="${blockedSticker}"
+                     width="96" height="96" alt="" aria-hidden="true">
+                <div class="browser-blocked-title">${escapeHtml(title)}</div>
+                <p class="browser-blocked-text">${escapeHtml(text)}</p>
                 ${hint ? `<p class="browser-blocked-hint">${escapeHtml(hint)}</p>` : ""}
                 ${
                   external
@@ -301,6 +390,17 @@ function renderBlocked(view, url, external) {
                     : ""
                 }
             </div>`;
+}
+
+function renderBlocked(view, url, external) {
+  renderRefusal(view, {
+    title: `${hostOf(url)} refuses to be embedded`,
+    text:
+      "The site sends a header that forbids showing it inside another page, "
+      + "so this window has nothing to render.",
+    hint: embedHint(url),
+    external,
+  });
 }
 
 // Полоска нужна только на обычных сайтах: встроенный плеер грузится всегда, и
@@ -318,7 +418,11 @@ function renderFrame(view, url, external, warn = false, onNavigate = () => {}) {
                 : ""
             }
             <div class="browser-frame-wrap">
-                <div class="browser-loading" role="status">Loading ${escapeHtml(hostOf(url))}…</div>
+                <div class="browser-loading" role="status">
+                    <img class="browser-sticker" src="${loadingSticker}"
+                         width="96" height="96" alt="" aria-hidden="true">
+                    Loading ${escapeHtml(hostOf(url))}…
+                </div>
                 <iframe class="browser-frame" src="${escapeHtml(url)}"
                         sandbox="allow-scripts allow-same-origin allow-popups allow-presentation"
                         allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen"

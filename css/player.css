@@ -1,0 +1,259 @@
+/* Мини-плеер: пульт для того, что играет - в Браузере или в дежурном плейлисте.
+   Своего фона у пульта нет: он заливается тем же, чем окно, иначе на его краю
+   виден шов из двух почти одинаковых чёрных. */
+
+/* Источник дежурной музыки. Не display: none - скрытому так фрейму браузер
+   может отказать в воспроизведении. */
+.music-source {
+    position: fixed;
+    left: -9999px;
+    width: 1px;
+    height: 1px;
+    border: 0;
+    pointer-events: none;
+}
+
+.player {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    height: 100%;
+    padding: var(--space-4);
+    color: var(--frost);
+    font-family: var(--font-sans);
+    font-size: var(--text-13);
+}
+
+.player-now {
+    display: flex;
+    gap: var(--space-3);
+    min-width: 0;
+}
+
+/* Квадрат под обложку держит место и до первого ролика. Плитка светлее фона,
+   а не темнее: на общем чёрном окна тёмный квадрат читался как грязь */
+.player-art {
+    position: relative;
+    width: 64px;
+    height: 64px;
+    flex: 0 0 auto;
+    border-radius: var(--radius-md);
+    overflow: hidden;
+    background: var(--frost-fill);
+}
+
+/* Селектор с рамкой нужен по специфичности: общий потолок картинок в окне
+   (.window-content img) иначе перебивает и режет обложку по высоте */
+.player-art .player-cover {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    object-fit: cover;
+    display: block;
+}
+
+/* Стикер ждёт под обложкой и показывается, пока плеер не назвал ролик: занимает
+   плитку целиком, иначе на её фоне выглядит обрезком. Селектор с рамкой - по
+   специфичности: .window-content img иначе вернёт ему display */
+.player-art .player-sticker {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    object-fit: cover;
+    display: none;
+}
+
+.player.is-loading .player-sticker {
+    display: block;
+}
+
+/* display из .player-cover перебивает браузерное правило для [hidden] */
+.player-cover[hidden] {
+    display: none;
+}
+
+.player-meta {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+    flex: 1 1 auto;
+}
+
+.player-title {
+    background: none;
+    border: none;
+    padding: 0;
+    text-align: left;
+    color: inherit;
+    font-family: inherit;
+    font-size: inherit;
+    cursor: pointer;
+    transition: color var(--dur-fast);
+    font-weight: var(--w-semibold);
+    line-height: var(--lh-snug);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.player-title:hover:not(:disabled) {
+    color: var(--accent);
+}
+
+.player.is-idle .player-title {
+    color: var(--frost-mute);
+    font-weight: var(--w-regular);
+    cursor: default;
+}
+
+.player-author {
+    color: var(--frost-soft);
+    font-size: var(--text-12);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+/* Время по краям полосы: слева сыграно, справа осталось */
+.player-seek {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    margin-top: auto;
+    color: var(--frost-mute);
+    font-size: var(--text-11);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Транспорт слева, звук справа - одной строкой под карточкой ролика */
+.player-bar {
+    display: flex;
+    gap: var(--space-3);
+    align-items: center;
+    justify-content: space-between;
+    margin-top: auto;
+}
+
+.player-controls {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+}
+
+.player-button {
+    display: grid;
+    place-items: center;
+    width: 32px;
+    height: 32px;
+    flex: 0 0 auto;
+    background: none;
+    border: none;
+    border-radius: var(--radius-pill);
+    color: var(--frost);
+    font-size: var(--text-24);
+    cursor: pointer;
+    transition: color var(--dur-fast);
+}
+
+.player-button:hover:not(:disabled) {
+    color: var(--accent);
+}
+
+.player-button:disabled {
+    opacity: 0.3;
+    cursor: default;
+}
+
+/* Единственная залитая кнопка: с неё начинают, остальное - контур */
+.player-button.is-primary {
+    width: 42px;
+    height: 42px;
+    font-size: var(--text-20);
+    background: var(--frost);
+    color: var(--abyss-900);
+}
+
+.player-button.is-primary:hover:not(:disabled) {
+    background: var(--accent);
+    color: var(--abyss-900);
+}
+
+.player-sound {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    flex: 0 1 120px;
+    color: var(--frost-mute);
+    font-size: var(--text-16);
+}
+
+.player-mute {
+    display: grid;
+    place-items: center;
+    background: none;
+    border: none;
+    color: inherit;
+    font-size: inherit;
+    padding: 0;
+    cursor: pointer;
+    transition: color var(--dur-fast);
+}
+
+.player-mute:hover {
+    color: var(--frost);
+}
+
+/* Обе полосы одинаковы, разводит их только место: время тянется на всю ширину */
+.player-scrub,
+.player-volume {
+    -webkit-appearance: none;
+    appearance: none;
+    flex: 1 1 auto;
+    min-width: 0;
+    height: 4px;
+    border-radius: var(--radius-pill);
+    background: var(--frost-line);
+    cursor: pointer;
+}
+
+/* Полоса без ролика не пропадает, а глохнет: исчезая, она дёргала бы раскладку */
+.player-scrub:disabled {
+    cursor: default;
+}
+
+.player-scrub:disabled::-webkit-slider-thumb {
+    background: var(--frost-mute);
+}
+
+.player-scrub:disabled::-moz-range-thumb {
+    background: var(--frost-mute);
+}
+
+.player-scrub::-webkit-slider-thumb,
+.player-volume::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    width: 12px;
+    height: 12px;
+    border-radius: var(--radius-pill);
+    background: var(--accent);
+    border: none;
+}
+
+.player-scrub::-moz-range-thumb,
+.player-volume::-moz-range-thumb {
+    width: 12px;
+    height: 12px;
+    border-radius: var(--radius-pill);
+    background: var(--accent);
+    border: none;
+}
+
+/* Шкала пустого пульта показывала бы 0:00 из 0:00 - убираем до первого ролика */
+.player.is-idle .player-seek {
+    visibility: hidden;
+}

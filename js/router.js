@@ -9,8 +9,14 @@ import { WINDOW_TITLES } from "./constants.js";
 // `console` - терминал. Остальные типы совпадают со своим слагом.
 const ALIASES = { text: "about", console: "terminal" };
 
+// Пульт живёт вне адреса: в доке его нет, открывает и закрывает его сама система,
+// и ссылки на него не бывает.
+const NO_ROUTE = new Set(["player"]);
+
 const TYPE_BY_SLUG = new Map(
-  Object.keys(WINDOW_TITLES).map((type) => [ALIASES[type] ?? type, type]),
+  Object.keys(WINDOW_TITLES)
+    .filter((type) => !NO_ROUTE.has(type))
+    .map((type) => [ALIASES[type] ?? type, type]),
 );
 
 export function slugForType(type) {
@@ -26,7 +32,7 @@ export function typeFromHash(hash) {
 }
 
 export function hashForType(type) {
-  if (!type || !WINDOW_TITLES[type]) return "";
+  if (!type || NO_ROUTE.has(type) || !WINDOW_TITLES[type]) return "";
   return `#${slugForType(type)}`;
 }
 
@@ -40,6 +46,9 @@ export function setupRouter({ openWindow, onActiveWindowChange, win = window }) 
   // добавлял бы запись в историю и «назад» пришлось бы жать десять раз.
   const writeHash = (type) => {
     if (applying) return;
+    // Окно без маршрута (пульт) всплывает поверх приложения и не должно стирать
+    // его адрес: пустой hash здесь значит «оставь как есть», а не «очисти».
+    if (type && !hashForType(type)) return;
     const hash = hashForType(type);
     // Фрагмент, который поставили не мы, не трогаем - он мог прийти извне.
     if (!hash && !typeFromHash(location.hash)) return;

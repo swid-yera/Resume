@@ -20,10 +20,11 @@ export function youtubePlaylistId(input) {
   return m ? m[1] : null;
 }
 
-// Плеер для ролика, для плейлиста или для ролика внутри плейлиста.
+// Плеер для ролика, для плейлиста или для ролика внутри плейлиста. Без
+// enablejsapi плеер не отвечает на postMessage, и мини-плеер им не управляет.
 function youtubeIntent(raw, videoId, playlistId) {
   const start = raw.match(YT_TIME_RE)?.[1];
-  const params = new URLSearchParams();
+  const params = new URLSearchParams({ enablejsapi: "1" });
   if (playlistId) params.set("list", playlistId);
   if (videoId && start) params.set("start", start);
   const query = params.toString();
@@ -117,14 +118,38 @@ export function refusesEmbedding(url) {
   return REFUSE_EMBEDDING.some((h) => host === h || host.endsWith("." + h));
 }
 
-// У ютуба отказ встраивания не тупик: сама страница закрыта, а плеер открыт,
-// и человеку стоит сказать, какую именно ссылку сюда можно принести.
+// Отказ встраивания не всегда тупик: у ютуба закрыта страница, но открыт плеер,
+// а профиль с гитхаба этот рабочий стол рисует сам. Где выход есть - называем его.
 export function embedHint(url) {
   const host = hostOf(url);
   if (host === "youtube.com" || host.endsWith(".youtube.com") || host === "youtu.be") {
     return "Videos do play here: paste a link to a video, a Shorts or a playlist.";
   }
+  if (host === "github.com" || host.endsWith(".github.com")) {
+    return "The GitHub app on this desktop shows the same profile, avatar and README.";
+  }
   return null;
+}
+
+// Отказ плеера виден только по коду IFrame API: 100 - ролика больше нет, 101 и
+// 150 - его не пускают за пределы ютуба. Непубличный плейлист приходит тем же
+// 150-м, поэтому про него говорим отдельно - иначе совет «откройте на ютубе»
+// звучит как отписка.
+const PLAYER_ERRORS = {
+  2: "The link does not name anything the player can open.",
+  5: "The player could not start this one.",
+  100: "The video is gone: removed, or made private by its owner.",
+  101: "The owner does not allow this video to play outside YouTube.",
+  150: "The owner does not allow this video to play outside YouTube.",
+};
+
+const PLAYLIST_REFUSED =
+  "An embedded player takes public playlists only: an unlisted one plays on YouTube itself, "
+  + "though its videos still open here one by one.";
+
+export function playerErrorText(code, hasPlaylist = false) {
+  if (hasPlaylist && (code === 100 || code === 101 || code === 150)) return PLAYLIST_REFUSED;
+  return PLAYER_ERRORS[code] ?? "YouTube refused to play this one.";
 }
 
 // Адрес для настоящей вкладки браузера. У файлов и поиска по нашей ФС

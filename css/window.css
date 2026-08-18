@@ -164,6 +164,39 @@
     overflow-y: auto;
 }
 
+/* F11: на весь экран остаётся только содержимое. Ограничения размера сняты -
+   иначе окно упёрлось бы в свои 95vw/90vh и вокруг осталась бы рамка экрана. */
+.window:fullscreen {
+    width: 100%;
+    height: 100%;
+    max-width: none;
+    max-height: none;
+    border-radius: 0;
+}
+
+.window:fullscreen .window-header {
+    display: none;
+}
+
+/* Шапки нет, значит и вычитать её высоту не из чего, а поля съели бы края экрана */
+.window:fullscreen .window-content {
+    height: 100%;
+    padding: 0;
+}
+
+.window-fullscreen-hint {
+    position: absolute;
+    top: var(--space-4);
+    left: 50%;
+    transform: translateX(-50%);
+    padding: var(--space-2) var(--space-4);
+    border-radius: var(--radius-pill);
+    background: var(--abyss-900);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    font-size: var(--text-13);
+}
+
 .window-content img,
 .window-content video {
     max-width: 100%;
@@ -215,6 +248,12 @@
 .window[data-type="projects"] {
     width: 880px;
     height: 560px;
+}
+
+/* Пульт, а не приложение с содержимым: только обложка, подпись и кнопки */
+.window[data-type="player"] {
+    width: 380px;
+    height: 200px;
 }
 
 .window.is-minimized {

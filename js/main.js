@@ -12,6 +12,7 @@ import { setupFileDrop } from "./drop.js";
 import {
   closeTopWindow,
   closeWindow,
+  fullscreenTopWindow,
   minimizeWindow,
   zoomWindow,
   onActiveWindowChange,
@@ -25,6 +26,9 @@ import { setupMenuBar, setActiveApp } from "./menu-bar.js";
 import { iconOrder, assignSlots } from "./desktop-sort.js";
 import { mountProjects } from "./apps/projects-data.js";
 import { setupRouter } from "./router.js";
+import { setupMusic } from "./music.js";
+import { subscribePlayer } from "./apps/player-bridge.js";
+import { isPlaying } from "./apps/player-state.js";
 
 document.addEventListener(
   "error",
@@ -49,7 +53,13 @@ function setupStartupOverlay() {
 }
 
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") closeTopWindow();
+  if (e.key === "F11") {
+    e.preventDefault();
+    fullscreenTopWindow();
+    return;
+  }
+  // В полный экран Esc уже вшит браузером: он гасит его, а окно должно остаться.
+  if (e.key === "Escape" && !document.fullscreenElement) closeTopWindow();
 });
 
 window.addEventListener("beforeunload", () => {
@@ -130,6 +140,20 @@ function menuCtx() {
 
 // --- Boot ---
 
+// Пульта нет в доке, поэтому открывает его система: сразу при загрузке стола и
+// заново, если его закрыли, а звук снова пошёл. Ловим именно начало
+// воспроизведения - иначе закрытое окно возвращалось бы на каждом опросе.
+function keepPlayerOnStage() {
+  openWindow("player");
+  let wasPlaying = false;
+  subscribePlayer((state) => {
+    const playing = isPlaying(state);
+    const started = playing && !wasPlaying;
+    wasPlaying = playing;
+    if (started && !openWindows.has("player")) openWindow("player");
+  });
+}
+
 function init() {
   setupStartupOverlay();
   // Проекты кладутся в C:\Users\antawkay\Documents\Projects до первого окна:
@@ -145,6 +169,10 @@ function init() {
   renderDesktopFiles();
   setupDockItems();
   setupFileDrop();
+
+  // Плейлист заряжается сразу, но молчит: звук без клика браузеры не пускают.
+  setupMusic();
+  keepPlayerOnStage();
 
   setupMenuBar({ getCtx: menuCtx });
   onActiveWindowChange(setActiveApp);

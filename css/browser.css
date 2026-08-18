@@ -10,6 +10,12 @@
     font-size: var(--text-14);
 }
 
+/* В полном экране страница занимает всё: адресная строка вернётся вместе с окном */
+.window:fullscreen .browser-toolbar,
+.window:fullscreen .browser-notice {
+    display: none;
+}
+
 .browser-toolbar {
     display: flex;
     gap: var(--space-2);
@@ -75,11 +81,10 @@
     border-color: var(--accent);
 }
 
-/* Сайт увёл фрейм на другой адрес, а прочитать его нельзя - чужой источник.
-   Гасим строку, чтобы она не выдавала устаревший адрес за действующий. */
-.browser-omnibox.is-stale {
+/* Мы внутри сайта, а путь чужой страницы прочитать нельзя. Гасим строку:
+   известен только сайт, и выдавать это за точный адрес нечестно. */
+.browser-omnibox.is-inside {
     color: var(--fg-subtle);
-    font-style: italic;
 }
 
 /* Колонка, чтобы фрейм добирал остаток высоты под полоской-предупреждением */
@@ -135,6 +140,7 @@
     padding: var(--space-3);
     cursor: pointer;
     color: var(--frost);
+    text-decoration: none;
 }
 
 .browser-fileitem:hover {
@@ -263,9 +269,19 @@
     inset: 0;
     display: grid;
     place-items: center;
+    place-content: center;
+    gap: var(--space-4);
     background: var(--surface);
     color: var(--fg-muted);
     font-size: var(--text-13);
+}
+
+/* Общее правило для картинок в окне ограничивает высоту долей от окна и
+   сплющило бы квадратный стикер, поэтому селектор перебивает его по весу. */
+.browser-view .browser-sticker {
+    width: 96px;
+    height: 96px;
+    max-height: none;
 }
 
 .browser-notice {
@@ -284,11 +300,16 @@
     color: var(--link-hover);
 }
 
+/* margin: auto в колонке-флексе ставит заглушку по центру окна, а не под шапку */
 .browser-blocked {
     max-width: 480px;
-    margin: 0 auto;
-    padding: var(--space-10) var(--space-6);
+    margin: auto;
+    padding: var(--space-6);
     text-align: center;
+}
+
+.browser-blocked .browser-sticker {
+    margin-bottom: var(--space-4);
 }
 
 .browser-blocked-title {
