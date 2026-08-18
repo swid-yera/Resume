@@ -1,10 +1,26 @@
 import { CONSTANTS } from "./constants.js";
-import { openWindow } from "./open-window.js";
+import { openWindow, openEntry } from "./open-window.js";
+import { getFs, DESKTOP } from "./fs.js";
+import { iconFor } from "./apps/explorer-model.js";
+import { escapeHtml } from "./utils.js";
+import { gridStep, freeSlots } from "./desktop-sort.js";
 
 // --- Desktop icons ---
 
+// Иконка ведёт либо в приложение (статическая разметка, её видит краулер),
+// либо в файл из ФС - такие появляются, когда файл бросают на стол.
+function activate(file) {
+  const path = file.dataset.path;
+  if (!path) return openWindow(file.dataset.type);
+  openEntry({ type: "file", name: file.querySelector("span").textContent, path });
+}
+
 export function setupFileDragging() {
   document.querySelectorAll(".file").forEach((file) => {
+    // Стол перерисовывается после каждого сброса, а слушатели вешаются один раз.
+    if (file.dataset.wired) return;
+    file.dataset.wired = "1";
+
     let isDragging = false;
     let hasMoved = false;
     let opening = false;
@@ -55,7 +71,7 @@ export function setupFileDragging() {
     const endInteraction = () => {
       if (!hasMoved && !opening) {
         opening = true;
-        openWindow(file.dataset.type);
+        activate(file);
         setTimeout(() => {
           opening = false;
         }, CONSTANTS.OPEN_DEBOUNCE_MS);
@@ -82,10 +98,81 @@ export function setupFileDragging() {
     file.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
         e.preventDefault();
-        openWindow(file.dataset.type);
+        activate(file);
       }
     });
   });
+}
+
+// Новые иконки координат не имеют и без этого легли бы стопкой в одну точку:
+// статическим места раздаёт CSS, а этим - свободные слоты той же сетки.
+function placeIcons(desktop, fresh) {
+  const box = desktop.getBoundingClientRect();
+  const rect = (el) => {
+    const r = el.getBoundingClientRect();
+    return { left: Math.round(r.left - box.left), top: Math.round(r.top - box.top) };
+  };
+
+  const placed = [...desktop.querySelectorAll(".file")]
+    .filter((el) => !fresh.includes(el))
+    .map(rect);
+  if (!placed.length) return;
+
+  const sample = fresh[0].getBoundingClientRect();
+  const grid = gridStep(placed, {
+    stepX: Math.round(sample.width) + CONSTANTS.PADDING,
+    stepY: Math.round(sample.height) + CONSTANTS.PADDING,
+  });
+  const rows = Math.max(1, Math.floor((box.height - grid.originY) / grid.stepY));
+
+  const slots = freeSlots(placed, grid, rows, fresh.length);
+  fresh.forEach((el, i) => {
+    if (!slots[i]) return;
+    el.style.left = `${slots[i].left}px`;
+    el.style.top = `${slots[i].top}px`;
+  });
+}
+
+// Ярлыки с рабочего стола ФС не рисуем: они дублируют статические иконки и док.
+// Поэтому пока на стол ничего не бросали, эта функция ничего не добавляет.
+export function renderDesktopFiles() {
+  const desktop = document.getElementById("desktop");
+  if (!desktop) return;
+
+  let entries = [];
+  try {
+    entries = getFs().list(DESKTOP).filter((e) => e.type === "file");
+  } catch {
+    entries = [];
+  }
+
+  const seen = new Set();
+  const fresh = [];
+  for (const entry of entries) {
+    seen.add(entry.path);
+    if (desktop.querySelector(`.file[data-path="${CSS.escape(entry.path)}"]`)) continue;
+
+    const el = document.createElement("div");
+    el.className = "file";
+    el.dataset.path = entry.path;
+    el.tabIndex = 0;
+    el.setAttribute("role", "button");
+    el.setAttribute("aria-label", `Open ${entry.name}`);
+    el.innerHTML = `
+            <div class="file-icon">${iconFor(entry)}</div>
+            <span>${escapeHtml(entry.name)}</span>`;
+    desktop.append(el);
+    fresh.push(el);
+  }
+
+  if (fresh.length) placeIcons(desktop, fresh);
+
+  // Файл, удалённый из ФС мимо стола, не должен остаться висеть иконкой.
+  for (const el of desktop.querySelectorAll(".file[data-path]")) {
+    if (!seen.has(el.dataset.path)) el.remove();
+  }
+
+  setupFileDragging();
 }
 
 // --- Dock ---

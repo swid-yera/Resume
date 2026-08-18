@@ -16,6 +16,7 @@ import { renderBrowser } from "./apps/browser.js";
 import { renderExplorer } from "./apps/explorer.js";
 import { renderMarkdown } from "./apps/markdown.js";
 import { renderSettings } from "./settings.js";
+import { extensionOf } from "./fs.js";
 
 // --- Projects ---
 
@@ -86,4 +87,16 @@ export function openWindow(type, arg) {
         '<div class="error-content"><p>Failed to open content.</p></div>';
     }
   }
+}
+
+const READABLE = new Set(["md", "markdown", "txt", "json", "ini", "css", "js", "html"]);
+
+// Чем открыть запись ФС. Один список на систему: по нему ходят и Проводник, и
+// иконки на рабочем столе. Незнакомое уходит в Браузер - он умеет и картинку,
+// и «предпросмотр недоступен».
+export function openEntry(entry) {
+  if (entry.type === "dir") return openWindow("explorer", entry.path);
+  if (entry.type === "app") return openWindow(entry.target);
+  if (READABLE.has(extensionOf(entry.name))) return openWindow("markdown", entry.path);
+  openWindow("browser", "file:///" + entry.path.replace(/\\/g, "/"));
 }

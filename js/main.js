@@ -7,7 +7,8 @@ import {
   setAppearance,
 } from "./settings.js";
 import { setupDateTime, teardownDateTime } from "./datetime.js";
-import { setupFileDragging, setupDockItems } from "./desktop.js";
+import { setupFileDragging, setupDockItems, renderDesktopFiles } from "./desktop.js";
+import { setupFileDrop } from "./drop.js";
 import {
   closeTopWindow,
   closeWindow,
@@ -139,7 +140,11 @@ function init() {
   applyTheme(currentSettings.theme);
   setupDateTime();
   setupFileDragging();
+  // Файлы, брошенные на стол в прошлый раз, лежат в localStorage и должны
+  // вернуться иконками до того, как пользователь что-то откроет.
+  renderDesktopFiles();
   setupDockItems();
+  setupFileDrop();
 
   setupMenuBar({ getCtx: menuCtx });
   onActiveWindowChange(setActiveApp);

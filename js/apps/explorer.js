@@ -1,8 +1,8 @@
 // Проводник: дерево слева, адресная строка крошками, таблица Details.
 // Вся логика без DOM - в explorer-model.js.
-import { getFs, THIS_PC, HOME, parentPath, baseName, extensionOf } from "../fs.js";
+import { getFs, THIS_PC, HOME, parentPath, baseName } from "../fs.js";
 import { escapeHtml } from "../utils.js";
-import { openWindow } from "../open-window.js";
+import { openEntry } from "../open-window.js";
 import { setWindowTitle } from "../window-manager.js";
 import {
   COLUMNS,
@@ -12,6 +12,7 @@ import {
   filterEntries,
   formatDate,
   formatSize,
+  icon,
   iconFor,
   nextSort,
   sortEntries,
@@ -28,7 +29,14 @@ const state = {
   expanded: new Set(["C:", "C:\\Users", "C:\\Users\\antawkay"]),
 };
 
-const READABLE = new Set(["md", "markdown", "txt", "json", "ini", "css", "js", "html"]);
+// Ссылка на draw открытого окна: сброшенный файл должен появиться в списке сам.
+let redraw = null;
+
+export const currentPath = () => state.history.current;
+
+export function refreshExplorer() {
+  redraw?.();
+}
 
 export function renderExplorer(windowContent, path) {
   if (path) state.history.push(path);
@@ -90,12 +98,10 @@ export function renderExplorer(windowContent, path) {
     draw();
   };
 
+  // Папка открывается в этом же окне, остальное - как везде в системе.
   const open = (entry) => {
     if (entry.type === "dir") return go(entry.path);
-    if (entry.type === "app") return openWindow(entry.target);
-    if (READABLE.has(extensionOf(entry.name))) return openWindow("markdown", entry.path);
-    // Картинку и всё незнакомое отдаём браузеру - он умеет показывать файлы.
-    openWindow("browser", "file:///" + entry.path.replace(/\\/g, "/"));
+    openEntry(entry);
   };
 
   // --- Отрисовка ---
@@ -131,7 +137,7 @@ export function renderExplorer(windowContent, path) {
       (item) => `
         <button type="button" class="ex-nav-item${item.path === path ? " is-current" : ""}"
                 data-go="${escapeHtml(item.path)}">
-          <span class="ex-nav-icon">📁</span>${escapeHtml(item.label)}
+          <span class="ex-nav-icon">${icon("i-folder")}</span>${escapeHtml(item.label)}
         </button>`,
     ).join("");
 
@@ -143,7 +149,7 @@ export function renderExplorer(windowContent, path) {
       <div class="ex-nav-group">
         <div class="ex-nav-label">This PC</div>
         <button type="button" class="ex-nav-item${path === THIS_PC ? " is-current" : ""}"
-                data-go="${THIS_PC}"><span class="ex-nav-icon">🖥️</span>This PC</button>
+                data-go="${THIS_PC}"><span class="ex-nav-icon">${icon("i-pc")}</span>This PC</button>
         ${fs.drives().map((d) => treeHtml(d, 1)).join("")}
       </div>`;
   }
@@ -359,6 +365,11 @@ export function renderExplorer(windowContent, path) {
       draw();
     }
   });
+
+  redraw = () => {
+    if (root.isConnected) draw();
+    else redraw = null;
+  };
 
   draw();
 }

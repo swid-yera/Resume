@@ -15,6 +15,7 @@ export const STORAGE_KEY = "pc-fs-v2";
 // Корень над дисками. Единственное место, где перечисляются сами диски.
 export const THIS_PC = "This PC";
 export const HOME = "C:\\Users\\antawkay";
+export const DESKTOP = HOME + "\\Desktop";
 export const PROJECTS_DIR = "C:\\Users\\antawkay\\Documents\\Projects";
 
 const DEFAULT_CWD = HOME;
@@ -147,7 +148,8 @@ export class VFS {
   }
 
   #persist() {
-    if (this.storage) this.storage.write(JSON.stringify(this.root));
+    if (!this.storage) return true;
+    return this.storage.write(JSON.stringify(this.root)) !== false;
   }
 
   // Обход с приведением регистра: в Windows `cd documents` открывает Documents,
@@ -191,8 +193,10 @@ export class VFS {
       type: node.type,
       kind: kindOf(name, node),
       modified: node.modified ?? null,
-      size: node.type === "file" ? fileSize(node.content) : null,
+      // У картинки содержимого нет, вес задан в сиде.
+      size: node.type === "file" ? (node.size ?? fileSize(node.content)) : null,
     };
+    if (node.src) entry.src = node.src;
     if (node.type === "app") entry.target = node.target;
     if (node.label) entry.label = node.label;
     return entry;
@@ -242,6 +246,16 @@ export class VFS {
     if (!node) throw new Error("The system cannot find the file specified: " + path);
     if (node.type !== "file") throw new Error("Not a file: " + path);
     return node.content;
+  }
+
+  // Готовый узел целиком: перетащенный файл уже разобран в drop-model.
+  // Возвращает false, если сохранить не удалось - у localStorage кончилась квота.
+  put(path, node) {
+    const [parent, name] = this.#parentOf(path);
+    const existing = parent.children[name];
+    if (existing && existing.type !== "file") throw new Error("Not a file: " + path);
+    parent.children[name] = { ...node, type: "file" };
+    return this.#persist();
   }
 
   write(path, content, mime) {
@@ -354,6 +368,17 @@ const app = (target, modified = "2026-04-02T09:14:00Z") => ({
   modified: T(modified),
 });
 
+// Картинка лежит в бандле, в ФС от неё только ссылка и вес: читать в текст
+// нечего. new URL, а не import: fs.js гоняется в node --test, где webp не
+// разобрать, а Vite этот вид ссылки всё равно подменяет на путь к ассету.
+const image = (src, size, modified = "2026-06-09T14:22:00Z") => ({
+  type: "file",
+  src,
+  mime: "image/webp",
+  size,
+  modified: T(modified),
+});
+
 const ABOUT_MD = `# About this machine
 
 **antawkay OS** — портфолио, которое притворяется настольной системой.
@@ -414,7 +439,18 @@ export function defaultTree() {
               }),
               Downloads: dir({}),
               Music: dir({}),
-              Pictures: dir({ "Photos.lnk": app("photos") }),
+              Pictures: dir({
+                "Photos.lnk": app("photos"),
+                "photo1.webp": image(
+                  new URL("../photos/photo1.webp", import.meta.url).href,
+                  54338,
+                ),
+                "photo3.webp": image(
+                  new URL("../photos/photo3.webp", import.meta.url).href,
+                  37270,
+                  "2026-06-09T14:25:00Z",
+                ),
+              }),
               Videos: dir({}),
             }),
           }),
@@ -462,8 +498,11 @@ const localStorageAdapter = {
   write(s) {
     try {
       localStorage.setItem(STORAGE_KEY, s);
+      return true;
     } catch {
-      /* хранилище недоступно - остаёмся в памяти */
+      // Хранилище недоступно или переполнено: остаёмся в памяти, но вызвавший
+      // должен об этом узнать, иначе файл молча исчезнет после перезагрузки.
+      return false;
     }
   },
 };
