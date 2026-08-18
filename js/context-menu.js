@@ -13,7 +13,7 @@ const SEP = { separator: true };
 function themeSubmenu(ctx) {
   return THEME_PRESETS.map((preset) => ({
     label: preset.label,
-    swatch: preset.swatch,
+    swatch: preset.id,
     checked: preset.id === ctx.activeTheme,
     onSelect: () => ctx.actions?.setTheme?.(preset.id),
   }));

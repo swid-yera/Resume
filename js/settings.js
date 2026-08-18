@@ -35,17 +35,13 @@ export function applyBrightness(value) {
   overlay.style.opacity = value / 100;
 }
 
+// Тема и оформление живут в атрибутах на <html>: токены переопределяются
+// целиком в colors_and_type.css, а JS не знает ни одного цвета.
 export function applyTheme(themeId) {
-  const theme = THEME_PRESETS.find((t) => t.id === themeId);
-  if (!theme) return;
-  const root = document.documentElement;
-  root.style.setProperty("--electric-blue", theme.accent);
-  root.style.setProperty("--neon-purple", theme.purple);
-  root.style.setProperty("--neon-green", theme.green);
+  if (!THEME_PRESETS.some((t) => t.id === themeId)) return;
+  document.documentElement.dataset.theme = themeId;
 }
 
-// Светлое оформление живёт в атрибуте на <html>: токены переопределяются
-// целиком в colors_and_type.css, а JS не знает ни одного цвета.
 export function applyAppearance(id) {
   if (!APPEARANCES.some((a) => a.id === id)) return;
   document.documentElement.dataset.appearance = id;
@@ -111,7 +107,7 @@ export function renderSettings(windowContent) {
                         ${THEME_PRESETS.map(
                           (t) => `
                             <button class="settings-swatch${t.id === currentSettings.theme ? " is-active" : ""}"
-                                    data-id="${t.id}" style="background:${t.swatch}"
+                                    data-id="${t.id}" data-theme-swatch="${t.id}"
                                     aria-label="${escapeHtml(t.label)}"></button>
                         `,
                         ).join("")}

@@ -12,47 +12,14 @@ export const CONSTANTS = {
   WINDOW_MIN_HEIGHT: 220,
 };
 
+// Палитры тем живут в colors_and_type.css под :root[data-theme]. Здесь только
+// список и подписи: JS переключает атрибут и ни одного цвета не знает.
 export const THEME_PRESETS = [
-  {
-    id: "neon",
-    label: "Frost",
-    accent: "#e4f0f6",
-    purple: "#ffffff",
-    green: "#03DAC6",
-    swatch: "#e4f0f6",
-  },
-  {
-    id: "rose",
-    label: "Rosé",
-    accent: "#F4A0B5",
-    purple: "#D4A0E0",
-    green: "#F0C0A0",
-    swatch: "#F4A0B5",
-  },
-  {
-    id: "forest",
-    label: "Forest",
-    accent: "#4CAF50",
-    purple: "#81C784",
-    green: "#A5D6A7",
-    swatch: "#4CAF50",
-  },
-  {
-    id: "amber",
-    label: "Amber",
-    accent: "#FFB300",
-    purple: "#FFD54F",
-    green: "#FFCA28",
-    swatch: "#FFB300",
-  },
-  {
-    id: "mono",
-    label: "Mono",
-    accent: "#AAAAAA",
-    purple: "#888888",
-    green: "#CCCCCC",
-    swatch: "#AAAAAA",
-  },
+  { id: "neon", label: "Frost" },
+  { id: "rose", label: "Rosé" },
+  { id: "forest", label: "Forest" },
+  { id: "amber", label: "Amber" },
+  { id: "mono", label: "Mono" },
 ];
 
 // Оформление и акцентная тема независимы: любой акцент работает и в тёмном,

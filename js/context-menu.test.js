@@ -34,7 +34,7 @@ test("the theme submenu lists every preset and ticks the active one", () => {
   const frost = theme.submenu.find((i) => i.label === "Frost");
   assert.equal(forest.checked, true);
   assert.equal(frost.checked, false);
-  assert.ok(forest.swatch, "у пункта темы должен быть свотч");
+  assert.equal(forest.swatch, "forest", "свотч несёт id темы, цвет подставит css");
 });
 
 // --- File icon ---

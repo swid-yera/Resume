@@ -71,40 +71,61 @@
     /* ============== ЦВЕТА ============== */
 
     /* Базовая палитра */
-    --abyss: #03040a;          /* Самый тёмный — фон окон */
     --bg-body: #0f0f12;        /* Фон body / десктопа */
-    --frost: #e4f0f6;          /* «Белый» системы — никогда не чистый #fff */
-    --electric-blue: #e4f0f6;  /* Основной акцент (frost) — ссылки, фокус, скролл */
-    --neon-purple: #ffffff;    /* Вторичный — ховер/нажатие акцента (ярче frost) */
-    --neon-green: #03dac6;     /* Утилитарный — успех / онлайн-точка */
-    --traffic-red: #ff5555;    /* Кнопка закрытия окна */
+    --frost: var(--theme-frost); /* «Белый» системы — никогда не чистый #fff */
+    --blackout: #000000;       /* Гашение экрана: заставка и яркость */
 
-    /* Шкала Frost — «белый» системы. Вместо #fff. */
+    /* Акцентные темы: сам набор. Значения нужны и корню (текущая тема),
+       и свотчам выбора темы, поэтому каждый цвет лежит отдельным токеном. */
+    --theme-frost:  #e4f0f6;
+    --theme-rose:   #f4a0b5;
+    --theme-forest: #4caf50;
+    --theme-amber:  #ffb300;
+    --theme-mono:   #aaaaaa;
+
+    /* Текущий акцент. Тема Frost — база, остальные переопределяют ниже. */
+    --electric-blue: var(--theme-frost); /* Основной — ссылки, фокус, скролл */
+    --neon-purple: var(--frost-100);     /* Ховер/нажатие акцента (ярче базы) */
+    --neon-green: #03dac6;               /* Утилитарный — успех / онлайн-точка */
+
+    /* Огоньки в шапке окна — единственное место, где цвет несёт смысл сам
+       по себе, поэтому он не выводится из акцента и не меняется темой. */
+    --traffic-red:   #ff5555;
+    --traffic-amber: #febc2e;
+    --traffic-green: #28c840;
+
+    /* Шкала Frost — «белый» системы. Вместо #fff.
+       Ступени soft/mute — текст, поэтому альфа выбрана по контрасту на --abyss:
+       0.72 даёт 9.1:1, 0.52 даёт 5.0:1. Ниже 0.5 подпись уходит под 4.5:1. */
     --frost-100: #ffffff;
-    --frost-200: #f4f8fb;
-    --frost-300: #e4f0f6;
     --frost-soft: rgba(228, 240, 246, 0.72); /* Вторичный текст */
-    --frost-mute: rgba(228, 240, 246, 0.44); /* Третичный текст */
+    --frost-mute: rgba(228, 240, 246, 0.52); /* Третичный текст */
     --frost-line: rgba(228, 240, 246, 0.10); /* Тонкая граница */
     --frost-fill: rgba(228, 240, 246, 0.06); /* Лёгкая заливка */
 
     /* Шкала Abyss — «чёрный» системы. */
-    --abyss-900: #03040a;
+    --abyss-900: #03040a; /* Самый тёмный — фон окон */
     --abyss-800: #0a0b12;
     --abyss-700: #14151c;
-    --abyss-600: #1e1f28;
 
-    /* Glass — для блюр-поверхностей (меню-бар / док) */
-    --glass-strong: rgba(0, 0, 0, 0.55);
+    /* Glass — для блюр-поверхностей (меню-бар, док, плашки поверх обоев).
+       В светлом оформлении переворачивается в белый, поэтому всё, что лежит
+       на обоях, красится отсюда, а не чёрным напрямую.
+       0.6 — минимум, при котором frost держит 4.5:1 даже на светлом участке
+       фотографии: ниже подпись под иконкой читается только за счёт тени. */
+    --glass-strong: rgba(0, 0, 0, 0.60);
     --glass-soft:   rgba(0, 0, 0, 0.32);
-    --glass-frost:  rgba(228, 240, 246, 0.08);
+
+    /* Сетка поверх обоев: рисуется по фотографии в режиме screen, поэтому
+       ступени свои, а не из шкалы Frost. */
+    --grid-major: rgba(255, 255, 255, 0.22);
+    --grid-minor: rgba(255, 255, 255, 0.10);
 
     /* Семантические алиасы */
     --fg:           var(--frost);
     --fg-muted:     var(--frost-soft);
     --fg-subtle:    var(--frost-mute);
-    --bg:           var(--bg-body);
-    --surface:      var(--abyss);
+    --surface:      var(--abyss-900);
     --surface-2:    var(--abyss-700);
     --border:       var(--frost-line);
     --accent:       var(--electric-blue);
@@ -114,13 +135,34 @@
     --success:      var(--neon-green);
     --danger:       var(--traffic-red);
 
+    /* ============== ТЕРМИНАЛ ==============
+       Палитра консоли: тёмная база со светлым текстом, синий/оранжевый/красный
+       акценты. Зелёный и синий для листинга Get-ChildItem — как в PowerShell.
+       Терминал остаётся тёмным в любом оформлении, поэтому эти цвета намеренно
+       стоят вне шкал Frost/Abyss и не переопределяются в светлом блоке. */
+    --term-bg:        #0c0e17; /* фон терминала */
+    --term-chrome:    #1d1f29; /* фон шапки окна */
+    --term-edge:      #424754; /* кромка окна */
+    --term-chrome-line: rgba(255, 255, 255, 0.08); /* волосяная линия под шапкой */
+    --term-status-line: rgba(0, 0, 0, 0.20);       /* она же на светлой плашке */
+    --term-fg:        #e1e1f0; /* основной текст */
+    --term-muted-fg:  #c2c6d6; /* приглушённый текст - приглашение, операторы */
+    --term-primary:   #adc6ff; /* синий акцент - строки, заголовок окна */
+    --term-tertiary:  #ffb786; /* оранжевый - известная команда */
+    --term-error:     #ffb4ab; /* красный - ошибка / неизвестная команда */
+    --term-status-bg: #4d8eff; /* фон строки состояния */
+    --term-status-fg: #00285d; /* текст строки состояния */
+    --term-green:     #13a10e; /* шапка листинга ls и ярлыки */
+    --term-blue:      #0037da; /* плашка папки */
+
     /* ============== ТИПОГРАФИКА ============== */
     --font-sans:    'Inter', system-ui, -apple-system, 'Segoe UI', sans-serif;
     --font-display: 'Alumni Sans', 'Inter', sans-serif;
     --font-mono:    ui-monospace, 'SF Mono', Menlo, Consolas, monospace;
     --font-terminal: 'Cascadia Mono', var(--font-mono); /* шрифт консоли */
 
-    /* Шкала размеров */
+    /* Шкала размеров. Нижняя ступень 11px — надписи капителью и мета-строки. */
+    --text-11: 11px;
     --text-12: 12px;
     --text-13: 13px;
     --text-14: 14px;
@@ -129,19 +171,14 @@
     --text-20: 20px;
     --text-24: 24px;
     --text-32: 32px;
-    --text-48: 48px;
-    --text-72: 72px;
 
     /* Насыщенность */
-    --w-light:    300;
     --w-regular:  400;
     --w-medium:   500;
     --w-semibold: 600;
     --w-bold:     700;
-    --w-black:    900;
 
     /* Высота строки */
-    --lh-tight: 1.1;
     --lh-snug:  1.3;
     --lh-base:  1.6;
 
@@ -161,7 +198,6 @@
     --space-8:  32px;
     --space-10: 40px;
     --space-12: 48px;
-    --space-16: 64px;
 
     /* ============== РАДИУСЫ ============== */
     --radius-xs: 4px;
@@ -184,9 +220,10 @@
     --ease-spring:   cubic-bezier(0.25, 0.46, 0.45, 0.94);
     --ease-snap:     cubic-bezier(0.23, 1, 0.32, 1);
 
-    --dur-fast: 150ms;
-    --dur-base: 300ms;
-    --dur-slow: 400ms;
+    --dur-fast: 150ms; /* весь отклик на наведение и фокус */
+    --dur-base: 300ms; /* открытие и закрытие поверхностей */
+    --dur-slow: 400ms; /* осознанно медленное: карусель, окно, заставка */
+    --dur-loop: 1s;    /* период зацикленных: мигание каретки, пульс точки */
 
     /* ============== РАСКЛАДКА ============== */
     --menu-height: 42px;
@@ -208,22 +245,8 @@
     --z-dock: 100;
     --z-window: 1000;
     --z-arrow: 1001;
+    --z-drop: 9000;
     --z-startup: 9999;
-
-    /* ============================================================
-       Легаси-алиасы — старые имена из styles.css поверх токенов.
-       Значения 1:1 с прежними, поэтому вид не меняется.
-       ============================================================ */
-    --code-bg: var(--abyss);
-    --text-light: var(--frost);
-    --font: var(--font-sans);
-    --clock-font: var(--font-display);
-    --shadow: var(--shadow-window);
-    --border-radius: var(--radius-lg);
-    --transition: all var(--dur-base) var(--ease-standard);
-    --spacing: var(--space-5);
-    --window-control-color: var(--traffic-red);
-    --window-resize-corner: var(--space-4);
 
     /* Раскладка, специфичная для этого сайта (нет в шкалах) */
     --desktop-padding-top: 50px;
@@ -252,41 +275,37 @@
     --surface-low:     #f4f2ff;   /* боковая панель, тулбар, статус-бар */
     --surface-mid:     #edecfb;   /* шапка таблицы, блок кода */
     --surface-high:    #e8e7f6;   /* сегментные контролы, чипы */
-    --surface-highest: #e2e1f0;   /* нажатое состояние */
-    --surface-dim:     #d9d9e7;   /* самый плотный слой */
 
-    /* Текст: три ступени контраста, все читаются на 12-13px */
+    /* Текст: три ступени контраста. Самая слабая рассчитана на --surface-mid,
+       где фон плотнее всего: #656778 даёт там 4.8:1, на белом 5.6:1. */
     --ink:      #1a1b25;
     --ink-soft: #444657;
-    --ink-mute: #747689;
-    --line:     #c4c5da;
+    --ink-mute: #656778;
 
     /* Замена тёмной шкалы Frost/Abyss теми же именами:
        всё, что уже написано на токенах, переворачивается само. */
     --frost:      var(--ink);
     --frost-100:  var(--surface-lowest);
-    --frost-200:  var(--surface-low);
-    --frost-300:  var(--surface-mid);
     --frost-soft: var(--ink-soft);
     --frost-mute: var(--ink-mute);
     --frost-line: rgba(196, 197, 218, 0.7);
     --frost-fill: rgba(68, 70, 87, 0.05);
 
-    --abyss:     var(--surface-lowest);
     --abyss-900: var(--surface-lowest);
     --abyss-800: var(--surface-low);
     --abyss-700: var(--surface-mid);
-    --abyss-600: var(--surface-high);
 
     /* Стекло на светлом — белое, а не чёрное */
     --glass-strong: rgba(255, 255, 255, 0.78);
     --glass-soft:   rgba(255, 255, 255, 0.55);
-    --glass-frost:  rgba(26, 27, 37, 0.06);
+
+    /* Сетка на светлом рисуется в multiply, поэтому линии тёмные */
+    --grid-major: rgba(26, 27, 37, 0.16);
+    --grid-minor: rgba(26, 27, 37, 0.08);
 
     --fg:        var(--ink);
     --fg-muted:  var(--ink-soft);
     --fg-subtle: var(--ink-mute);
-    --bg:        var(--surface-low);
     --bg-body:   var(--surface-low);
     --surface:   var(--surface-lowest);
     --surface-2: var(--surface-low);
@@ -303,10 +322,6 @@
     --shadow-icon:   drop-shadow(0 2px 4px rgba(26, 27, 37, 0.16));
     --shadow-text:   none;
     --shadow-text-hi: none;
-
-    --code-bg:    var(--surface-lowest);
-    --text-light: var(--ink);
-    --shadow:     var(--shadow-window);
 }
 
 /* Заливка выделения и наведения строится от текущего акцента, а не от
@@ -314,15 +329,14 @@
 :root {
     --accent-fill:       color-mix(in srgb, var(--accent) 22%, transparent);
     --accent-fill-soft:  color-mix(in srgb, var(--accent) 12%, transparent);
-    --accent-on-fill:    var(--fg);
-    --accent-contrast:   var(--abyss);
+    --accent-contrast:   var(--abyss-900);
 
     /* Акцент как цвет текста. Насыщенный синий на тёмном фоне не читается,
        поэтому на тёмном он разбавлен «белым» системы, а на светлом берётся
        как есть. Так Stitch и красил подписи секций в обеих дизайн-системах. */
     --accent-text:       color-mix(in srgb, var(--accent) 30%, var(--fg));
     /* Текст на сплошной акцентной заливке: монограмма, первичная кнопка. */
-    --accent-ink:        var(--abyss);
+    --accent-ink:        var(--abyss-900);
 }
 
 :root[data-appearance="light"] {
@@ -335,5 +349,44 @@
     --accent-fill:      color-mix(in srgb, var(--accent) 12%, transparent);
     --accent-fill-soft: color-mix(in srgb, var(--accent) 6%, transparent);
     --accent-text:      var(--accent);
-    --accent-ink:       #ffffff;
+    --accent-ink:       var(--frost-100);
 }
+
+/* ============================================================
+   Акцентные темы
+
+   Тема — атрибут на <html>, как и оформление: JS ставит data-theme и не знает
+   ни одного цвета. Тема Frost — база в :root, отдельного блока ей не нужно.
+   ============================================================ */
+
+:root[data-theme="rose"] {
+    --electric-blue: var(--theme-rose);
+    --neon-purple:   #d4a0e0;
+    --neon-green:    #f0c0a0;
+}
+
+:root[data-theme="forest"] {
+    --electric-blue: var(--theme-forest);
+    --neon-purple:   #81c784;
+    --neon-green:    #a5d6a7;
+}
+
+:root[data-theme="amber"] {
+    --electric-blue: var(--theme-amber);
+    --neon-purple:   #ffd54f;
+    --neon-green:    #ffca28;
+}
+
+:root[data-theme="mono"] {
+    --electric-blue: var(--theme-mono);
+    --neon-purple:   #888888;
+    --neon-green:    #cccccc;
+}
+
+/* Свотч показывает чужую тему, а не текущую, поэтому берёт цвет из набора,
+   а не из --accent. Правило общее для пункта меню и кнопки в настройках. */
+[data-theme-swatch="neon"]   { background: var(--theme-frost); }
+[data-theme-swatch="rose"]   { background: var(--theme-rose); }
+[data-theme-swatch="forest"] { background: var(--theme-forest); }
+[data-theme-swatch="amber"]  { background: var(--theme-amber); }
+[data-theme-swatch="mono"]   { background: var(--theme-mono); }

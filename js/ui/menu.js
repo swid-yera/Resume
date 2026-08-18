@@ -55,7 +55,7 @@ export function menuItemHtml(item, index) {
 
   const check = `<span class="menu__check" aria-hidden="true">${item.checked ? "✓" : ""}</span>`;
   const swatch = item.swatch
-    ? `<span class="menu__swatch" style="background:${escapeHtml(item.swatch)}" aria-hidden="true"></span>`
+    ? `<span class="menu__swatch" data-theme-swatch="${escapeHtml(item.swatch)}" aria-hidden="true"></span>`
     : "";
   const label = `<span class="menu__label">${escapeHtml(item.label ?? "")}</span>`;
   const trailing = item.submenu
