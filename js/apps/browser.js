@@ -306,6 +306,7 @@ function renderBlocked(view, url, external) {
 // Полоска нужна только на обычных сайтах: встроенный плеер грузится всегда, и
 // предупреждать там не о чем. onNavigate зовётся на каждую загрузку фрейма:
 // первая - это сама страница, последующие означают, что сайт увёл себя сам.
+// Реферер фрейму обязателен: без него плеер ютуба отдаёт Error 153 вместо ролика.
 function renderFrame(view, url, external, warn = false, onNavigate = () => {}) {
   view.innerHTML = `
             ${
@@ -321,7 +322,7 @@ function renderFrame(view, url, external, warn = false, onNavigate = () => {}) {
                 <iframe class="browser-frame" src="${escapeHtml(url)}"
                         sandbox="allow-scripts allow-same-origin allow-popups allow-presentation"
                         allow="accelerometer; autoplay; encrypted-media; gyroscope; picture-in-picture; fullscreen"
-                        referrerpolicy="no-referrer" allowfullscreen></iframe>
+                        referrerpolicy="strict-origin-when-cross-origin" allowfullscreen></iframe>
             </div>`;
 
   const frame = view.querySelector(".browser-frame");
