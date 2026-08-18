@@ -19,25 +19,30 @@ export const QUICK_ACCESS = [
 ];
 
 const ICONS = {
-  dir: "📁",
-  drive: "💽",
-  app: "🔗",
-  md: "📝",
-  txt: "📄",
-  img: "🖼️",
-  file: "📄",
+  dir: "i-folder",
+  drive: "i-drive",
+  app: "i-shortcut",
+  md: "i-file-text",
+  txt: "i-file-blank",
+  img: "i-image",
+  file: "i-file",
 };
 
 const IMAGE_EXT = new Set(["webp", "png", "jpg", "jpeg", "gif", "svg"]);
 
+export const isImage = (name) => IMAGE_EXT.has(extensionOf(name));
+
+// Символы лежат в спрайте в index.html; размер задаёт font-size обёртки.
+export const icon = (id) => `<svg class="fileicon" aria-hidden="true"><use href="#${id}"/></svg>`;
+
 export function iconFor(entry) {
-  if (entry.type === "dir") return entry.label ? ICONS.drive : ICONS.dir;
-  if (entry.type === "app") return ICONS.app;
+  if (entry.type === "dir") return icon(entry.label ? ICONS.drive : ICONS.dir);
+  if (entry.type === "app") return icon(ICONS.app);
   const ext = extensionOf(entry.name);
-  if (ext === "md" || ext === "markdown") return ICONS.md;
-  if (IMAGE_EXT.has(ext)) return ICONS.img;
-  if (ext === "txt") return ICONS.txt;
-  return ICONS.file;
+  if (ext === "md" || ext === "markdown") return icon(ICONS.md);
+  if (IMAGE_EXT.has(ext)) return icon(ICONS.img);
+  if (ext === "txt") return icon(ICONS.txt);
+  return icon(ICONS.file);
 }
 
 // --- Форматирование ---
