@@ -18,9 +18,12 @@ marked.setOptions({ gfm: true, breaks: false });
 
 const SITE = "https://antawkay.com";
 
+// Дата берётся только из фронтматтера: подстановка «сегодня» сделала бы sitemap
+// разным при каждой сборке и врала бы краулеру про изменения.
 function isoDate(value) {
-  const d = value ? new Date(value) : new Date();
-  return (Number.isNaN(d.valueOf()) ? new Date() : d).toISOString().slice(0, 10);
+  if (!value) return null;
+  const d = new Date(value);
+  return Number.isNaN(d.valueOf()) ? null : d.toISOString().slice(0, 10);
 }
 
 export async function readProjects(contentDir) {
@@ -39,8 +42,13 @@ export async function readProjects(contentDir) {
     }),
   );
 
-  // Свежие проекты сверху - тот же порядок, что и в папке Projects.
-  return projects.sort((a, b) => b.lastmod.localeCompare(a.lastmod));
+  // Свежие проекты сверху - тот же порядок, что и в папке Projects. Без даты
+  // сортировать нечем, поэтому такие уходят в конец по алфавиту.
+  return projects.sort((a, b) => {
+    if (a.lastmod && b.lastmod) return b.lastmod.localeCompare(a.lastmod);
+    if (a.lastmod !== b.lastmod) return a.lastmod ? -1 : 1;
+    return a.slug.localeCompare(b.slug);
+  });
 }
 
 async function writePage(outDir, relPath, html) {
@@ -69,7 +77,7 @@ export async function buildSeoPages({ root, outDir, site = SITE }) {
   await writePage(outDir, "projects", projectsIndexHtml(projects, site));
   await writePage(outDir, "about", aboutPageHtml(about, site));
 
-  const newest = projects[0]?.lastmod ?? isoDate();
+  const newest = projects.find((p) => p.lastmod)?.lastmod;
   await writeFile(
     path.join(outDir, "sitemap.xml"),
     sitemapXml([

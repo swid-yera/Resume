@@ -20,6 +20,14 @@ export function projectSlug(file) {
   return slugify(name);
 }
 
+// Ссылки приходят из фронтматтера, то есть из обычного текстового файла. В
+// разметку пускаем только схемы, которые нельзя превратить в исполняемый код;
+// всё остальное считаем отсутствующей ссылкой.
+export function safeUrl(value) {
+  const url = String(value ?? "").trim();
+  return /^(https?:\/\/|mailto:|\/|#)/i.test(url) ? url : "";
+}
+
 // Markdown пишется для рабочего стола, где картинки лежат рядом: `projects/x.webp`.
 // На странице /projects/<slug>/ тот же путь ушёл бы на уровень глубже, поэтому
 // относительные ссылки поднимаются к корню сайта.
@@ -100,7 +108,16 @@ text-decoration:none;color:inherit;background:var(--fill)}
 color:var(--frost-mute);font-size:.875rem}
 `.trim();
 
+// Внутри <script> браузер ищет строку "</script>" до всякого разбора JSON, так
+// что описание из фронтматтера иначе закрыло бы блок и открыло свой.
+function jsonLdBlock(jsonLd) {
+  return JSON.stringify(jsonLd, null, 4).replace(/</g, "\\u003c");
+}
+
 function head({ lang, title, description, canonical, image, jsonLd }) {
+  const url = escapeHtml(canonical);
+  const preview = escapeHtml(image);
+
   return `<!DOCTYPE html>
 <html lang="${lang}">
 
@@ -109,26 +126,26 @@ function head({ lang, title, description, canonical, image, jsonLd }) {
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <title>${escapeHtml(title)}</title>
     <meta name="description" content="${escapeHtml(description)}">
-    <link rel="canonical" href="${canonical}">
+    <link rel="canonical" href="${url}">
     <meta name="theme-color" content="#0038ff">
 
     <meta property="og:type" content="website">
     <meta property="og:site_name" content="${SITE_NAME}">
-    <meta property="og:url" content="${canonical}">
+    <meta property="og:url" content="${url}">
     <meta property="og:title" content="${escapeHtml(title)}">
     <meta property="og:description" content="${escapeHtml(description)}">
-    <meta property="og:image" content="${image}">
+    <meta property="og:image" content="${preview}">
     <meta name="twitter:card" content="summary_large_image">
     <meta name="twitter:title" content="${escapeHtml(title)}">
     <meta name="twitter:description" content="${escapeHtml(description)}">
-    <meta name="twitter:image" content="${image}">
+    <meta name="twitter:image" content="${preview}">
 
     <link rel="icon" type="image/x-icon" href="/favicon/favicon.ico">
     <link rel="icon" type="image/png" sizes="32x32" href="/favicon/favicon-32x32.png">
     <link rel="apple-touch-icon" sizes="180x180" href="/favicon/apple-touch-icon.png">
     <style>${PAGE_CSS}</style>
     <script type="application/ld+json">
-${JSON.stringify(jsonLd, null, 4)}
+${jsonLdBlock(jsonLd)}
     </script>
 </head>`;
 }
@@ -155,6 +172,8 @@ export function projectPageHtml({ slug, data, bodyHtml }, site) {
     ? `${site}/projects/${data.image}`
     : `${site}/og-image.png`;
   const stack = Array.isArray(data.stack) ? data.stack : [];
+  const live = safeUrl(data.url);
+  const repo = safeUrl(data.repo);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -165,8 +184,8 @@ export function projectPageHtml({ slug, data, bodyHtml }, site) {
         name,
         description,
         url: canonical,
-        ...(data.url ? { sameAs: [data.url] } : {}),
-        ...(data.repo ? { codeRepository: data.repo } : {}),
+        ...(live ? { sameAs: [live] } : {}),
+        ...(repo ? { codeRepository: repo } : {}),
         ...(stack.length ? { programmingLanguage: stack } : {}),
         ...(data.date ? { dateCreated: data.date } : {}),
         ...(data.image ? { image } : {}),
@@ -193,12 +212,10 @@ export function projectPageHtml({ slug, data, bodyHtml }, site) {
     .join("");
 
   const actions = [
-    data.url
-      ? `<a class="primary" href="${escapeHtml(data.url)}" rel="noopener">Открыть сайт</a>`
+    live
+      ? `<a class="primary" href="${escapeHtml(live)}" rel="noopener">Открыть сайт</a>`
       : "",
-    data.repo
-      ? `<a href="${escapeHtml(data.repo)}" rel="noopener">Исходники</a>`
-      : "",
+    repo ? `<a href="${escapeHtml(repo)}" rel="noopener">Исходники</a>` : "",
   ]
     .filter(Boolean)
     .join("");
@@ -315,6 +332,7 @@ export function aboutPageHtml({ data, bodyHtml }, site) {
   const description = data.description || `${SITE_NAME}: обо мне и о стеке.`;
   const groups = skillGroups(data);
   const note = skillNote(data);
+  const github = safeUrl(data.github);
 
   const jsonLd = {
     "@context": "https://schema.org",
@@ -384,8 +402,8 @@ ${rootRelative(bodyHtml)}
             }</h2>${skills}
         </section>
         <div class="actions">${
-          data.github
-            ? `<a class="primary" href="${escapeHtml(data.github)}" rel="noopener">GitHub</a>`
+          github
+            ? `<a class="primary" href="${escapeHtml(github)}" rel="noopener">GitHub</a>`
             : ""
         }</div>
         <footer class="foot">

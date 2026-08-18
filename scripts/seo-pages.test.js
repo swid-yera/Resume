@@ -130,6 +130,47 @@ test("quotes in a description cannot break out of the meta tag", () => {
   assert.doesNotMatch(html, /content="a "quoted"/);
 });
 
+test("a closing script tag in the frontmatter cannot break out of the json-ld block", () => {
+  const html = projectPageHtml(
+    {
+      ...anitop,
+      data: { ...anitop.data, description: "</script><script>alert(1)</script>" },
+    },
+    SITE,
+  );
+  const blocks = html.match(/<script[^>]*>/g);
+  assert.deepEqual(blocks, ['<script type="application/ld+json">']);
+});
+
+test("a quote in the image path cannot break out of the meta tag", () => {
+  const html = projectPageHtml(
+    { ...anitop, data: { ...anitop.data, image: 'a.webp" onload="alert(1)' } },
+    SITE,
+  );
+  assert.doesNotMatch(html, /onload="alert\(1\)"/);
+});
+
+test("a link with an executable scheme is dropped, not rendered", () => {
+  const html = projectPageHtml(
+    {
+      ...anitop,
+      data: {
+        ...anitop.data,
+        url: "javascript:alert(1)",
+        repo: "JavaScript:alert(2)",
+      },
+    },
+    SITE,
+  );
+  assert.doesNotMatch(html, /href="javascript:/i);
+  const ld = JSON.parse(
+    html.match(/<script type="application\/ld\+json">([\s\S]*?)<\/script>/)[1],
+  );
+  const project = ld["@graph"].find((n) => n["@type"] === "SoftwareSourceCode");
+  assert.equal(project.sameAs, undefined);
+  assert.equal(project.codeRepository, undefined);
+});
+
 test("the page links back to the desktop", () => {
   const html = projectPageHtml(anitop, SITE);
   assert.match(html, /href="\/"/);
