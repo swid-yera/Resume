@@ -21,6 +21,18 @@ const COMMAND_HELP = [
   ["cat <file>", "print file contents"],
   ["mkdir <path>", "create a directory"],
   ["date", "print the current date"],
+  ["history", "list commands from this session"],
+  ["clear", "clear the screen"],
+];
+
+// Подсказка по клавишам под таблицей команд: без неё дополнение и предсказание
+// невозможно обнаружить - они ничем себя не выдают, пока не нажмёшь.
+const KEY_HELP = [
+  ["Tab", "complete a command or path, press again to cycle"],
+  ["Ctrl+Space", "show every match at once"],
+  ["→", "accept the greyed-out suggestion from history"],
+  ["Ctrl+F", "accept one word of it"],
+  ["↑ ↓", "walk through history"],
 ];
 
 // Цветной сегмент строки: текст t и цветовой ключ c (сами цвета знает рендерер).
@@ -43,11 +55,11 @@ const MODE = { dir: "d----", app: "-a---", file: "-a---" };
 
 const bytes = (n) => String(n).replace(/\B(?=(\d{3})+(?!\d))/g, " ");
 
-// Собирает результат: rich - по строке на каждую строку/ряд блоков (ячейки ряда
-// склеиваются пробелом), lines - тот же rich плоским текстом.
-function result(blocks, extra = {}) {
+// Блоки в плоский список строк-сегментов: ячейки ряда склеиваются пробелом.
+// Тем же способом читает экран копирование сессии, поэтому функция экспортная.
+export function blocksToRich(blocks) {
   const rich = [];
-  for (const b of blocks) {
+  for (const b of blocks ?? []) {
     if (b.table) {
       for (const row of b.rows) {
         const segs = [];
@@ -61,6 +73,11 @@ function result(blocks, extra = {}) {
       for (const segs of b.rows) rich.push(segs);
     }
   }
+  return rich;
+}
+
+function result(blocks, extra = {}) {
+  const rich = blocksToRich(blocks);
   return { blocks, rich, lines: rich.map((r) => r.map((s) => s.t).join("")), ...extra };
 }
 
@@ -159,6 +176,11 @@ const COMMANDS = {
         "max-content minmax(0, 1fr)",
         COMMAND_HELP.map(([c, d]) => [cell([seg(c, "cmd")]), cell([seg(d, "muted")])]),
       ),
+      textBlock([tline(""), tline("Keys:", "th")]),
+      tableBlock(
+        "max-content minmax(0, 1fr)",
+        KEY_HELP.map(([k, d]) => [cell([seg(k, "string")]), cell([seg(d, "muted")])]),
+      ),
     ]),
 
   pwd: (fs) => result([textBlock([tline(fs.pwd())])]),
@@ -198,9 +220,27 @@ const COMMANDS = {
   },
 
   date: () => result([textBlock([tline(new Date().toString())])]),
+
+  // Get-History: номер и команда, нумерация с единицы, как в pwsh.
+  history: (fs, args, line, ctx) => {
+    const items = ctx.history ?? [];
+    if (!items.length) return result([]);
+    return result([
+      tableBlock(
+        "max-content minmax(0, 1fr)",
+        items.map((cmd, i) => [
+          cell([seg(String(i + 1), "muted")], "r"),
+          cell([seg(cmd, null)]),
+        ]),
+      ),
+    ]);
+  },
+
+  // Экран чистит вызывающая сторона: сам исполнитель к нему не имеет доступа.
+  clear: () => result([], { clear: true }),
 };
 
-export function execute(fs, raw) {
+export function execute(fs, raw, ctx = {}) {
   const trimmed = String(raw).trim();
   if (!trimmed) return { blocks: [], rich: [], lines: [] };
   const parts = trimmed.split(/\s+/);
@@ -209,7 +249,7 @@ export function execute(fs, raw) {
   if (!handler) {
     return err(`'${parts[0]}' is not recognized as an internal or external command.`);
   }
-  return handler(fs, parts.slice(1), trimmed);
+  return handler(fs, parts.slice(1), trimmed, ctx);
 }
 
 export const COMMAND_NAMES = Object.keys(COMMANDS);

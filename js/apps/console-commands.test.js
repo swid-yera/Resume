@@ -172,6 +172,28 @@ test("an empty line produces no output and no error", () => {
   assert.equal(res.clear, undefined);
 });
 
+test("help also names the keys, otherwise completion is undiscoverable", () => {
+  const text = out(fsFixture(), "help");
+  for (const key of ["Tab", "Ctrl\\+Space", "Ctrl\\+F"]) {
+    assert.match(text, new RegExp(key));
+  }
+});
+
+test("clear asks the caller to wipe the screen and prints nothing itself", () => {
+  const res = execute(fsFixture(), "clear");
+  assert.equal(res.clear, true);
+  assert.deepEqual(res.lines, []);
+});
+
+test("history numbers the commands of this session from one", () => {
+  const res = execute(fsFixture(), "history", { history: ["pwd", "cd Documents"] });
+  assert.deepEqual(res.lines, ["1 pwd", "2 cd Documents"]);
+});
+
+test("history without a session prints nothing", () => {
+  assert.deepEqual(execute(fsFixture(), "history").lines, []);
+});
+
 // --- Цвет (параллельный канал rich, не трогает .lines) ---
 
 // Есть ли в rich хоть один сегмент с цветом color (и, если задано, с текстом,
