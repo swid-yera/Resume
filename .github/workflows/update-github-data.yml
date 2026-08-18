@@ -19,100 +19,15 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v4
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
       - name: Fetch GitHub profiles
         env:
           GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-        run: |
-          node - <<'EOF'
-          const https = require('https');
-          const fs    = require('fs');
-
-          const TOKEN    = process.env.GH_TOKEN;
-          const PROFILES = ['swid-yera', 'Antawq'];
-
-          const headers = {
-            'Authorization': `Bearer ${TOKEN}`,
-            'Accept': 'application/vnd.github+json',
-            'X-GitHub-Api-Version': '2022-11-28',
-            'User-Agent': 'github-actions-data-updater'
-          };
-
-          function get(url) {
-            return new Promise((resolve, reject) => {
-              https.get(url, { headers }, res => {
-                let data = '';
-                res.on('data', c => data += c);
-                res.on('end', () => {
-                  if (res.statusCode === 404) { resolve(null); return; }
-                  if (res.statusCode >= 400) { reject(new Error(`HTTP ${res.statusCode} for ${url}`)); return; }
-                  resolve(JSON.parse(data));
-                });
-              }).on('error', reject);
-            });
-          }
-
-          async function fetchReadme(username) {
-            for (const branch of ['main', 'master']) {
-              const url = `https://raw.githubusercontent.com/${username}/${username}/${branch}/README.md`;
-              const text = await new Promise(resolve => {
-                https.get(url, { headers: { 'User-Agent': 'github-actions-data-updater' } }, res => {
-                  if (res.statusCode !== 200) { resolve(null); return; }
-                  let d = '';
-                  res.on('data', c => d += c);
-                  res.on('end', () => resolve(d));
-                }).on('error', () => resolve(null));
-              });
-              if (text) return text;
-            }
-            return null;
-          }
-
-          function fetchBase64(url) {
-            return new Promise(resolve => {
-              https.get(url, { headers: { 'User-Agent': 'github-actions-data-updater' } }, res => {
-                if (res.statusCode !== 200) { resolve(null); return; }
-                const contentType = res.headers['content-type'] || 'image/svg+xml';
-                const chunks = [];
-                res.on('data', c => chunks.push(c));
-                res.on('end', () => {
-                  const b64 = Buffer.concat(chunks).toString('base64');
-                  resolve(`data:${contentType.split(';')[0]};base64,${b64}`);
-                });
-              }).on('error', () => resolve(null));
-            });
-          }
-
-          async function inlineImages(markdown) {
-            if (!markdown) return markdown;
-            const IMG_RE = /!\[([^\]]*)\]\((https?:\/\/[^)]+)\)/g;
-            const matches = [...markdown.matchAll(IMG_RE)];
-            for (const [full, alt, url] of matches) {
-              try {
-                const b64 = await fetchBase64(url);
-                if (b64) markdown = markdown.replace(full, `![${alt}](${b64})`);
-              } catch (e) { /* оставить как есть */ }
-            }
-            return markdown;
-          }
-
-          async function main() {
-            const result = { updated_at: new Date().toISOString() };
-
-            for (const username of PROFILES) {
-              console.log(`Fetching ${username}...`);
-              const [user, readme] = await Promise.all([
-                get(`https://api.github.com/users/${username}`),
-                fetchReadme(username)
-              ]);
-              result[username] = { user, readme: await inlineImages(readme) };
-            }
-
-            fs.writeFileSync('public/github-data.json', JSON.stringify(result, null, 2));
-            console.log('github-data.json updated.');
-          }
-
-          main().catch(err => { console.error(err); process.exit(1); });
-          EOF
+        run: node scripts/github-data.js
 
       - name: Commit if changed
         run: |
