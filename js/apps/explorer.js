@@ -246,6 +246,16 @@ export function renderExplorer(windowContent, path) {
 
   const entryAt = (path) => shown.find((e) => e.path === path) ?? null;
 
+  // Выделение меняем классом на месте: перерисовка списка заменила бы строку
+  // между двумя кликами, и браузеру не на чем было бы поднять dblclick.
+  const select = (row) => {
+    state.selected = entryAt(row.dataset.path);
+    for (const el of view.querySelectorAll("[data-path]")) {
+      el.classList.toggle("is-selected", el === row);
+    }
+    status.textContent = statusText(shown, state.selected);
+  };
+
   const goUp = () => {
     const up = parentPath(state.history.current);
     if (!up) return;
@@ -287,10 +297,7 @@ export function renderExplorer(windowContent, path) {
     }
 
     const row = e.target.closest("[data-path]");
-    if (row) {
-      state.selected = entryAt(row.dataset.path);
-      return draw();
-    }
+    if (row) return select(row);
 
     // Клик по пустому месту адресной строки открывает поле ввода пути.
     if (e.target.closest(".ex-address") && !e.target.closest(".ex-crumb")) {
@@ -349,9 +356,7 @@ export function renderExplorer(windowContent, path) {
       const next = all[all.indexOf(row) + (e.key === "ArrowDown" ? 1 : -1)];
       if (!next) return;
       next.focus();
-      state.selected = entryAt(next.dataset.path);
-      for (const el of all) el.classList.toggle("is-selected", el === next);
-      status.textContent = statusText(shown, state.selected);
+      select(next);
     }
   });
 
