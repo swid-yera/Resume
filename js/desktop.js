@@ -4,6 +4,7 @@ import { getFs, DESKTOP } from "./fs.js";
 import { iconFor } from "./apps/explorer-model.js";
 import { escapeHtml } from "./utils.js";
 import { gridStep, freeSlots } from "./desktop-sort.js";
+import { isMobile } from "./mobile.js";
 
 // --- Desktop icons ---
 
@@ -30,6 +31,9 @@ export function setupFileDragging() {
       startY = 0;
 
     file.addEventListener("pointerdown", (e) => {
+      // На узком экране иконки не таскают: их раскладывает сетка стола, а
+      // перехват указателя отнял бы у страницы прокрутку.
+      if (isMobile()) return;
       e.preventDefault();
       file.setPointerCapture(e.pointerId);
       isDragging = false;
@@ -165,7 +169,7 @@ export function renderDesktopFiles() {
     fresh.push(el);
   }
 
-  if (fresh.length) placeIcons(desktop, fresh);
+  if (fresh.length && !isMobile()) placeIcons(desktop, fresh);
 
   // Файл, удалённый из ФС мимо стола, не должен остаться висеть иконкой.
   for (const el of desktop.querySelectorAll(".file[data-path]")) {
@@ -177,7 +181,19 @@ export function renderDesktopFiles() {
 
 // --- Dock ---
 
+// Растворённый край включаем только когда прокручивать есть что: узнать это
+// из CSS нельзя, а на широком экране маска зря съедала бы крайние иконки.
+function watchDockOverflow() {
+  const dock = document.querySelector(".dock");
+  if (!dock) return;
+  const update = () =>
+    dock.classList.toggle("dock--overflows", dock.scrollWidth > dock.clientWidth);
+  update();
+  new ResizeObserver(update).observe(dock);
+}
+
 export function setupDockItems() {
+  watchDockOverflow();
   document.querySelectorAll(".dock-item").forEach((item) => {
     item.addEventListener("click", (e) => {
       e.stopPropagation();

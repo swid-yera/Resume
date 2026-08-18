@@ -10,9 +10,9 @@
 @import "css/dock.css";
 @import "css/github.css";
 @import "css/telegram.css";
-@import "css/responsive-shell.css";
 @import "css/terminal.css";
 @import "css/browser.css";
+@import "css/player.css";
 @import "css/menu.css";
 @import "css/projects.css";
 @import "css/explorer.css";
@@ -20,4 +20,5 @@
 @import "css/settings.css";
 @import "css/appearance-light.css";
 @import "css/resume.css";
+@import "css/responsive-shell.css";
 @import "css/responsive-apps.css";

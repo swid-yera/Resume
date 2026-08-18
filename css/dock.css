@@ -3,7 +3,7 @@
 /* Dock */
 .dock {
     position: fixed;
-    bottom: 15px;
+    bottom: calc(15px + env(safe-area-inset-bottom, 0px));
     left: 50%;
     transform: translateX(-50%);
     backdrop-filter: blur(var(--blur-soft));

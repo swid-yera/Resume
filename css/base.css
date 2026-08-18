@@ -13,7 +13,10 @@
 
 body {
     background: var(--bg-body);
+    /* dvh, а не vh: на телефоне адресная строка входит в vh, и нижняя полоса
+       с доком оказывалась за краем экрана. */
     height: 100vh;
+    height: 100dvh;
     width: 100vw;
     overflow: hidden;
     position: fixed;

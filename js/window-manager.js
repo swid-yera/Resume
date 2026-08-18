@@ -1,5 +1,6 @@
 import { CONSTANTS, WINDOW_TITLES } from "./constants.js";
 import { openWindows } from "./state.js";
+import { isMobile, onMobileChange } from "./mobile.js";
 
 const windowTemplate = document.getElementById("window-template");
 
@@ -69,7 +70,7 @@ function makeDraggable(win) {
     initialY = 0;
 
   header.addEventListener("pointerdown", (e) => {
-    if (e.target.closest(".window-control")) return;
+    if (isMobile() || e.target.closest(".window-control")) return;
     e.preventDefault();
     header.setPointerCapture(e.pointerId);
     startX = e.clientX;
@@ -115,6 +116,7 @@ function makeResizable(win) {
 
   win.el.querySelectorAll(".window-resize-handle").forEach((handle) => {
     handle.addEventListener("pointerdown", (e) => {
+      if (isMobile()) return;
       e.preventDefault();
       handle.setPointerCapture(e.pointerId);
       dir = handle.dataset.dir;
@@ -204,7 +206,8 @@ function restoreGeometry(win) {
 }
 
 export function zoomWindow(win) {
-  if (!win) return;
+  // На узком экране окно и так во весь стол, разворачивать нечего.
+  if (!win || isMobile()) return;
   const el = win.el;
 
   if (el.classList.contains("is-maximized")) {
@@ -273,6 +276,28 @@ export function closeWindow(win) {
   win.el.addEventListener("animationend", onEnd);
 }
 
+function cascade(el) {
+  const step = CONSTANTS.WINDOW_CASCADE_STEP;
+  const slot = openWindows.size % 6;
+  let left = 60 + slot * step;
+  let top = 60 + slot * step;
+  left = Math.min(left, Math.max(20, window.innerWidth - el.offsetWidth - 20));
+  top = Math.min(top, Math.max(20, window.innerHeight - el.offsetHeight - 20));
+  el.style.left = left + "px";
+  el.style.top = top + "px";
+}
+
+// Поворот экрана меняет раскладку: геометрия, снятая с десктопа, на узком
+// экране увела бы окно за край стола, а мобильная на десктопе слепила бы все
+// окна в одну точку.
+onMobileChange((mobile) => {
+  for (const win of openWindows.values()) {
+    if (mobile) win.el.classList.remove("is-maximized");
+    dropGeometry(win.el);
+    if (!mobile) cascade(win.el);
+  }
+});
+
 export function createWindow(type) {
   const el = windowTemplate.content.firstElementChild.cloneNode(true);
   const contentEl = el.querySelector(".window-content");
@@ -302,14 +327,9 @@ export function createWindow(type) {
 
   document.body.appendChild(el);
 
-  const step = CONSTANTS.WINDOW_CASCADE_STEP;
-  const slot = openWindows.size % 6;
-  let left = 60 + slot * step;
-  let top = 60 + slot * step;
-  left = Math.min(left, Math.max(20, window.innerWidth - el.offsetWidth - 20));
-  top = Math.min(top, Math.max(20, window.innerHeight - el.offsetHeight - 20));
-  el.style.left = left + "px";
-  el.style.top = top + "px";
+  // Узкому экрану координаты не нужны: окно раскладывает CSS во весь стол, а
+  // инлайновый стиль перебил бы его.
+  if (!isMobile()) cascade(el);
 
   openWindows.set(type, win);
   setDockIndicator(type, true);

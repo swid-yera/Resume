@@ -42,12 +42,15 @@ function windowMenu(ctx) {
       disabled: !hasWindows,
       onSelect: () => ctx.actions?.minimizeTop?.(),
     },
-    {
+  ];
+
+  if (!ctx.isCompact) {
+    items.push({
       label: "Zoom",
       disabled: !hasWindows,
       onSelect: () => ctx.actions?.zoomTop?.(),
-    },
-  ];
+    });
+  }
 
   if (hasWindows) {
     items.push(SEP, { sectionLabel: "OPEN WINDOWS" });
@@ -109,9 +112,10 @@ function fileMenu(ctx) {
 }
 
 function viewMenu(ctx) {
-  return {
-    label: "View",
-    items: [
+  const items = [];
+
+  if (!ctx.isCompact) {
+    items.push(
       {
         label: "Sort Icons By",
         submenu: [
@@ -120,10 +124,15 @@ function viewMenu(ctx) {
         ],
       },
       SEP,
-      { label: "Appearance", submenu: appearanceSubmenu(ctx) },
-      { label: "Change Theme", submenu: themeSubmenu(ctx) },
-    ],
-  };
+    );
+  }
+
+  items.push(
+    { label: "Appearance", submenu: appearanceSubmenu(ctx) },
+    { label: "Change Theme", submenu: themeSubmenu(ctx) },
+  );
+
+  return { label: "View", items };
 }
 
 function shellMenu(ctx) {
@@ -141,8 +150,10 @@ function shellMenu(ctx) {
 // --- Sets ---
 
 export function menusFor(activeType, ctx) {
+  const edit = ctx.isCompact ? [] : [editMenu(ctx)];
+
   if (activeType === "console") {
-    return [shellMenu(ctx), editMenu(ctx), windowMenu(ctx), helpMenu(ctx)];
+    return [shellMenu(ctx), ...edit, windowMenu(ctx), helpMenu(ctx)];
   }
 
   if (activeType === "projects") {
@@ -152,14 +163,25 @@ export function menusFor(activeType, ctx) {
   if (!activeType) {
     return [
       fileMenu(ctx),
-      editMenu(ctx),
+      ...edit,
       viewMenu(ctx),
       windowMenu(ctx),
       helpMenu(ctx),
     ];
   }
 
-  return [fileMenu(ctx), editMenu(ctx), windowMenu(ctx), helpMenu(ctx)];
+  return [fileMenu(ctx), ...edit, windowMenu(ctx), helpMenu(ctx)];
+}
+
+// Узкий экран не держит пять меню в строку, поэтому бар схлопывается в одну
+// кнопку с именем приложения, а их содержимое склеивается в один список.
+export function compactMenuItems(activeType, ctx) {
+  const items = [];
+  for (const menu of menusFor(activeType, ctx)) {
+    if (items.length) items.push(SEP);
+    items.push({ sectionLabel: menu.label.toUpperCase() }, ...menu.items);
+  }
+  return items;
 }
 
 // --- Rendering ---
@@ -169,9 +191,21 @@ let getCtx = null;
 let activeType = null;
 let openLabel = null;
 
+// Служебное имя единственной кнопки узкого бара: меню с таким заголовком нет,
+// поэтому спутать его с настоящим нельзя.
+const COMPACT_LABEL = "__app__";
+
 function renderBar() {
   if (!barEl) return;
-  const menus = menusFor(activeType, getCtx());
+  const ctx = getCtx();
+
+  // На узком экране имя приложения само и есть кнопка меню.
+  if (ctx.isCompact) {
+    barEl.innerHTML = `<button type="button" class="menu-bar__item menu-bar__app${openLabel ? " is-open" : ""}" data-label="${COMPACT_LABEL}" id="active-app" aria-haspopup="menu">${appNameFor(activeType)}</button>`;
+    return;
+  }
+
+  const menus = menusFor(activeType, ctx);
 
   barEl.innerHTML =
     `<span class="menu-bar__spacer" aria-hidden="true"></span>` +
@@ -187,8 +221,12 @@ function renderBar() {
 function openBarMenu(label) {
   const btn = barEl.querySelector(`[data-label="${label}"]`);
   if (!btn) return;
-  const menu = menusFor(activeType, getCtx()).find((m) => m.label === label);
-  if (!menu) return;
+  const ctx = getCtx();
+  const items =
+    label === COMPACT_LABEL
+      ? compactMenuItems(activeType, ctx)
+      : menusFor(activeType, ctx).find((m) => m.label === label)?.items;
+  if (!items?.length) return;
 
   const r = btn.getBoundingClientRect();
   openLabel = label;
@@ -196,7 +234,7 @@ function openBarMenu(label) {
   openMenu({
     x: r.left,
     y: r.bottom + 2,
-    items: menu.items,
+    items,
     onClose: () => {
       openLabel = null;
       renderBar();
@@ -206,6 +244,13 @@ function openBarMenu(label) {
 
 export function setActiveApp(type) {
   activeType = type ?? null;
+  renderBar();
+}
+
+// Набор меню зависит от ширины экрана, поэтому поворот телефона пересобирает бар.
+export function refreshMenuBar() {
+  closeMenu();
+  openLabel = null;
   renderBar();
 }
 

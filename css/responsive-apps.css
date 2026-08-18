@@ -1,6 +1,7 @@
-/* Узкие экраны: Проводник, ридер и заданная ширина окон */
+/* Узкие экраны: приложения. Окно, док и меню - в responsive-shell.css */
 
-@media (max-width: 768px) {
+@media (max-width: 768px), (max-height: 480px) {
+    /* Боковые панели съедают ту самую ширину, ради которой их открывают */
     .ex-nav,
     .md-outline {
         display: none;
@@ -19,14 +20,120 @@
         padding: var(--space-4);
     }
 
-    /* Заданная ширина окна не должна переживать узкий экран: `.window` в
-       мобильной секции сжимается до 90vw, но правило с [data-type] у него
-       выигрывает по специфичности, и окно оставалось шире вьюпорта. */
-    .window[data-type="text"],
-    .window[data-type="markdown"],
-    .window[data-type="explorer"] {
-        width: 90vw;
-        height: 80vh;
-        max-height: 500px;
+    /* Строки и кнопки под палец: ниже --tap-target попадание становится лотереей */
+    .ex-row {
+        height: var(--tap-target);
+    }
+
+    .ex-btn,
+    .browser-nav,
+    .telegram-input button,
+    .arrow {
+        width: var(--tap-target);
+        height: var(--tap-target);
+    }
+
+    .ex-crumb {
+        padding: var(--space-2);
+    }
+
+    /* Кнопки, путь и поиск в одну строку не встают, поэтому поиск занимает
+       свою: basis в целую ширину сам сталкивает его вниз. */
+    .ex-toolbar {
+        flex-wrap: wrap;
+    }
+
+    .ex-address {
+        height: var(--tap-target);
+    }
+
+    .ex-search {
+        width: auto;
+        flex: 1 1 100%;
+        height: var(--tap-target);
+    }
+
+    /* Строка состояния держит переключатель вида, а он теперь в палец высотой */
+    .ex-status {
+        height: var(--tap-target);
+    }
+
+    /* Кнопкам в палец шириной остаётся слишком мало на адрес, поэтому он
+       занимает свою строку - как и поиск в Проводнике. */
+    .browser-toolbar {
+        flex-wrap: wrap;
+    }
+
+    .browser-omnibox-form {
+        flex: 1 1 100%;
+    }
+
+    .browser-omnibox {
+        padding: var(--space-2) var(--space-4);
+    }
+
+    /* Таб-строка терминала задаёт потолок кнопкам внутри себя */
+    .console-tabs {
+        height: var(--tap-target);
+    }
+
+    .console-tabs__action {
+        height: var(--space-8);
+        min-width: var(--space-8);
+    }
+
+    /* Все кнопки пульта одного размера: главную выделяет заливка, а не габарит */
+    .player-button,
+    .player-button.is-primary {
+        width: var(--tap-target);
+        height: var(--tap-target);
+    }
+
+    /* Зона нажатия у ползунка - вся высота поля, а не толщина полосы, поэтому
+       поле становится выше, а сама полоса уходит в дорожку и остаётся тонкой. */
+    .player-scrub,
+    .player-volume {
+        height: var(--space-5);
+        background: transparent;
+    }
+
+    .player-scrub::-webkit-slider-runnable-track,
+    .player-volume::-webkit-slider-runnable-track {
+        height: var(--space-1);
+        border-radius: var(--radius-pill);
+        background: var(--frost-line);
+    }
+
+    .player-scrub::-moz-range-track,
+    .player-volume::-moz-range-track {
+        height: var(--space-1);
+        border-radius: var(--radius-pill);
+        background: var(--frost-line);
+    }
+
+    /* Webkit кладёт ползунок на верх дорожки; сдвиг на (12 - 4) / 2 ставит его
+       по центру. Firefox центрирует сам. */
+    .player-scrub::-webkit-slider-thumb,
+    .player-volume::-webkit-slider-thumb {
+        margin-top: calc(var(--space-1) * -1);
+    }
+
+    /* Плитка мельче, чтобы в ряд вставала не одна */
+    .folder-content {
+        grid-template-columns: repeat(auto-fill, minmax(96px, 1fr));
+        gap: var(--space-3);
+    }
+
+    /* Плитка тянется по ячейке, а не сидит в ней фиксированным квадратом:
+       на узком экране каждый лишний пиксель картинки виден. */
+    .folder-item img,
+    .folder-item video {
+        width: 100%;
+        height: auto;
+        aspect-ratio: 1;
+    }
+
+    .folder-item span {
+        font-size: var(--text-12);
     }
 }

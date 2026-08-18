@@ -137,19 +137,7 @@ function buildPanel(items, point, depth, opts = {}) {
   panel.style.left = `${left}px`;
   panel.style.top = `${top}px`;
 
-  panel.addEventListener("click", (e) => {
-    const row = e.target.closest(".menu__item");
-    if (!row || row.classList.contains("is-disabled")) return;
-    const item = items[Number(row.dataset.index)];
-    if (!item || item.submenu) return;
-    closeMenu();
-    item.onSelect?.();
-  });
-
-  // Подменю раскрывается по наведению, как в настоящей ОС.
-  panel.addEventListener("pointerover", (e) => {
-    const row = e.target.closest(".menu__item");
-    if (!row) return;
+  function openSubmenu(row) {
     openRoot
       .querySelectorAll(`.menu[data-depth="${depth + 1}"]`)
       .forEach((p) => p.remove());
@@ -161,6 +149,27 @@ function buildPanel(items, point, depth, opts = {}) {
     buildPanel(item.submenu, { x: parent.right, y: r.top }, depth + 1, {
       flipFrom: parent.left,
     });
+  }
+
+  panel.addEventListener("click", (e) => {
+    const row = e.target.closest(".menu__item");
+    if (!row || row.classList.contains("is-disabled")) return;
+    const item = items[Number(row.dataset.index)];
+    if (!item) return;
+    if (item.submenu) {
+      openSubmenu(row);
+      return;
+    }
+    closeMenu();
+    item.onSelect?.();
+  });
+
+  // Подменю раскрывается по наведению, как в настоящей ОС, но на тач-экране
+  // наводить нечем - там до него добирается тап через обработчик click.
+  panel.addEventListener("pointerover", (e) => {
+    const row = e.target.closest(".menu__item");
+    if (!row) return;
+    openSubmenu(row);
   });
 
   return panel;

@@ -10,6 +10,7 @@ import { activeOwner, sendPlayer, subscribePlayer } from "./player-bridge.js";
 import { icon } from "./explorer-model.js";
 import { openWindow } from "../open-window.js";
 import { CONSTANTS } from "../constants.js";
+import { isMobile } from "../mobile.js";
 import loadingSticker from "../../icons/loading-sticker.webp";
 
 const BLANK_TIME = "--:--";
@@ -19,6 +20,9 @@ const BLANK_TIME = "--:--";
 function placeBottomRight(root) {
   const win = root.closest(".window");
   if (!win) return;
+  // На узком экране пульт прижат к доку правилами CSS, а инлайновые координаты
+  // перебили бы их: там он лежит плашкой во всю ширину, а не карточкой в углу.
+  if (isMobile()) return;
   const margin = CONSTANTS.PADDING;
   win.style.left = Math.max(margin, window.innerWidth - win.offsetWidth - margin) + "px";
   win.style.top =

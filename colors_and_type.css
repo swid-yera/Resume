@@ -226,7 +226,10 @@
     --dur-loop: 1s;    /* период зацикленных: мигание каретки, пульс точки */
 
     /* ============== РАСКЛАДКА ============== */
-    --menu-height: 42px;
+    /* Полосы системы обходят вырез и домашний индикатор: viewport-fit=cover
+       пускает страницу под них, а env() отдаёт их высоту. Высота учтена прямо
+       в токене, чтобы её видели и те, кто считает от него положение окна. */
+    --menu-height: calc(42px + env(safe-area-inset-top, 0px));
     --dock-icon-size: 50px;
     --file-icon-size: 100px;
     --window-header-height: 47px;
@@ -250,7 +253,8 @@
 
     /* Раскладка, специфичная для этого сайта (нет в шкалах) */
     --desktop-padding-top: 50px;
-    --desktop-padding-bottom: 80px;
+    --desktop-padding-bottom: calc(80px + env(safe-area-inset-bottom, 0px));
+    --tap-target: 44px; /* нижняя граница зоны нажатия пальцем */
     --window-content-padding: 6px;
     --window-control-expanded-width: 40px;
     --window-control-expanded-radius: 7px;

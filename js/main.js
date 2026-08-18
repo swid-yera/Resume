@@ -22,13 +22,14 @@ import { WINDOW_TITLES } from "./constants.js";
 import { folderContents, openWindows } from "./state.js";
 import { openWindow } from "./open-window.js";
 import { setupContextMenu } from "./context-menu.js";
-import { setupMenuBar, setActiveApp } from "./menu-bar.js";
+import { setupMenuBar, setActiveApp, refreshMenuBar } from "./menu-bar.js";
 import { iconOrder, assignSlots } from "./desktop-sort.js";
 import { mountProjects } from "./apps/projects-data.js";
 import { setupRouter } from "./router.js";
 import { setupMusic } from "./music.js";
 import { subscribePlayer } from "./apps/player-bridge.js";
 import { isPlaying } from "./apps/player-state.js";
+import { isMobile, onMobileChange } from "./mobile.js";
 
 document.addEventListener(
   "error",
@@ -126,6 +127,7 @@ function sortDesktopIcons(mode) {
 function menuCtx() {
   const active = activeWindowType();
   return {
+    isCompact: isMobile(),
     activeTheme: currentSettings.theme,
     activeAppearance: currentSettings.appearance,
     openTypes: [...openWindows.keys()],
@@ -144,7 +146,9 @@ function menuCtx() {
 // заново, если его закрыли, а звук снова пошёл. Ловим именно начало
 // воспроизведения - иначе закрытое окно возвращалось бы на каждом опросе.
 function keepPlayerOnStage() {
-  openWindow("player");
+  // На узком экране пульт не занимает стол впустую: звук там всё равно не
+  // пойдёт без жеста, поэтому пульт приезжает, когда музыка уже играет.
+  if (!isMobile()) openWindow("player");
   let wasPlaying = false;
   subscribePlayer((state) => {
     const playing = isPlaying(state);
@@ -176,6 +180,8 @@ function init() {
 
   setupMenuBar({ getCtx: menuCtx });
   onActiveWindowChange(setActiveApp);
+  // Поворот телефона меняет набор меню: узкий бар держит их одной кнопкой.
+  onMobileChange(refreshMenuBar);
 
   setupContextMenu({
     getCtx: menuCtx,

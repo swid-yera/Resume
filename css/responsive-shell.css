@@ -1,7 +1,12 @@
-/* Узкие экраны: стол, окно, док, меню-бар и мелкие окна */
+/* Узкие экраны: система ведёт себя как мобильная - окно раскрывается на весь
+   стол, иконки раскладывает сетка, док прокручивается вбок.
 
-/* Адаптайв для десктопа */
-@media (min-width: 769px) {
+   Файл подключается после приложений: он перекрывает заданные ими размеры окна,
+   а те объявлены с атрибутом, поэтому здесь селекторы тоже с атрибутом. */
+
+/* Иконки стоят там, где их положили, только на большом столе. Условие -
+   отрицание мобильного: широкий экран И достаточно высокий. */
+@media (min-width: 769px) and (min-height: 481px) {
     .file[data-type="projects"] {
         left: 80px;
         top: 80px;
@@ -16,124 +21,184 @@
     }
 }
 
-/* Адаптайв для планшетов */
-@media (max-width: 768px) {
+/* Узкий экран - телефон стоймя, низкий - он же лёжа. Тот же запрос лежит в
+   js/mobile.js: раскладку делит CSS, а поведение - JS, и разъезжаться им нельзя. */
+@media (max-width: 768px), (max-height: 480px) {
+    /* Шкалы под палец: рисунок мельче, зона нажатия крупнее */
+    :root {
+        --file-icon-size: 72px;
+        --dock-icon-size: 44px;
+        --window-header-height: 44px;
+        --window-control-size: 20px;
+    }
+
+    /* Стол раскладывает иконки сам: перетаскивать их пальцем нечем, а
+       расставленные под мышь координаты на узком экране лезут за край. */
     .desktop {
-        padding: 40px 15px 100px 15px;
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
+        align-content: start;
+        gap: var(--space-5) var(--space-2);
+        padding: calc(var(--menu-height) + var(--space-5)) var(--space-4)
+                 var(--desktop-padding-bottom);
+        touch-action: pan-y;
+        overflow-y: auto;
     }
-    .file[data-type="projects"] {
-        left: 20px;
-        top: 40px;
+
+    .file {
+        position: static;
+        min-width: 0;
     }
-    .file[data-type="photos"] {
-        left: 20px;
-        top: 160px;
-    }
-    .file[data-type="text"] {
-        left: 20px;
-        top: 280px;
-    }
-    .file-icon {
-        width: 80px;
-        height: 80px;
-    }
+
     .file span {
-        font-size: var(--text-13);
+        margin-top: var(--space-2);
+        max-width: 100%;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        font-size: var(--text-12);
     }
-    .window {
-        width: 90vw;
-        max-height: 500px;
+
+    /* Окно - лист во весь стол, как приложение на телефоне */
+    .window,
+    .window[data-type] {
+        left: 0;
+        top: var(--menu-height);
+        width: 100%;
+        height: calc(100dvh - var(--menu-height) - var(--desktop-padding-bottom));
+        max-width: none;
+        max-height: none;
+        border-radius: 0;
     }
-    .window-content {
-        font-size: var(--text-14);
-    }
-    .dock {
-        padding: 8px;
-        gap: 12px;
-    }
-    .dock-icon {
-        width: 45px;
-        height: 45px;
-    }
-    .menu-bar {
-        font-size: var(--text-13);
-        height: 36px;
-    }
-    .datetime {
-        font-size: var(--text-20);
-    }
-    .arrow {
-        width: 30px;
-        height: 30px;
-        font-size: var(--text-16);
-    }
-    .gh-body {
-        grid-template-columns: 1fr;
-    }
-    .gh-profiles {
-        grid-template-columns: 1fr;
-    }
-    .telegram-chat-list {
-        width: 100px;
-    }
+
+    /* Растягивать лист нечего, а невидимые кромки съедали бы края содержимого */
     .window-resize-handle {
         display: none;
     }
-}
 
-/* Адаптайв для мобильных */
-@media (max-width: 480px) {
-    .window {
-        max-height: 450px;
+    .window-header {
+        height: var(--window-header-height);
+        padding: 0 var(--space-4);
+        cursor: default;
     }
-    .desktop {
-        padding: 30px 10px 90px 10px;
-        background-position: 72% center;    
+
+    /* Разворачивать нечего: окно и так во весь стол */
+    .window-control.maximize {
+        display: none;
     }
-    .file-icon {
-        width: 70px;
-        height: 70px;
+
+    /* Расстояние между огоньками держит их зоны нажатия непересекающимися */
+    .window-controls {
+        gap: var(--space-6);
     }
-    .file span {
-        font-size: var(--text-12);
-        padding: 4px 8px;
+
+    .window-control {
+        position: relative;
     }
-    .window-content {
-        font-size: var(--text-13);
+
+    /* Огонёк остаётся мелким, а нажимается зона в палец шириной */
+    .window-control::after {
+        content: "";
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        width: var(--tap-target);
+        height: var(--tap-target);
+        transform: translate(-50%, -50%);
     }
-    .dock {
-        padding: 6px;
-        gap: 10px;
+
+    /* Пульт не разворачивается: он остаётся плашкой над доком */
+    .window[data-type="player"] {
+        top: auto;
+        bottom: var(--desktop-padding-bottom);
+        left: var(--space-2);
+        width: calc(100% - var(--space-4));
+        height: 200px;
+        border-radius: var(--radius-lg);
     }
-    .dock-icon {
-        width: 40px;
-        height: 40px;
+
+    /* Меню-бар: пять меню в строку не помещаются, поэтому имя приложения само
+       и есть кнопка единственного меню (см. js/menu-bar.js). */
+    .menu-bar {
+        padding: env(safe-area-inset-top, 0px) var(--space-3) 0;
     }
-    .arrow {
-        width: 28px;
-        height: 28px;
+
+    .menu-bar__app {
+        display: flex;
+        align-items: center;
+        min-height: var(--tap-target);
+        color: var(--fg);
+        font-size: var(--text-14);
+        font-weight: var(--w-semibold);
+    }
+
+    .datetime {
+        font-size: var(--text-20);
+    }
+
+    /* Одно меню вместо пяти длиннее и в экран целиком не всегда влезает */
+    .menu {
+        max-width: calc(100vw - var(--space-4));
+        max-height: calc(100dvh - var(--menu-height) - var(--space-4));
+        overflow-y: auto;
+    }
+
+    .menu__item {
+        height: var(--tap-target);
         font-size: var(--text-14);
     }
-    .window-header {
-        padding: 10px 15px;
+
+    /* Док во всю ширину и с прокруткой: девять иконок в строку не помещаются */
+    .dock {
+        left: var(--space-2);
+        right: var(--space-2);
+        transform: none;
+        justify-content: flex-start;
+        gap: var(--space-3);
+        padding: var(--space-2);
+        overflow-x: auto;
+        overscroll-behavior-x: contain;
+        scrollbar-width: none;
     }
-    .window-title {
-        font-size: var(--text-13);
+
+    .dock::-webkit-scrollbar {
+        display: none;
     }
-    .window-control {
-        --window-control-size: 12px;
-        --window-control-expanded-width: 34px;
+
+    /* Растворённый край честнее обрубленного: по нему видно, что за границей
+       дока есть ещё иконки, а не что последняя криво обрезана. */
+    .dock--overflows {
+        -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--space-4),
+                            #000 calc(100% - var(--space-4)), transparent 100%);
+        mask-image: linear-gradient(to right, transparent 0, #000 var(--space-4),
+                    #000 calc(100% - var(--space-4)), transparent 100%);
     }
-    .call-item img {
-        width: 35px;
-        height: 35px;
+
+    .dock-item {
+        flex: 0 0 auto;
     }
-    .folder-item img,
-    .folder-item video {
-        width: 80px;
-        height: 80px;
+
+    /* Подсказка держится на наведении, которого на тач-экране нет */
+    .dock-tooltip {
+        display: none;
     }
-    .folder-item span {
-        font-size: var(--text-12);
+
+    /* Поле мельче 16px iOS считает поводом приблизить страницу, и та застревает
+       увеличенной. Кегль консоли ведёт за собой её подсветку и каретку. */
+    .console,
+    .browser-omnibox,
+    .ex-address-input,
+    .ex-search,
+    .telegram-input input {
+        font-size: var(--text-16);
+    }
+
+    .gh-body,
+    .gh-profiles {
+        grid-template-columns: 1fr;
+    }
+
+    .telegram-chat-list {
+        width: 100px;
     }
 }

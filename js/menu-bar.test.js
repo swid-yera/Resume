@@ -1,7 +1,7 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 
-import { menusFor, appNameFor } from "./menu-bar.js";
+import { menusFor, appNameFor, compactMenuItems } from "./menu-bar.js";
 
 const ctx = (over = {}) => ({
   windows: [],
@@ -136,15 +136,54 @@ test("no menu promises a shortcut it cannot honour", () => {
 });
 
 test("every enabled item either acts or opens a submenu", () => {
-  for (const type of [null, "console", "projects", "telegram"]) {
-    for (const menu of menusFor(type, ctx())) {
-      for (const item of menu.items) {
-        if (!item.label || item.disabled) continue;
-        assert.ok(
-          typeof item.onSelect === "function" || Array.isArray(item.submenu),
-          `пункт "${item.label}" в меню "${menu.label}" ничего не делает`,
-        );
+  for (const isCompact of [false, true]) {
+    for (const type of [null, "console", "projects", "telegram"]) {
+      for (const menu of menusFor(type, ctx({ isCompact }))) {
+        for (const item of menu.items) {
+          if (!item.label || item.disabled) continue;
+          assert.ok(
+            typeof item.onSelect === "function" || Array.isArray(item.submenu),
+            `пункт "${item.label}" в меню "${menu.label}" ничего не делает`,
+          );
+        }
       }
+    }
+  }
+});
+
+// --- Узкий экран ---
+
+test("the compact bar drops Edit, whose items never do anything anyway", () => {
+  assert.deepEqual(titles(menusFor(null, ctx({ isCompact: true }))), [
+    "File",
+    "View",
+    "Window",
+    "Help",
+  ]);
+});
+
+test("Zoom is gone on a narrow screen, where the window already fills the desktop", () => {
+  const windows = [{ type: "console", title: "Terminal", isTop: true }];
+  const menu = find(menusFor("console", ctx({ windows, isCompact: true })), "Window");
+  assert.ok(itemLabels(menu).includes("Minimize"));
+  assert.ok(!itemLabels(menu).includes("Zoom"));
+});
+
+test("sorting icons is gone on a narrow screen, where a grid places them", () => {
+  const view = find(menusFor(null, ctx({ isCompact: true })), "View");
+  assert.ok(!itemLabels(view).includes("Sort Icons By"));
+  assert.ok(itemLabels(view).includes("Change Theme"));
+});
+
+test("the compact menu keeps every entry, under the heading it came from", () => {
+  const items = compactMenuItems(null, ctx({ isCompact: true }));
+  const headings = items.filter((i) => i.sectionLabel).map((i) => i.sectionLabel);
+  assert.deepEqual(headings, ["FILE", "VIEW", "WINDOW", "HELP"]);
+
+  const labels = items.filter((i) => i.label).map((i) => i.label);
+  for (const menu of menusFor(null, ctx({ isCompact: true }))) {
+    for (const item of menu.items) {
+      if (item.label) assert.ok(labels.includes(item.label), `потерян пункт "${item.label}"`);
     }
   }
 });

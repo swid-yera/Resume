@@ -55,7 +55,7 @@
     left: 0;
     width: 100%;
     height: var(--menu-height);
-    padding: 0 var(--space-6);
+    padding: env(safe-area-inset-top, 0px) var(--space-6) 0;
     background: var(--glass-strong);
     backdrop-filter: blur(var(--blur-glass));
     display: flex;

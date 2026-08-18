@@ -4,6 +4,7 @@ import { getFs, THIS_PC, HOME, parentPath, baseName } from "../fs.js";
 import { escapeHtml } from "../utils.js";
 import { openEntry } from "../open-window.js";
 import { setWindowTitle } from "../window-manager.js";
+import { isMobile } from "../mobile.js";
 import {
   COLUMNS,
   QUICK_ACCESS,
@@ -191,8 +192,12 @@ export function renderExplorer(windowContent, path) {
                    data-go="${escapeHtml(c.path)}">${escapeHtml(c.label)}</button>`,
       )
       .join('<span class="ex-crumb-sep">›</span>');
-    // Хвост пути важнее корня: если не влезло, показываем конец.
-    crumbs.scrollLeft = crumbs.scrollWidth;
+    // Хвост пути важнее корня: если не влезло, показываем конец. Ширина
+    // крошек окончательна только после раскладки, поэтому ждём кадр - на узкой
+    // строке промах виден сразу.
+    requestAnimationFrame(() => {
+      crumbs.scrollLeft = crumbs.scrollWidth;
+    });
   }
 
   function drawView(entries) {
@@ -297,7 +302,16 @@ export function renderExplorer(windowContent, path) {
     }
 
     const row = e.target.closest("[data-path]");
-    if (row) return select(row);
+    if (row) {
+      select(row);
+      // На тач-экране открывают одним касанием: двойное там занято зумом, и
+      // ждать его от пальца бессмысленно.
+      if (isMobile()) {
+        const entry = entryAt(row.dataset.path);
+        if (entry) open(entry);
+      }
+      return;
+    }
 
     // Клик по пустому месту адресной строки открывает поле ввода пути.
     if (e.target.closest(".ex-address") && !e.target.closest(".ex-crumb")) {
