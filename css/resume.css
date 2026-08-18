@@ -1,0 +1,537 @@
+/* Окно резюме (data-type="text").
+
+   Раскладку подобрал Stitch: проект antawkay-os-desktop, экраны
+   «Resume window» (Obsidian Desktop) и «Resume window, light»
+   (Daylight Desktop). Рейка 300px слева, колонка чтения 700px справа,
+   статус-бар 24px. Меру колонки Stitch и выбрал: прежнее окно About
+   гнало строку во всю ширину, на 1040px это 150 знаков. */
+
+.resume {
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    background: var(--surface);
+    color: var(--fg);
+    font-size: var(--text-13);
+    line-height: var(--lh-base);
+}
+
+.resume-body {
+    flex: 1;
+    display: flex;
+    min-height: 0;
+}
+
+/* Рейка: кто это и что знает */
+
+.resume-rail {
+    width: 300px;
+    flex: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    padding: var(--space-6) var(--space-5);
+    border-right: 1px solid var(--border);
+    background: var(--surface-2);
+    overflow-y: auto;
+}
+
+.resume-id {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    text-align: center;
+}
+
+/* Фотографии нет, поэтому монограмма. Заливка акцентом, буквы на ней -
+   отдельный токен: на тёмном они с синим подтоном, на светлом белые. */
+.resume-mono {
+    width: 80px;
+    height: 80px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    border-radius: var(--radius-pill);
+    border: 2px solid var(--border);
+    background: var(--accent);
+    color: var(--accent-ink);
+    font-size: var(--text-24);
+    font-weight: var(--w-bold);
+    letter-spacing: var(--track-tight);
+}
+
+.resume-name {
+    margin: var(--space-2) 0 0;
+    font-size: var(--text-18);
+    font-weight: var(--w-semibold);
+    line-height: var(--lh-snug);
+}
+
+.resume-role {
+    margin: 0;
+    color: var(--fg-subtle);
+    font-size: var(--text-12);
+    line-height: var(--lh-snug);
+}
+
+.resume-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.resume-group__label {
+    margin: 0;
+    color: var(--fg-subtle);
+    font-size: var(--text-11);
+    font-weight: var(--w-bold);
+    text-transform: uppercase;
+    letter-spacing: var(--track-caps);
+}
+
+/* Контакты */
+
+.resume-contacts {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.resume-contact {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    color: var(--fg-muted);
+    font-size: var(--text-12);
+    text-decoration: none;
+    transition: color var(--dur-fast) var(--ease-standard);
+}
+
+a.resume-contact:hover,
+a.resume-contact:focus-visible {
+    color: var(--accent-text);
+}
+
+.resume-contact__label {
+    color: var(--fg);
+    font-weight: var(--w-semibold);
+}
+
+.resume-contact__detail {
+    color: var(--fg-subtle);
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* Стек */
+
+.resume-skills {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.resume-skills + .resume-skills {
+    margin-top: var(--space-3);
+}
+
+.resume-skills__label {
+    margin: 0;
+    color: var(--fg-subtle);
+    font-size: var(--text-11);
+    font-weight: var(--w-bold);
+    text-transform: uppercase;
+    letter-spacing: var(--track-caps);
+}
+
+.resume-pills {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+/* Плашка у Stitch не капсула, а прямоугольник с радиусом 4px: капсулы читаются
+   как теги-фильтры, а это перечисление. */
+.resume-pill {
+    height: 22px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--space-2);
+    border: 1px solid var(--frost-line);
+    border-radius: var(--radius-xs);
+    background: var(--frost-fill);
+    color: var(--fg-muted);
+    font-size: var(--text-11);
+    font-weight: var(--w-semibold);
+    white-space: nowrap;
+}
+
+/* Основная колонка */
+
+.resume-main {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-10);
+    padding: var(--space-8);
+    overflow-y: auto;
+}
+
+.resume-section {
+    max-width: 700px;
+}
+
+/* Подпись, за ней волосяная линия до края. Акцентное тире перед акцентной
+   подписью на белом читается как ссылка - Stitch это и переигрывал. */
+.resume-h {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    margin: 0 0 var(--space-4);
+    color: var(--accent-text);
+    font-size: var(--text-11);
+    font-weight: var(--w-bold);
+    text-transform: uppercase;
+    letter-spacing: var(--track-caps);
+}
+
+.resume-h::after {
+    content: "";
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+}
+
+/* Проза */
+
+.resume-prose {
+    color: var(--fg-muted);
+    font-size: var(--text-13);
+}
+
+.resume-prose > :first-child {
+    margin-top: 0;
+}
+
+.resume-prose > :last-child {
+    margin-bottom: 0;
+}
+
+.resume-prose p {
+    margin: 0 0 var(--space-4);
+}
+
+.resume-prose ul,
+.resume-prose ol {
+    margin: 0 0 var(--space-4);
+    padding-left: var(--space-5);
+}
+
+.resume-prose li {
+    margin-bottom: var(--space-2);
+}
+
+.resume-prose strong {
+    color: var(--fg);
+    font-weight: var(--w-semibold);
+}
+
+.resume-prose a {
+    color: var(--accent-text);
+}
+
+.resume-prose code {
+    padding: 1px var(--space-1);
+    border-radius: var(--radius-xs);
+    background: var(--frost-fill);
+    font-family: var(--font-mono);
+    font-size: var(--text-12);
+}
+
+/* Секции из тела about.md идут панелью: это принципы и пояснения, а не
+   данные резюме, и отделять их надо. */
+.resume-section--panel {
+    padding: var(--space-6);
+    border: 1px solid color-mix(in srgb, var(--accent) 20%, transparent);
+    border-radius: var(--radius-lg);
+    /* Заливка своя, а не --accent-fill-soft: у Stitch панель принципов держится
+       на рамке, а фон едва угадывается. На 12% она читалась синим блоком. */
+    background: color-mix(in srgb, var(--accent) 7%, transparent);
+}
+
+/* Карточки проектов */
+
+.resume-cards {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.resume-card {
+    display: grid;
+    grid-template-columns: 200px 1fr;
+    gap: var(--space-4);
+    padding: var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--surface-2);
+    transition: border-color var(--dur-fast) var(--ease-standard);
+}
+
+.resume-card:hover {
+    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+}
+
+/* Скриншот главной страницы проекта. Правила .window-content img тут сбиты
+   намеренно: там max-height 80% и автоцентр. */
+.resume-card__shot {
+    width: 100%;
+    max-height: none;
+    aspect-ratio: 16 / 9;
+    object-fit: cover;
+    object-position: top;
+    margin: 0;
+    border-radius: var(--radius-sm);
+    background: var(--abyss-700);
+    display: block;
+}
+
+.resume-card__shot--empty {
+    border: 1px solid var(--frost-line);
+}
+
+.resume-card__body {
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+}
+
+.resume-card__head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.resume-card__name {
+    margin: 0;
+    font-size: var(--text-14);
+    font-weight: var(--w-semibold);
+    line-height: var(--lh-snug);
+}
+
+.resume-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    height: 18px;
+    padding: 0 var(--space-2);
+    border: 1px solid var(--frost-line);
+    border-radius: var(--radius-xs);
+    color: var(--fg-subtle);
+    font-size: var(--text-11);
+    font-weight: var(--w-bold);
+    text-transform: uppercase;
+    letter-spacing: var(--track-loose);
+}
+
+.resume-badge.is-live {
+    border-color: color-mix(in srgb, var(--success) 40%, transparent);
+    background: color-mix(in srgb, var(--success) 12%, transparent);
+    color: var(--success);
+}
+
+.resume-badge.is-live::before {
+    content: "";
+    width: 5px;
+    height: 5px;
+    border-radius: var(--radius-pill);
+    background: var(--success);
+}
+
+.resume-card__meta {
+    margin: 0;
+    color: var(--fg-subtle);
+    font-family: var(--font-mono);
+    font-size: var(--text-11);
+}
+
+.resume-card__desc {
+    margin: 0;
+    color: var(--fg-muted);
+    font-size: var(--text-12);
+    line-height: var(--lh-base);
+}
+
+.resume-card__links {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    margin-top: var(--space-1);
+}
+
+.resume-link {
+    height: 26px;
+    display: inline-flex;
+    align-items: center;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--frost-line);
+    border-radius: var(--radius-xs);
+    background: var(--frost-fill);
+    color: var(--fg-muted);
+    font-family: inherit;
+    font-size: var(--text-11);
+    font-weight: var(--w-semibold);
+    text-decoration: none;
+    cursor: pointer;
+    transition: color var(--dur-fast) var(--ease-standard),
+                border-color var(--dur-fast) var(--ease-standard);
+}
+
+.resume-link:hover,
+.resume-link:focus-visible {
+    border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+    color: var(--fg);
+}
+
+.resume-link--primary {
+    border-color: transparent;
+    background: var(--accent);
+    color: var(--accent-contrast);
+}
+
+.resume-link--primary:hover,
+.resume-link--primary:focus-visible {
+    border-color: transparent;
+    background: var(--accent-hover);
+    color: var(--accent-contrast);
+}
+
+/* Опыт и образование */
+
+.resume-tl {
+    margin: 0;
+    padding: var(--space-1) 0 var(--space-1) var(--space-5);
+    list-style: none;
+    border-left: 1px solid var(--border);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-5);
+}
+
+.resume-tl__item {
+    position: relative;
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: var(--space-4);
+}
+
+.resume-tl__item::before {
+    content: "";
+    position: absolute;
+    left: calc(-1 * var(--space-5) - 4px);
+    top: 6px;
+    width: 7px;
+    height: 7px;
+    border-radius: var(--radius-pill);
+    background: var(--border);
+}
+
+.resume-tl__period {
+    margin: 0;
+    color: var(--fg-subtle);
+    font-family: var(--font-mono);
+    font-size: var(--text-11);
+}
+
+.resume-tl__body {
+    min-width: 0;
+}
+
+.resume-tl__org {
+    margin: 0;
+    font-size: var(--text-13);
+    font-weight: var(--w-semibold);
+}
+
+.resume-tl__role {
+    margin: 0;
+    color: var(--fg-muted);
+    font-size: var(--text-12);
+}
+
+.resume-tl__summary {
+    margin: var(--space-1) 0 0;
+    color: var(--fg-subtle);
+    font-size: var(--text-12);
+}
+
+/* Статус-бар */
+
+.resume-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 24px;
+    flex: none;
+    padding: 0 var(--space-3);
+    border-top: 1px solid var(--frost-line);
+    background: var(--surface-2);
+    color: var(--fg-subtle);
+    font-size: var(--text-12);
+}
+
+.window[data-type="text"] {
+    width: 1040px;
+    height: 720px;
+}
+
+/* На светлом карточка почти белая: тональный слой на белом фоне не отделяет
+   её от страницы, отделяет рамка - она же подсвечивается по наведению. */
+:root[data-appearance="light"] .resume-card {
+    background: var(--surface-lowest);
+}
+
+/* Узкое окно и телефон: рейка уезжает наверх, карточка складывается. */
+@media (max-width: 860px) {
+    .resume-body {
+        display: block;
+        overflow-y: auto;
+    }
+
+    .resume-rail {
+        width: auto;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        overflow: visible;
+    }
+
+    .resume-main {
+        gap: var(--space-8);
+        padding: var(--space-5);
+        overflow: visible;
+    }
+
+    .resume-card {
+        grid-template-columns: 1fr;
+    }
+
+    .resume-card__shot {
+        max-width: 320px;
+    }
+
+    .resume-tl__item {
+        grid-template-columns: 1fr;
+        gap: var(--space-1);
+    }
+}

@@ -1,0 +1,416 @@
+/* Проводник.
+
+   Раскладка и плотность взяты с макета Stitch (Projects File Explorer,
+   светлый и тёмный варианты): панель 220px, строка 28px, статус-бар 24px.
+   Всё на токенах, поэтому оба оформления работают от одних правил. */
+
+.explorer {
+    display: flex;
+    height: 100%;
+    font-size: var(--text-13);
+    color: var(--fg);
+    background: var(--surface);
+    user-select: none;
+}
+
+.ex-nav {
+    width: 220px;
+    flex: none;
+    padding: var(--space-2) var(--space-1);
+    background: var(--surface-2);
+    border-right: 1px solid var(--frost-line);
+    overflow-y: auto;
+}
+
+.ex-nav-group + .ex-nav-group {
+    margin-top: var(--space-4);
+}
+
+.ex-nav-label {
+    padding: var(--space-1) var(--space-3);
+    font-size: var(--text-12);
+    font-weight: var(--w-bold);
+    letter-spacing: var(--track-caps);
+    text-transform: uppercase;
+    color: var(--fg-subtle);
+}
+
+.ex-nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    height: 28px;
+    padding: 0 var(--space-3);
+    border: none;
+    border-radius: var(--radius-xs);
+    background: transparent;
+    color: var(--fg-muted);
+    font-size: var(--text-13);
+    text-align: left;
+    cursor: default;
+}
+
+.ex-nav-item:hover {
+    background: var(--frost-fill);
+    color: var(--fg);
+}
+
+/* Текущая папка: заливка акцентом и рельс слева. Подпись остаётся тёмной -
+   на светлом белый текст по бледной заливке не читался бы. */
+.ex-nav-item.is-current {
+    background: var(--accent-fill);
+    color: var(--fg);
+    font-weight: var(--w-semibold);
+}
+
+.ex-nav-item.is-current::before {
+    content: "";
+    position: absolute;
+    left: 0;
+    top: 4px;
+    bottom: 4px;
+    width: 2px;
+    border-radius: var(--radius-pill);
+    background: var(--accent);
+}
+
+.ex-nav-icon {
+    font-size: var(--text-14);
+    line-height: 1;
+}
+
+.ex-tree-row {
+    display: flex;
+    align-items: center;
+    padding-left: calc(var(--depth) * 14px);
+}
+
+.ex-twisty {
+    width: 16px;
+    flex: none;
+    border: none;
+    background: transparent;
+    color: var(--fg-subtle);
+    font-size: var(--text-12);
+    cursor: pointer;
+    transition: transform var(--dur-fast) var(--ease-standard);
+}
+
+.ex-twisty.is-open {
+    transform: rotate(90deg);
+}
+
+.ex-main {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    flex-direction: column;
+}
+
+.ex-toolbar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    padding: var(--space-2) var(--space-3);
+    border-bottom: 1px solid var(--frost-line);
+    background: var(--surface);
+}
+
+.ex-nav-buttons {
+    display: flex;
+    gap: 2px;
+}
+
+.ex-btn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 24px;
+    height: 24px;
+    border: none;
+    border-radius: var(--radius-xs);
+    background: transparent;
+    color: var(--fg-muted);
+    font-size: var(--text-12);
+    cursor: pointer;
+}
+
+.ex-btn:hover:not(:disabled) {
+    background: var(--frost-fill);
+    color: var(--fg);
+}
+
+.ex-btn:disabled {
+    opacity: 0.35;
+    cursor: default;
+}
+
+.ex-btn.is-active {
+    background: var(--accent-fill);
+    color: var(--fg);
+}
+
+.ex-address {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    align-items: center;
+    height: 28px;
+    padding: 0 var(--space-2);
+    border: 1px solid var(--frost-line);
+    border-radius: var(--radius-xs);
+    background: var(--surface-2);
+    cursor: text;
+}
+
+/* Длинный путь обрезается слева, а не справа: текущая папка нужнее корня.
+   Прокрутку в конец делает drawCrumbs, полосу прячем - она тут лишняя. */
+.ex-crumbs {
+    display: flex;
+    align-items: center;
+    flex: 1;
+    min-width: 0;
+    overflow-x: auto;
+    white-space: nowrap;
+    scrollbar-width: none;
+}
+
+.ex-crumbs::-webkit-scrollbar {
+    display: none;
+}
+
+.ex-crumb {
+    flex: none;
+}
+
+.ex-crumb {
+    padding: 2px var(--space-1);
+    border: none;
+    border-radius: var(--radius-xs);
+    background: transparent;
+    color: var(--fg-muted);
+    font-size: var(--text-12);
+    cursor: pointer;
+}
+
+.ex-crumb:hover {
+    background: var(--frost-fill);
+    color: var(--fg);
+}
+
+.ex-crumb.is-last {
+    color: var(--fg);
+    font-weight: var(--w-medium);
+}
+
+.ex-crumb-sep {
+    color: var(--fg-subtle);
+    font-size: var(--text-12);
+}
+
+.ex-address-input {
+    width: 100%;
+    border: none;
+    outline: none;
+    background: transparent;
+    color: var(--fg);
+    font-family: var(--font-mono);
+    font-size: var(--text-12);
+    user-select: text;
+}
+
+.ex-address-input.is-bad {
+    color: var(--danger);
+}
+
+.ex-search {
+    width: 200px;
+    flex: none;
+    height: 28px;
+    padding: 0 var(--space-3);
+    border: 1px solid var(--frost-line);
+    border-radius: var(--radius-xs);
+    outline: none;
+    background: var(--surface-2);
+    color: var(--fg);
+    font-size: var(--text-12);
+    user-select: text;
+}
+
+.ex-search:focus {
+    border-color: var(--accent);
+}
+
+.ex-view {
+    flex: 1;
+    overflow: auto;
+    min-height: 0;
+}
+
+.ex-empty {
+    padding: var(--space-8);
+    color: var(--fg-subtle);
+    text-align: center;
+}
+
+/* Details: сетка одна на шапку и строки, иначе колонки разъезжаются */
+.ex-table {
+    --ex-grid: minmax(160px, 1fr) 150px 130px 90px;
+}
+
+.ex-head,
+.ex-row {
+    display: grid;
+    grid-template-columns: var(--ex-grid);
+    align-items: center;
+}
+
+.ex-head {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    background: var(--surface-2);
+    border-bottom: 1px solid var(--frost-line);
+    backdrop-filter: blur(var(--blur-soft));
+}
+
+.ex-col {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    height: 26px;
+    padding: 0 var(--space-3);
+    border: none;
+    border-right: 1px solid var(--frost-line);
+    background: transparent;
+    color: var(--fg-muted);
+    font-size: var(--text-12);
+    font-weight: var(--w-medium);
+    text-align: left;
+    cursor: pointer;
+}
+
+.ex-col:last-child {
+    border-right: none;
+}
+
+.ex-col:hover {
+    background: var(--frost-fill);
+    color: var(--fg);
+}
+
+.ex-col--size {
+    justify-content: flex-end;
+}
+
+.ex-caret {
+    font-size: var(--text-11);
+    color: var(--accent);
+}
+
+.ex-row {
+    height: 28px;
+    cursor: default;
+}
+
+.ex-row:hover {
+    background: var(--frost-fill);
+}
+
+.ex-row.is-selected {
+    background: var(--accent-fill);
+}
+
+.ex-row:focus-visible {
+    outline: 1px solid var(--accent);
+    outline-offset: -1px;
+}
+
+.ex-cell {
+    padding: 0 var(--space-3);
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    color: var(--fg-muted);
+    font-size: var(--text-13);
+}
+
+.ex-col--name.ex-cell {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    color: var(--fg);
+}
+
+.ex-col--size.ex-cell {
+    text-align: right;
+}
+
+.ex-icon {
+    flex: none;
+    font-size: var(--text-14);
+}
+
+.ex-tiles {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(104px, 1fr));
+    gap: var(--space-2);
+    padding: var(--space-4);
+}
+
+.ex-tile {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-2);
+    border-radius: var(--radius-sm);
+    cursor: default;
+}
+
+.ex-tile:hover {
+    background: var(--frost-fill);
+}
+
+.ex-tile.is-selected {
+    background: var(--accent-fill);
+}
+
+.ex-tile-icon {
+    font-size: var(--text-32);
+}
+
+.ex-tile-name {
+    max-width: 100%;
+    overflow: hidden;
+    color: var(--fg);
+    font-size: var(--text-12);
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.ex-status {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 24px;
+    flex: none;
+    padding: 0 var(--space-3);
+    border-top: 1px solid var(--frost-line);
+    background: var(--surface-2);
+    color: var(--fg-subtle);
+    font-size: var(--text-12);
+}
+
+.ex-view-toggle {
+    display: flex;
+    gap: 2px;
+}
+
+.window[data-type="explorer"] {
+    width: 940px;
+    height: 560px;
+}

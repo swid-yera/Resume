@@ -1,0 +1,440 @@
+/* Терминал: тело консоли и хром её окна */
+
+.console {
+    --term-row-gap: 3px; /* ровный вертикальный зазор между строками */
+
+    font-family: var(--font-terminal);
+    font-size: var(--text-13);
+    line-height: 1.35;
+    color: var(--term-fg);
+    background: var(--term-bg);
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    cursor: text;
+}
+
+/* Полоса вкладок: слева сессии, справа действия. Высота и устройство взяты
+   с кодовых блоков PostHog - шапка на ступень плотнее тела, активный элемент
+   держится подписью и рейкой под ней, действия отбиты волосяной чертой. */
+.console-tabs {
+    flex: none;
+    display: flex;
+    align-items: stretch;
+    justify-content: space-between;
+    height: 36px;
+    background: var(--term-chrome);
+    border-bottom: 1px solid var(--term-chrome-line);
+}
+
+.console-tabs__list {
+    display: flex;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+}
+
+.console-tabs__list::-webkit-scrollbar {
+    display: none;
+}
+
+.console-tab {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    max-width: 180px;
+    padding: 0 var(--space-3);
+    border-right: 1px solid var(--term-chrome-line);
+    color: var(--term-muted-fg);
+    cursor: pointer;
+    white-space: nowrap;
+}
+
+.console-tab:hover {
+    color: var(--term-fg);
+}
+
+.console-tab.is-active {
+    color: var(--term-primary);
+}
+
+/* Рейка вровень с низом полосы, поверх её границы. */
+.console-tab.is-active::after {
+    content: "";
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: -1px;
+    height: 2px;
+    background: var(--term-primary);
+}
+
+.console-tab__label {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.console-tab__close {
+    flex: none;
+    width: 16px;
+    height: 16px;
+    display: grid;
+    place-items: center;
+    padding: 0;
+    border: none;
+    border-radius: var(--radius-xs);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    line-height: 1;
+    cursor: pointer;
+    opacity: 0.55;
+}
+
+.console-tab__close:hover {
+    background: var(--term-chrome-line);
+    opacity: 1;
+}
+
+.console-tabs__list.is-single .console-tab__close {
+    display: none;
+}
+
+.console-tabs__actions {
+    flex: none;
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    padding: 0 var(--space-2);
+    border-left: 1px solid var(--term-chrome-line);
+}
+
+.console-tabs__action {
+    height: 22px;
+    min-width: 22px;
+    padding: 0 var(--space-2);
+    border: none;
+    border-radius: var(--radius-xs);
+    background: transparent;
+    color: var(--term-muted-fg);
+    font: inherit;
+    font-size: var(--text-12);
+    cursor: pointer;
+    transition: background var(--dur-fast) var(--ease-standard),
+                color var(--dur-fast) var(--ease-standard);
+}
+
+.console-tabs__action:hover {
+    background: var(--term-chrome-line);
+    color: var(--term-fg);
+}
+
+/* Прокручиваемое тело терминала между таб-строкой и статус-баром. */
+.console-body {
+    flex: 1;
+    min-height: 0;
+    overflow-y: auto;
+    padding: var(--space-3);
+}
+
+/* Единый вертикальный зазор между всеми строками вывода: и между блоками, и
+   между строками внутри блока, и между рядами грида - ритм одинаковый. */
+.console-out,
+.console-block {
+    display: flex;
+    flex-direction: column;
+    gap: var(--term-row-gap);
+}
+
+/* Текстовый блок вывода: моноширинные строки с переносами как в терминале. */
+.console-block {
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Отбивка между группами «команда + её вывод»: воздух перед новым приглашением
+   (кроме самого первого). */
+.console-echo:not(:first-child) {
+    margin-top: 0.6em;
+}
+
+/* Грид-вывод (help / ls / dir): колонки держит CSS grid, а не добивка пробелами -
+   поэтому выравнивание не зависит от метрик шрифта. */
+.console-grid {
+    display: grid;
+    column-gap: 2ch;
+    row-gap: var(--term-row-gap);
+    align-items: baseline;
+}
+
+.console-cell {
+    min-width: 0;
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+/* Правая колонка (Length / размер) - по правому краю, как в PowerShell. */
+.console-cell.cell-r {
+    text-align: right;
+}
+
+/* Статус-бар */
+.console-status {
+    flex: none;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    height: 24px;
+    padding: 0 var(--space-3);
+    /* Яркая синяя полоса с тёмным текстом, как статус-бар редактора. */
+    background: var(--term-status-bg);
+    border-top: 1px solid var(--term-status-line);
+    font-family: var(--font-sans);
+    font-size: var(--text-11);
+    color: var(--term-status-fg);
+    user-select: none;
+}
+
+.console-status-left,
+.console-status-right {
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+}
+
+.console-status-left { font-weight: var(--w-semibold); }
+
+/* Позиции справа - декоративные (UTF-8, Ln/Col, LF), но подсвечиваем ховером:
+   тёмный текст на светлой синей плашке. */
+.console-status-right span {
+    padding: 0 var(--space-1);
+    border-radius: var(--radius-xs);
+    transition: background var(--dur-fast) var(--ease-standard),
+                color var(--dur-fast) var(--ease-standard);
+}
+
+.console-status-right span:hover {
+    background: var(--term-primary);
+    color: var(--term-status-fg);
+}
+
+.console-status-dot {
+    width: 8px;
+    height: 8px;
+    border-radius: var(--radius-pill);
+    background: var(--term-primary);
+    animation: console-status-pulse calc(var(--dur-loop) * 2) ease-in-out infinite;
+}
+
+@keyframes console-status-pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+}
+
+.console-status-pos { font-variant-numeric: tabular-nums; }
+
+.console-echo {
+    color: var(--term-fg);
+}
+
+.console-line {
+    display: flex;
+    gap: var(--space-2);
+    align-items: baseline;
+    margin-top: 0.55em;
+}
+
+.console-ps1 {
+    white-space: nowrap;
+}
+
+/* Поле ввода в обёртке, поверх которой рисуются подсветка и блочный курсор. */
+.console-field {
+    position: relative;
+    flex: 1;
+    min-width: 0;
+}
+
+.console-input {
+    width: 100%;
+    background: transparent;
+    border: none;
+    outline: none;
+    /* Текст рисует цветной слой .console-ink поверх; сам input прозрачный, но
+       остаётся полем ввода (каретка, выделение, клики). */
+    color: transparent;
+    font: inherit;
+    caret-color: transparent;
+}
+
+/* Цветной слой поверх input: подсветка ввода в духе PSReadLine. */
+.console-ink {
+    position: absolute;
+    left: 0;
+    top: 0;
+    right: 0;
+    white-space: pre;
+    overflow: hidden;
+    pointer-events: none;
+    color: var(--term-fg);
+}
+
+/* Скрытый измеритель: повторяет текст до каретки, чтобы узнать её X. */
+.console-measure {
+    position: absolute;
+    left: 0;
+    top: 0;
+    visibility: hidden;
+    white-space: pre;
+    pointer-events: none;
+}
+
+/* Блочный курсор - прямоугольник в ширину символа. */
+.console-cursor {
+    position: absolute;
+    top: 0.15em;
+    width: 0.6em;
+    height: 1.1em;
+    background: var(--term-fg);
+    pointer-events: none;
+    mix-blend-mode: difference;
+}
+
+.console-field:focus-within .console-cursor {
+    animation: console-blink var(--dur-loop) steps(1) infinite;
+}
+
+/* Без фокуса курсор пустой (только рамка) и не мигает - как в терминале. */
+.console-field:not(:focus-within) .console-cursor {
+    background: transparent;
+    box-shadow: inset 0 0 0 1px var(--term-fg);
+    mix-blend-mode: normal;
+}
+
+@keyframes console-blink {
+    0%, 50% { opacity: 1; }
+    50.01%, 100% { opacity: 0; }
+}
+
+/* Подсказка из истории: серый хвост за кареткой. 60% приглушённого тона по
+   фону терминала - это 4.6:1, то есть подсказка читается, но спорить с набранным
+   текстом (11.3:1) не начинает. */
+.t-ghost {
+    color: color-mix(in srgb, var(--term-muted-fg) 60%, var(--term-bg));
+}
+
+/* Список вариантов по Ctrl+Space: колонки набираются сами, чтобы длинный
+   перечень файлов не гнал терминал в бесконечную прокрутку. */
+.console-menu {
+    margin-top: var(--space-2);
+    padding: var(--space-2);
+    border: 1px solid var(--term-chrome-line);
+    border-radius: var(--radius-xs);
+    background: var(--term-chrome);
+    columns: 4 14ch;
+    column-gap: var(--space-4);
+    list-style: none;
+}
+
+.console-menu[hidden] {
+    display: none;
+}
+
+/* max-content, иначе в многоколоночной раскладке подсветка растягивается
+   на всю ширину колонки и вариант тонет в синей полосе. */
+.console-menu__item {
+    width: max-content;
+    max-width: 100%;
+    padding: 0 var(--space-1);
+    border-radius: var(--radius-xs);
+    color: var(--term-muted-fg);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    cursor: pointer;
+}
+
+.console-menu__item.is-current {
+    background: var(--term-status-bg);
+    color: var(--term-status-fg);
+}
+
+/* Цветовые классы вывода и подсветки (ключи задаёт console.js). Классов больше,
+   чем цветов: роли разные, а красятся намеренно одинаково, и группировка не даёт
+   развести их по новым оттенкам. Всего на вывод пять нот плюс плашка папки. */
+.console .t-def,
+.console .t-num     { color: var(--term-fg); }
+
+.console .t-ps,
+.console .t-param,
+.console .t-op,
+.console .t-muted   { color: var(--term-muted-fg); }
+
+.console .t-cmd     { color: var(--term-tertiary); }
+
+.console .t-cmd-bad,
+.console .t-err     { color: var(--term-error); }
+
+.console .t-string  { color: var(--term-primary); }
+
+/* Зелёный забирает ярлыки и шапку таблицы Get-ChildItem; часть её колонок идёт
+   курсивом - как pwsh красит TableHeader и CustomTableHeaderLabel. */
+.console .t-app,
+.console .t-th,
+.console .t-thi     { color: var(--term-green); }
+
+.console .t-thi     { font-style: italic; }
+
+/* Папка: синий фон + светлый текст - как $PSStyle.FileInfo.Directory (\e[44;1m).
+   Небольшой паддинг и скругление превращают имя в аккуратный чип. */
+.console .t-dir {
+    color: var(--frost-100);
+    background: var(--term-blue);
+    padding: 0 3px;
+    border-radius: var(--radius-xs);
+}
+
+
+/* Окно консоли: компактная карточка с тонкой кромкой, глубокой тенью и белым
+   кольцом в 1px по краю. Терминал остаётся тёмным и в светлом оформлении:
+   светлый cmd - это уже не терминал, а редактор. Держится это на том, что
+   палитра --term-* объявлена только в :root и светлым блоком не трогается. */
+.window[data-type="console"] {
+    width: 920px;
+    height: 580px;
+    border: 1px solid var(--term-edge);
+    box-shadow: var(--shadow-deep), 0 0 0 1px var(--term-chrome-line);
+}
+
+.window[data-type="console"] .window-header {
+    background: var(--term-chrome);
+    border-bottom: 1px solid var(--term-chrome-line);
+}
+
+/* Тело вплотную к кромке окна - без отступа window-content вокруг терминала. */
+.window[data-type="console"] .window-content {
+    padding: 0;
+    border-radius: 0;
+}
+
+/* Заголовок «pwsh» с шевроном приглашения, синим акцентом. */
+.window[data-type="console"] .window-title {
+    display: inline-flex;
+    align-items: center;
+    margin-left: var(--space-4);
+    font-family: var(--font-terminal);
+    font-size: var(--text-13);
+    font-weight: var(--w-medium);
+    letter-spacing: var(--track-normal);
+    color: var(--term-primary);
+}
+
+.window[data-type="console"] .window-title::before {
+    content: "\203A";
+    margin-right: var(--space-2);
+    font-size: 1.25em;
+    opacity: 0.85;
+}

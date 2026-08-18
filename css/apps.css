@@ -1,0 +1,244 @@
+/* Мелкие окна: папка, звонки, подсказка, заметки, галерея */
+
+/* Папки */
+.folder-content {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+    gap: var(--space-5);
+    background: var(--surface);
+}
+
+.folder-item {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    cursor: pointer;
+    padding: var(--space-3);
+    transition: background var(--dur-fast) var(--ease-standard);
+    border-radius: var(--radius-md);
+}
+
+.folder-item:hover,
+.folder-item:focus {
+    background: var(--frost-line);
+}
+
+.folder-item img,
+.folder-item video {
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+    border-radius: var(--radius-md);
+}
+
+.folder-item span {
+    margin-top: 8px;
+    font-size: var(--text-14);
+    color: var(--fg);
+    text-align: center;
+}
+
+/* Звонки */
+.call-log {
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+    overflow-y: auto;
+    max-height: 100%;
+}
+
+.call-item {
+    display: flex;
+    align-items: center;
+    padding: var(--space-3);
+    background: var(--frost-fill);
+    border-radius: var(--radius-md);
+    transition: background var(--dur-fast) var(--ease-standard);
+}
+
+.call-item:hover {
+    background: var(--frost-line);
+}
+
+.call-item img {
+    width: 40px;
+    height: 40px;
+    margin-right: 15px;
+    border-radius: var(--radius-pill);
+}
+
+.call-info {
+    flex: 1;
+}
+
+.call-info h3 {
+    font-size: var(--text-16);
+    font-weight: var(--w-semibold);
+    margin-bottom: 4px;
+}
+
+.call-info p {
+    font-size: var(--text-14);
+    color: var(--fg);
+    opacity: 0.7;
+}
+
+/* Подсказка у заголовка: кружок «i», по наведению или фокусу разворачивается
+   в пояснение. Фокус, а не только ховер - иначе на тач-экране не открыть. */
+.hint {
+    position: relative;
+    display: inline-flex;
+    vertical-align: middle;
+    margin-left: var(--space-2);
+}
+
+.hint__btn {
+    width: 18px;
+    height: 18px;
+    padding: 0;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--frost-fill);
+    border: 1px solid var(--frost-line);
+    border-radius: var(--radius-pill);
+    color: var(--fg-muted);
+    font: italic 600 11px/1 Georgia, serif;
+    cursor: help;
+}
+
+.hint__btn:hover,
+.hint__btn:focus {
+    color: var(--fg);
+    border-color: var(--accent);
+    outline: none;
+}
+
+.hint__bubble {
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0;
+    z-index: 1;
+    width: max-content;
+    max-width: min(24rem, 70vw);
+    padding: var(--space-2) var(--space-3);
+    background: var(--abyss-700);
+    border: 1px solid var(--frost-line);
+    border-radius: var(--radius-md);
+    color: var(--fg-muted);
+    font-size: var(--text-12);
+    font-weight: var(--w-regular);
+    line-height: 1.5;
+    text-align: left;
+    white-space: normal;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateY(-4px);
+    transition: opacity var(--dur-fast) var(--ease-standard),
+                transform var(--dur-fast) var(--ease-standard),
+                visibility var(--dur-fast);
+}
+
+.hint__btn:hover + .hint__bubble,
+.hint__btn:focus + .hint__bubble {
+    opacity: 1;
+    visibility: visible;
+    transform: none;
+}
+
+/* Заметки */
+.notes-area {
+    width: 100%;
+    height: 100%;
+    padding: var(--space-4);
+    font-size: var(--text-14);
+    line-height: var(--lh-base);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-md);
+    background: var(--frost-fill);
+    resize: none;
+    color: var(--fg);
+    font-family: var(--font-sans);
+    overflow-y: auto;
+}
+
+.notes-area:focus {
+    outline: none;
+    box-shadow: 0 0 0 2px var(--accent);
+}
+
+/* Галерея */
+.gallery {
+    position: relative;
+    width: 100%;
+    height: 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    overflow: hidden;
+    touch-action: none;
+    background: var(--surface);
+}
+
+.gallery-container {
+    display: flex;
+    transition: transform var(--dur-slow) var(--ease-standard);
+    height: 100%;
+    width: 100%;
+}
+
+.gallery-item {
+    flex: 0 0 100%;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    height: 100%;
+}
+
+.gallery-item img,
+.gallery-item video {
+    max-width: 90%;
+    max-height: 70%;
+    border-radius: var(--radius-md);
+}
+
+.gallery-item--link img {
+    cursor: pointer;
+}
+
+.arrow {
+    position: absolute;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    background: var(--glass-soft);
+    color: var(--fg);
+    font-size: var(--text-20);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    cursor: pointer;
+    border-radius: var(--radius-pill);
+    z-index: var(--z-arrow);
+    transition: background var(--dur-fast) var(--ease-standard);
+    border: none;
+}
+
+.arrow:hover,
+.arrow:focus {
+    background: var(--glass-strong);
+}
+
+.arrow[aria-disabled="true"] {
+    opacity: 0.3;
+    cursor: not-allowed;
+}
+
+.arrow.left {
+    left: 15px;
+}
+
+.arrow.right {
+    right: 15px;
+}

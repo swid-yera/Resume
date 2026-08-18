@@ -1,0 +1,150 @@
+/* Окно GitHub */
+
+/* GitHub */
+.github-profile {
+    display: flex;
+    flex-direction: column;
+    font-family: var(--font-sans);
+    color: var(--fg-muted);
+    padding: var(--space-4);
+    height: 100%;
+    overflow-y: auto;
+    background: var(--surface);
+    border-radius: calc(var(--radius-lg) - var(--window-content-padding));
+}
+
+.gh-body {
+    display: grid;
+    grid-template-columns: 130px 1fr;
+    gap: var(--space-5);
+}
+
+.gh-left-column {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: var(--space-3);
+    padding-top: var(--space-12);
+}
+
+.gh-left-column img.gh-avatar {
+    width: 120px;
+    height: 120px;
+    border-radius: var(--radius-pill);
+    border: 2px solid var(--border);
+}
+
+.gh-left-column h2 {
+    font-size: var(--text-16);
+    margin: 0;
+    text-align: center;
+    color: var(--fg);
+}
+
+.gh-left-column p {
+    font-size: var(--text-12);
+    color: var(--fg-subtle);
+    margin: 0;
+    text-align: center;
+}
+
+.gh-right-column {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.gh-readme,
+.gh-repos {
+    background: var(--surface-2);
+    padding: var(--space-4);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--border);
+}
+
+.gh-readme {
+    overflow-x: auto;
+}
+
+.gh-repos ul {
+    list-style: none;
+    padding: 0;
+    margin: 0;
+}
+
+.gh-repos li {
+    margin-bottom: var(--space-2);
+    padding: var(--space-2) 0;
+    border-bottom: 1px solid var(--border);
+    transition: background var(--dur-fast) var(--ease-standard);
+}
+
+.gh-repos li:hover {
+    background: var(--accent-fill-soft);
+    border-radius: var(--radius-xs);
+}
+
+.gh-repos li:last-child {
+    border-bottom: none;
+}
+
+.gh-repos a {
+    color: var(--link);
+    text-decoration: none;
+    font-weight: var(--w-medium);
+    transition: color var(--dur-fast) var(--ease-standard);
+}
+
+.gh-repos a:hover,
+.gh-repos a:focus {
+    color: var(--link-hover);
+    text-decoration: underline;
+}
+
+.gh-profiles {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+}
+
+.gh-profile {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    padding: var(--space-5);
+}
+
+.gh-profile .gh-body {
+    margin-top: var(--space-3);
+}
+
+.gh-readme h1,
+.gh-readme h2,
+.gh-readme h3 {
+    color: var(--fg);
+    margin-bottom: var(--space-2);
+}
+
+.gh-readme p {
+    margin-bottom: var(--space-3);
+    color: var(--fg-muted);
+    line-height: var(--lh-base);
+}
+
+.gh-readme code {
+    background: var(--frost-fill);
+    padding: 2px var(--space-1);
+    border-radius: var(--radius-xs);
+    font-family: var(--font-mono);
+    font-size: var(--text-13);
+    color: var(--accent-text);
+}
+
+.gh-readme pre {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    padding: var(--space-3);
+    border-radius: var(--radius-sm);
+    overflow-x: auto;
+    margin-bottom: var(--space-4);
+}

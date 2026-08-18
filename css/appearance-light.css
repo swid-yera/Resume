@@ -1,0 +1,51 @@
+/* Светлое оформление, системный хром: только те места, где цвет не выводится
+   из токенов. Всё остальное переворачивается само через :root[data-appearance].
+   Значения - с макетов Stitch (дизайн-система Daylight Desktop). */
+
+/* Обои: на светлом Stitch отказался от фотографии в пользу мягкого градиента
+   из трёх слоёв поверхностей. Фото тут дало бы грязь под белыми окнами. */
+:root[data-appearance="light"] .desktop {
+    background-image: linear-gradient(
+        135deg,
+        var(--surface-low) 0%,
+        var(--surface-lowest) 45%,
+        var(--surface-high) 100%
+    );
+}
+
+/* Сетка на светлом рисуется теми же градиентами: цвет линий приходит
+   токенами, а вычитающий режим и плотность - отсюда. */
+:root[data-appearance="light"] .desktop::before {
+    opacity: 0.18;
+    mix-blend-mode: multiply;
+}
+
+:root[data-appearance="light"] .menu-bar {
+    border-bottom: 1px solid var(--frost-line);
+}
+
+:root[data-appearance="light"] .dock {
+    background: var(--glass-strong);
+    border: 1px solid var(--frost-line);
+}
+
+/* Окно консоли исключено намеренно: терминал остаётся тёмным целиком, включая
+   шапку и кромку. Без :not() спор решался бы порядком файлов - у светлой шапки
+   и у шапки консоли одинаковая специфичность (0,3,0). */
+:root[data-appearance="light"] .window:not([data-type="console"]) {
+    border: 1px solid var(--frost-line);
+}
+
+:root[data-appearance="light"] .window:not([data-type="console"]) .window-header {
+    background: var(--surface-2);
+}
+
+/* На белом стекло сливается с фоном окна, поэтому нажатию нужен плотный слой */
+:root[data-appearance="light"] .arrow {
+    box-shadow: var(--shadow-card);
+}
+
+:root[data-appearance="light"] .arrow:hover,
+:root[data-appearance="light"] .arrow:focus {
+    background: var(--surface-high);
+}

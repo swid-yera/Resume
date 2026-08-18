@@ -1,0 +1,32 @@
+/* Узкие экраны: Проводник, ридер и заданная ширина окон */
+
+@media (max-width: 768px) {
+    .ex-nav,
+    .md-outline {
+        display: none;
+    }
+
+    .ex-table {
+        --ex-grid: minmax(120px, 1fr) 90px;
+    }
+
+    .ex-col--modified,
+    .ex-col--kind {
+        display: none;
+    }
+
+    .md-scroll {
+        padding: var(--space-4);
+    }
+
+    /* Заданная ширина окна не должна переживать узкий экран: `.window` в
+       мобильной секции сжимается до 90vw, но правило с [data-type] у него
+       выигрывает по специфичности, и окно оставалось шире вьюпорта. */
+    .window[data-type="text"],
+    .window[data-type="markdown"],
+    .window[data-type="explorer"] {
+        width: 90vw;
+        height: 80vh;
+        max-height: 500px;
+    }
+}

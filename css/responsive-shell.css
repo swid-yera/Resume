@@ -1,0 +1,139 @@
+/* Узкие экраны: стол, окно, док, меню-бар и мелкие окна */
+
+/* Адаптайв для десктопа */
+@media (min-width: 769px) {
+    .file[data-type="projects"] {
+        left: 80px;
+        top: 80px;
+    }
+    .file[data-type="photos"] {
+        left: 220px;
+        top: 80px;
+    }
+    .file[data-type="text"] {
+        left: 360px;
+        top: 80px;
+    }
+}
+
+/* Адаптайв для планшетов */
+@media (max-width: 768px) {
+    .desktop {
+        padding: 40px 15px 100px 15px;
+    }
+    .file[data-type="projects"] {
+        left: 20px;
+        top: 40px;
+    }
+    .file[data-type="photos"] {
+        left: 20px;
+        top: 160px;
+    }
+    .file[data-type="text"] {
+        left: 20px;
+        top: 280px;
+    }
+    .file-icon {
+        width: 80px;
+        height: 80px;
+    }
+    .file span {
+        font-size: var(--text-13);
+    }
+    .window {
+        width: 90vw;
+        max-height: 500px;
+    }
+    .window-content {
+        font-size: var(--text-14);
+    }
+    .dock {
+        padding: 8px;
+        gap: 12px;
+    }
+    .dock-icon {
+        width: 45px;
+        height: 45px;
+    }
+    .menu-bar {
+        font-size: var(--text-13);
+        height: 36px;
+    }
+    .datetime {
+        font-size: var(--text-20);
+    }
+    .arrow {
+        width: 30px;
+        height: 30px;
+        font-size: var(--text-16);
+    }
+    .gh-body {
+        grid-template-columns: 1fr;
+    }
+    .gh-profiles {
+        grid-template-columns: 1fr;
+    }
+    .telegram-chat-list {
+        width: 100px;
+    }
+    .window-resize-handle {
+        display: none;
+    }
+}
+
+/* Адаптайв для мобильных */
+@media (max-width: 480px) {
+    .window {
+        max-height: 450px;
+    }
+    .desktop {
+        padding: 30px 10px 90px 10px;
+        background-position: 72% center;    
+    }
+    .file-icon {
+        width: 70px;
+        height: 70px;
+    }
+    .file span {
+        font-size: var(--text-12);
+        padding: 4px 8px;
+    }
+    .window-content {
+        font-size: var(--text-13);
+    }
+    .dock {
+        padding: 6px;
+        gap: 10px;
+    }
+    .dock-icon {
+        width: 40px;
+        height: 40px;
+    }
+    .arrow {
+        width: 28px;
+        height: 28px;
+        font-size: var(--text-14);
+    }
+    .window-header {
+        padding: 10px 15px;
+    }
+    .window-title {
+        font-size: var(--text-13);
+    }
+    .window-control {
+        --window-control-size: 12px;
+        --window-control-expanded-width: 34px;
+    }
+    .call-item img {
+        width: 35px;
+        height: 35px;
+    }
+    .folder-item img,
+    .folder-item video {
+        width: 80px;
+        height: 80px;
+    }
+    .folder-item span {
+        font-size: var(--text-12);
+    }
+}

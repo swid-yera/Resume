@@ -1,0 +1,199 @@
+/* Рабочий стол: обои, сетка, меню-бар, иконки файлов */
+
+/* Desktop */
+.desktop {
+    width: 100%;
+    height: 100%;
+    padding: var(--desktop-padding-top) var(--space-5) var(--desktop-padding-bottom) var(--space-5);
+    position: fixed;
+    top: 0;
+    left: 0;
+    background-image: url(photos/wppr-phone.webp);
+    background-position: center;
+    background-size: cover;
+    background-repeat: no-repeat;
+    z-index: var(--z-desktop);
+    overflow: hidden;
+    touch-action: none;
+    isolation: isolate;
+}
+
+/* Десктоп: обычная плотность экрана — лёгкий сжатый фон */
+@media (min-width: 1024px) {
+    .desktop {
+        background-image: url(photos/wppr-tv.webp);
+    }
+}
+
+/* Десктоп: retina/высокая плотность — фон без потерь */
+@media (min-width: 1024px) and (min-resolution: 2dppx) {
+    .desktop {
+        background-image: url(photos/wppr-retina.webp);
+    }
+}
+
+.desktop::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background-image:
+        linear-gradient(0deg, var(--grid-major) 1px, transparent 1px),
+        linear-gradient(90deg, var(--grid-major) 1px, transparent 1px),
+        linear-gradient(0deg, transparent 0 32px, var(--grid-minor) 32px 33px, transparent 33px),
+        linear-gradient(90deg, transparent 0 32px, var(--grid-minor) 32px 33px, transparent 33px);
+    background-size: 70px 70px;
+    opacity: 0.3;
+    pointer-events: none;
+    z-index: 1;
+    mix-blend-mode: screen;
+}
+
+/* Меню */
+.menu-bar {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: var(--menu-height);
+    padding: 0 var(--space-6);
+    background: var(--glass-strong);
+    backdrop-filter: blur(var(--blur-glass));
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    z-index: var(--z-menubar);
+    color: var(--fg);
+    font-size: var(--text-14);
+    font-weight: var(--w-medium);
+}
+
+/* Меню приложений (слева) */
+.menu-bar__items {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    font-size: var(--text-13);
+    font-weight: var(--w-regular);
+    color: var(--fg-subtle);
+}
+
+.menu-bar__active {
+    color: var(--fg);
+    font-weight: var(--w-semibold);
+    padding: 0 var(--space-2);
+    cursor: default;
+}
+
+/* Пустое место слева, где раньше был значок системы */
+.menu-bar__spacer {
+    width: 14px;
+    height: 14px;
+    margin-right: var(--space-1);
+    flex: none;
+}
+
+.menu-bar__item {
+    appearance: none;
+    border: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    padding: 3px var(--space-2);
+    border-radius: var(--radius-sm);
+    cursor: default;
+    transition: background var(--dur-fast) var(--ease-standard),
+                color var(--dur-fast) var(--ease-standard);
+}
+
+.menu-bar__item:hover {
+    background: var(--frost-fill);
+    color: var(--fg);
+}
+
+.menu-bar__item.is-open {
+    background: var(--accent);
+    color: var(--accent-contrast);
+}
+
+.datetime {
+    padding: 4px 12px;
+    border-radius: var(--radius-sm);
+    font-family: var(--font-display);
+    font-size: var(--text-24);
+    font-weight: var(--w-bold);
+}
+
+/* Файлы на рабочем столе */
+.file {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    cursor: pointer;
+    text-decoration: none;
+    color: inherit;
+    transition: transform var(--dur-fast) var(--ease-snap);
+    z-index: var(--z-file);
+    touch-action: none;
+    will-change: left, top;
+    position: absolute;
+}
+
+.file.dragging {
+    opacity: 0.9;
+    transform: scale(1.1);
+    z-index: var(--z-file-dragging);
+}
+
+.file-icon {
+    position: relative;
+    width: var(--file-icon-size);
+    height: var(--file-icon-size);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+    box-shadow: none;
+    background: transparent;
+}
+
+.file-icon img,
+.file-icon video,
+.file-icon svg {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    background: transparent;
+}
+
+.file-icon video::-webkit-media-controls {
+    display: none;
+}
+
+.folder .file-icon {
+    background: transparent;
+}
+
+.text-icon {
+    padding: 8px;
+}
+
+/* Иконка файла на столе рисуется обводкой от currentColor, а он тут наследуется
+   чёрным - на обоях её просто не видно. Красим тем же, чем подпись. */
+.file-icon .fileicon {
+    padding: 8px;
+    color: var(--fg);
+}
+
+:root[data-appearance="light"] .file-icon .fileicon {
+    color: var(--fg);
+}
+
+.file span {
+    margin-top: 10px;
+    font-size: var(--text-14);
+    color: var(--fg);
+    text-shadow: var(--shadow-text);
+    font-weight: var(--w-medium);
+    background: var(--glass-strong);
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-sm);
+}

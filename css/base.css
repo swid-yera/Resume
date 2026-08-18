@@ -1,0 +1,197 @@
+/* Сброс, фон, оверлеи, скроллбары, доступность, спрайт иконок, приём файлов */
+
+/* Шрифты и токены вынесены в colors_and_type.css (подключается перед этим файлом) */
+
+* {
+    margin: 0;
+    padding: 0;
+    box-sizing: border-box;
+    font-family: var(--font-sans);
+    user-select: none;
+    -webkit-tap-highlight-color: transparent;
+}
+
+body {
+    background: var(--bg-body);
+    height: 100vh;
+    width: 100vw;
+    overflow: hidden;
+    position: fixed;
+    touch-action: manipulation;
+}
+
+#startup-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--blackout);
+    opacity: 1;
+    pointer-events: none;
+    z-index: var(--z-startup);
+    animation: startup-fadeout var(--dur-fast) linear var(--dur-slow) forwards;
+}
+
+@keyframes startup-fadeout {
+    to {
+        opacity: 0;
+        visibility: hidden;
+    }
+}
+
+#brightness-overlay {
+    position: fixed;
+    inset: 0;
+    background: var(--blackout);
+    opacity: 0;
+    pointer-events: none;
+    z-index: var(--z-brightness);
+    transition: opacity var(--dur-fast) var(--ease-standard);
+}
+
+.hidden {
+    display: none !important;
+}
+
+/* Скроллбары */
+.window-content::-webkit-scrollbar,
+.github-profile::-webkit-scrollbar,
+.call-log::-webkit-scrollbar,
+.notes-area::-webkit-scrollbar {
+    width: 8px;
+}
+
+.window-content::-webkit-scrollbar-track,
+.github-profile::-webkit-scrollbar-track,
+.call-log::-webkit-scrollbar-track,
+.notes-area::-webkit-scrollbar-track {
+    background: var(--frost-fill);
+    border-radius: var(--radius-xs);
+}
+
+.window-content::-webkit-scrollbar-thumb,
+.github-profile::-webkit-scrollbar-thumb,
+.call-log::-webkit-scrollbar-thumb,
+.notes-area::-webkit-scrollbar-thumb {
+    background: var(--electric-blue);
+    border-radius: var(--radius-xs);
+}
+
+.window-content::-webkit-scrollbar-thumb:hover,
+.github-profile::-webkit-scrollbar-thumb:hover,
+.call-log::-webkit-scrollbar-thumb:hover,
+.notes-area::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-purple);
+}
+
+.telegram-chat-list::-webkit-scrollbar {
+    width: 6px;
+}
+
+.telegram-chat-list::-webkit-scrollbar-thumb {
+    background: var(--electric-blue);
+    border-radius: var(--radius-xs);
+}
+
+.telegram-chat-list::-webkit-scrollbar-thumb:hover {
+    background: var(--neon-purple);
+}
+
+/* В DOM есть, на экране нет. Именно clip, а не display:none: display:none
+   выкидывает узел и из озвучки скринридером. */
+.visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    overflow: hidden;
+    clip: rect(0 0 0 0);
+    clip-path: inset(50%);
+    white-space: nowrap;
+    border: 0;
+}
+
+/* Спрайт иконок: только хранилище <symbol>, сам не рисуется */
+.sprite {
+    display: none;
+}
+
+/* Размер берётся от font-size обёртки, цвет — от её же color */
+.fileicon {
+    display: block;
+    width: 1em;
+    height: 1em;
+    fill: none;
+    stroke: currentColor;
+    stroke-width: 2;
+    stroke-linecap: round;
+    stroke-linejoin: round;
+}
+
+/* Перетаскивание файлов в систему */
+
+/* display в классе перебил бы браузерное [hidden] { display: none } */
+.drop-overlay[hidden] {
+    display: none;
+}
+
+.drop-overlay {
+    position: fixed;
+    inset: 0;
+    z-index: var(--z-drop);
+    display: grid;
+    place-items: center;
+    pointer-events: none;
+    background: var(--frost-fill);
+    border: 2px dashed var(--accent);
+}
+
+.drop-overlay__label {
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    background: var(--abyss-900);
+    border: 1px solid var(--border);
+    color: var(--fg);
+}
+
+.drop-toast {
+    position: fixed;
+    right: var(--space-4);
+    bottom: var(--space-4);
+    z-index: calc(var(--z-drop) + 1);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    max-width: 22rem;
+    padding: var(--space-3) var(--space-4);
+    border-radius: var(--radius-md);
+    background: var(--abyss-900);
+    border: 1px solid var(--border);
+    color: var(--fg);
+    font-size: var(--text-13);
+}
+
+.drop-toast--error {
+    border-color: var(--accent);
+}
+
+.noscript-fallback {
+    position: relative;
+    z-index: 1;
+    max-width: 40rem;
+    margin: 0 auto;
+    padding: var(--space-5);
+    color: var(--fg);
+}
+
+/* Focus styles for accessibility */
+*:focus-visible {
+    outline: 2px solid var(--accent);
+    outline-offset: 2px;
+}
+
+button:focus-visible,
+.dock-item:focus-visible,
+.file:focus-visible {
+    outline: 3px solid var(--accent);
+    outline-offset: 3px;
+}

@@ -1,0 +1,79 @@
+/* Окно настроек */
+
+/* Окно настроек: раскладки у него не было вовсе - подписи липли к контролам,
+   а свотчи тем схлопывались в точки, потому что размер им никто не задавал. */
+.settings-window {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-6);
+    padding: var(--space-6);
+    color: var(--fg);
+}
+
+.settings-section {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+}
+
+.settings-label {
+    color: var(--fg-muted);
+    font-size: var(--text-13);
+    font-weight: var(--w-medium);
+}
+
+.settings-slider {
+    width: 260px;
+    accent-color: var(--accent);
+}
+
+.settings-swatches {
+    display: flex;
+    gap: var(--space-3);
+}
+
+.settings-swatch {
+    width: 28px;
+    height: 28px;
+    border: 2px solid transparent;
+    border-radius: var(--radius-pill);
+    box-shadow: 0 0 0 1px var(--frost-line);
+    cursor: pointer;
+}
+
+.settings-swatch.is-active {
+    border-color: var(--fg);
+}
+
+/* Сегментный переключатель в настройках */
+.settings-seg-group {
+    align-self: flex-start;
+}
+
+.settings-seg-group {
+    display: inline-flex;
+    gap: 2px;
+    padding: 2px;
+    border: 1px solid var(--frost-line);
+    border-radius: var(--radius-sm);
+    background: var(--surface-2);
+}
+
+.settings-seg {
+    padding: var(--space-1) var(--space-4);
+    border: none;
+    border-radius: var(--radius-xs);
+    background: transparent;
+    color: var(--fg-muted);
+    font-size: var(--text-13);
+    cursor: pointer;
+}
+
+.settings-seg:hover {
+    color: var(--fg);
+}
+
+.settings-seg.is-active {
+    background: var(--accent);
+    color: var(--accent-contrast);
+}

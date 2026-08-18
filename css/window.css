@@ -1,0 +1,229 @@
+/* Окно: рамка, шапка, огоньки, зоны ресайза, состояния и анимации */
+
+/* Окна */
+.window {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 1040px;
+    height: 720px;
+    max-width: 95vw;
+    max-height: 90vh;
+    background: var(--surface);
+    border-radius: var(--radius-lg);
+    box-shadow: var(--shadow-window);
+    overflow: hidden;
+    z-index: var(--z-window);
+    touch-action: none;
+    animation: window-open var(--dur-slow) var(--ease-spring);
+}
+
+.window.is-closing {
+    animation: window-minimize var(--dur-base) var(--ease-standard) forwards;
+}
+
+/* Зоны изменения размера окна (невидимые, как в macOS) */
+.window-resize-handle {
+    position: absolute;
+    z-index: 2;
+    touch-action: none;
+}
+
+.window-resize-handle.n {
+    top: 0;
+    left: 0;
+    right: 0;
+    height: var(--window-resize-edge);
+    cursor: ns-resize;
+}
+
+.window-resize-handle.s {
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: var(--window-resize-edge);
+    cursor: ns-resize;
+}
+
+.window-resize-handle.e {
+    top: 0;
+    bottom: 0;
+    right: 0;
+    width: var(--window-resize-edge);
+    cursor: ew-resize;
+}
+
+.window-resize-handle.w {
+    top: 0;
+    bottom: 0;
+    left: 0;
+    width: var(--window-resize-edge);
+    cursor: ew-resize;
+}
+
+.window-resize-handle.ne,
+.window-resize-handle.nw,
+.window-resize-handle.se,
+.window-resize-handle.sw {
+    width: var(--space-4);
+    height: var(--space-4);
+    z-index: 3;
+}
+
+.window-resize-handle.ne {
+    top: 0;
+    right: 0;
+    cursor: nesw-resize;
+}
+
+.window-resize-handle.nw {
+    top: 0;
+    left: 0;
+    cursor: nwse-resize;
+}
+
+.window-resize-handle.se {
+    bottom: 0;
+    right: 0;
+    cursor: nwse-resize;
+}
+
+.window-resize-handle.sw {
+    bottom: 0;
+    left: 0;
+    cursor: nesw-resize;
+}
+
+.window-header {
+    background: var(--surface);
+    padding: 10px var(--space-5);
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    border-bottom: 1px solid var(--frost-line);
+    cursor: move;
+    touch-action: none;
+}
+
+.window-controls {
+    display: flex;
+    gap: 10px;
+}
+
+.window-control {
+    width: var(--window-control-size);
+    height: var(--window-control-size);
+    border-radius: var(--radius-pill);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: width var(--dur-fast) var(--ease-standard),
+                border-radius var(--dur-fast) var(--ease-standard),
+                filter var(--dur-fast) var(--ease-standard);
+    cursor: pointer;
+    border: none;
+    padding: 0;
+    transform-origin: left center;
+}
+
+.window-control.close {
+    background: var(--traffic-red);
+}
+
+.window-control.minimize {
+    background: var(--traffic-amber);
+}
+
+.window-control.maximize {
+    background: var(--traffic-green);
+}
+
+/* Раскрывается только кнопка закрытия — min/max декоративные */
+.window-control.close:hover {
+    width: var(--window-control-expanded-width);
+    border-radius: var(--window-control-expanded-radius);
+    filter: brightness(1.15);
+}
+
+.window-title {
+    font-size: var(--text-14);
+    color: var(--frost);
+    font-weight: var(--w-bold);
+    letter-spacing: 1px;
+    margin-left: var(--space-5);
+}
+
+.window-content {
+    padding: var(--window-content-padding);
+    height: calc(100% - var(--window-header-height));
+    color: var(--fg);
+    font-size: var(--text-16);
+    line-height: 1.6;
+    touch-action: pan-y;
+    background: var(--surface);
+    overflow-y: auto;
+}
+
+.window-content img,
+.window-content video {
+    max-width: 100%;
+    max-height: 80%;
+    border-radius: var(--radius-md);
+    margin: 0 auto;
+    display: block;
+}
+
+.window-content video::-webkit-media-controls {
+    display: none;
+}
+
+/* Error content */
+.error-content {
+    padding: 20px;
+    text-align: center;
+}
+
+.error-content p {
+    color: var(--danger);
+    font-size: var(--text-16);
+}
+
+
+/* Анимации */
+@keyframes window-open {
+    from {
+        transform: scale(0.9) translateY(20px);
+        opacity: 0;
+    }
+    to {
+        transform: scale(1) translateY(0);
+        opacity: 1;
+    }
+}
+
+@keyframes window-minimize {
+    to {
+        transform: scale(0.3);
+        opacity: 0;
+    }
+}
+
+
+/* Папка проектов - вертикальный список, а не холст: окно уже и ниже обычного,
+   но высоты должно хватать на две карточки целиком, иначе список открывается
+   уже проскроленным. 320px тут стояло со времён единственного проекта. */
+.window[data-type="projects"] {
+    width: 880px;
+    height: 560px;
+}
+
+.window.is-minimized {
+    display: none;
+}
+
+.window.is-maximized {
+    left: var(--space-2) !important;
+    top: calc(var(--menu-height) + var(--space-2)) !important;
+    width: calc(100vw - var(--space-4)) !important;
+    height: calc(100vh - var(--menu-height) - var(--desktop-padding-bottom) - var(--space-2)) !important;
+}

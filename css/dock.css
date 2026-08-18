@@ -1,0 +1,93 @@
+/* Док и его подсказки */
+
+/* Dock */
+.dock {
+    position: fixed;
+    bottom: 15px;
+    left: 50%;
+    transform: translateX(-50%);
+    backdrop-filter: blur(var(--blur-soft));
+    border-radius: var(--radius-xl);
+    padding: var(--space-3);
+    display: flex;
+    gap: var(--space-4);
+    box-shadow: var(--shadow-window);
+    z-index: var(--z-dock);
+}
+
+.dock-item {
+    position: relative;
+    cursor: pointer;
+    transition: transform var(--dur-fast) var(--ease-spring);
+    background: transparent;
+    border: none;
+    padding: 0;
+}
+
+.dock-icon {
+    width: var(--dock-icon-size);
+    height: var(--dock-icon-size);
+    filter: var(--shadow-icon);
+    border-radius: var(--radius-lg);
+}
+
+.dock-item:focus-visible {
+    transform: scale(1.4) translateY(-8px);
+}
+
+.dock-item:focus-visible .dock-tooltip {
+    opacity: 1;
+    transform: translateX(-50%) translateY(-10px);
+}
+
+/* Hover only on real pointers — touch devices keep sticky :hover that turns
+   the first tap into a hover and requires a second tap to open the app. */
+@media (hover: hover) {
+    .dock-item:hover {
+        transform: scale(1.4) translateY(-8px);
+    }
+
+    .dock-item:hover .dock-tooltip {
+        opacity: 1;
+        transform: translateX(-50%) translateY(-10px);
+    }
+}
+
+.dock-tooltip {
+    position: absolute;
+    bottom: 65px;
+    left: 50%;
+    transform: translateX(-50%);
+    backdrop-filter: blur(var(--blur-soft));
+    color: var(--fg);
+    text-shadow: var(--shadow-text-hi);
+    padding: 6px 12px;
+    border-radius: var(--radius-sm);
+    font-size: var(--text-12);
+    opacity: 0;
+    transition: opacity var(--dur-fast) var(--ease-standard),
+                transform var(--dur-fast) var(--ease-spring);
+    white-space: nowrap;
+    pointer-events: none;
+}
+
+/* Индикатор запущенного приложения */
+.dock-indicator {
+    position: absolute;
+    bottom: -6px;
+    left: 50%;
+    width: 4px;
+    height: 4px;
+    border-radius: var(--radius-pill);
+    background: var(--frost);
+    opacity: 0;
+    transform: translateX(-50%) translateY(4px);
+    transition: opacity var(--dur-base) var(--ease-standard),
+                transform var(--dur-base) var(--ease-spring);
+    pointer-events: none;
+}
+
+.dock-indicator.is-running {
+    opacity: 1;
+    transform: translateX(-50%) translateY(0);
+}
