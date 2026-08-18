@@ -37,6 +37,17 @@ test("the theme submenu lists every preset and ticks the active one", () => {
   assert.equal(forest.swatch, "forest", "свотч несёт id темы, цвет подставит css");
 });
 
+test("the desktop menu offers full screen where the browser has it", () => {
+  const withApi = itemsForTarget({ kind: "desktop" }, { ...ctx, canFullscreen: true });
+  assert.ok(labels(withApi).includes("Enter Full Screen"));
+  assert.ok(!labels(itemsForTarget({ kind: "desktop" }, ctx)).includes("Enter Full Screen"));
+});
+
+test("from full screen the desktop menu leads back", () => {
+  const items = itemsForTarget({ kind: "desktop" }, { ...ctx, canFullscreen: true, isFullscreen: true });
+  assert.ok(labels(items).includes("Exit Full Screen"));
+});
+
 // --- File icon ---
 
 test("a desktop icon can be opened and inspected", () => {

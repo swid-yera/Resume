@@ -12,7 +12,8 @@ import { setupFileDrop } from "./drop.js";
 import {
   closeTopWindow,
   closeWindow,
-  fullscreenTopWindow,
+  toggleFullscreen,
+  focusDesktop,
   minimizeWindow,
   zoomWindow,
   onActiveWindowChange,
@@ -56,7 +57,7 @@ function setupStartupOverlay() {
 document.addEventListener("keydown", (e) => {
   if (e.key === "F11") {
     e.preventDefault();
-    fullscreenTopWindow();
+    toggleFullscreen();
     return;
   }
   // В полный экран Esc уже вшит браузером: он гасит его, а окно должно остаться.
@@ -86,6 +87,7 @@ const actions = {
     if (win) closeWindow(win);
   },
   closeTop: closeTopWindow,
+  toggleFullscreen,
   minimizeWindow: (type) => minimizeWindow(openWindows.get(type)),
   zoomWindow: (type) => zoomWindow(openWindows.get(type)),
   minimizeTop: () => minimizeWindow(openWindows.get(activeWindowType())),
@@ -128,6 +130,8 @@ function menuCtx() {
   const active = activeWindowType();
   return {
     isCompact: isMobile(),
+    canFullscreen: !!document.fullscreenEnabled,
+    isFullscreen: !!document.fullscreenElement,
     activeTheme: currentSettings.theme,
     activeAppearance: currentSettings.appearance,
     openTypes: [...openWindows.keys()],
@@ -148,7 +152,11 @@ function menuCtx() {
 function keepPlayerOnStage() {
   // На узком экране пульт не занимает стол впустую: звук там всё равно не
   // пойдёт без жеста, поэтому пульт приезжает, когда музыка уже играет.
-  if (!isMobile()) openWindow("player");
+  if (!isMobile()) {
+    openWindow("player");
+    // Пульт приехал сам, а не по клику, поэтому активным остаётся стол.
+    focusDesktop();
+  }
   let wasPlaying = false;
   subscribePlayer((state) => {
     const playing = isPlaying(state);

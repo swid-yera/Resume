@@ -132,6 +132,16 @@ function viewMenu(ctx) {
     { label: "Change Theme", submenu: themeSubmenu(ctx) },
   );
 
+  // Полный экран предлагаем только там, где браузер его отдаёт: на телефоне
+  // такого API может не быть, и пункт оказался бы мёртвым.
+  if (ctx.canFullscreen) {
+    items.push(SEP, {
+      label: ctx.isFullscreen ? "Exit Full Screen" : "Enter Full Screen",
+      shortcut: ctx.isCompact ? undefined : "F11",
+      onSelect: () => ctx.actions?.toggleFullscreen?.(),
+    });
+  }
+
   return { label: "View", items };
 }
 

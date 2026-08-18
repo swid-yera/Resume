@@ -5,14 +5,27 @@ import { isMobile, onMobileChange } from "./mobile.js";
 const windowTemplate = document.getElementById("window-template");
 
 let topZ = 1000;
+let desktopActive = true;
 const activeChangeCbs = new Set();
 
 // --- Focus & status ---
 
 export function raiseWindow(win) {
   win.el.style.zIndex = ++topZ;
+  desktopActive = false;
   notifyActiveChange();
 }
+
+// Стол активен, пока не тронули окно: F11 должен разворачивать его, а не пульт
+// с музыкой, который приезжает сам. Клик по столу возвращает активность назад,
+// как в macOS возвращает в Finder.
+export function focusDesktop() {
+  desktopActive = true;
+}
+
+document.addEventListener("pointerdown", (e) => {
+  if (e.target.closest("#desktop")) focusDesktop();
+});
 
 function topWindow() {
   let top = null;
@@ -233,28 +246,34 @@ function showExitHint(el) {
   setTimeout(() => hint.remove(), CONSTANTS.FULLSCREEN_HINT_MS);
 }
 
-// F11 как в настоящем браузере: окно занимает весь экран целиком, без рабочего
-// стола и своей шапки.
-export function fullscreenTopWindow() {
+// F11 как в настоящем браузере: активное окно занимает весь экран целиком, без
+// рабочего стола и своей шапки. Активен стол - на весь экран уходит он сам
+// вместе с панелью и доком, то есть корень документа.
+export function toggleFullscreen() {
   if (document.fullscreenElement) {
     document.exitFullscreen();
     return;
   }
-  const top = topWindow();
-  if (!top?.el.requestFullscreen) return;
+  const top = desktopActive ? null : topWindow();
+  if (top) fullscreenWindow(top);
+  else document.documentElement.requestFullscreen?.().catch(() => {});
+}
 
-  stashGeometry(top);
-  top.el.requestFullscreen().then(
+function fullscreenWindow(win) {
+  if (!win.el.requestFullscreen) return;
+
+  stashGeometry(win);
+  win.el.requestFullscreen().then(
     () => {
-      dropGeometry(top.el);
-      showExitHint(top.el);
+      dropGeometry(win.el);
+      showExitHint(win.el);
     },
-    () => restoreGeometry(top),
+    () => restoreGeometry(win),
   );
   document.addEventListener(
     "fullscreenchange",
     () => {
-      if (!document.fullscreenElement) restoreGeometry(top);
+      if (!document.fullscreenElement) restoreGeometry(win);
     },
     { once: true },
   );

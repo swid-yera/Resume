@@ -49,7 +49,14 @@ function desktopItems(ctx) {
     SEP,
     { label: "Open Terminal", onSelect: () => ctx.actions?.openWindow?.("console") },
     { label: "Resume", onSelect: () => ctx.actions?.openWindow?.("text") },
-  ];
+    // Полный экран предлагаем только там, где браузер его отдаёт.
+    ctx.canFullscreen && SEP,
+    ctx.canFullscreen && {
+      label: ctx.isFullscreen ? "Exit Full Screen" : "Enter Full Screen",
+      shortcut: ctx.isCompact ? undefined : "F11",
+      onSelect: () => ctx.actions?.toggleFullscreen?.(),
+    },
+  ].filter(Boolean);
 }
 
 function fileItems(target, ctx) {

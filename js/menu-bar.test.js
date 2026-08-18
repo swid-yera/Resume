@@ -118,17 +118,37 @@ test("the View menu carries the theme presets with the active one ticked", () =>
   assert.equal(theme.submenu.find((i) => i.label === "Amber").checked, true);
 });
 
+// --- Full screen ---
+
+test("full screen is offered only where the browser has the API", () => {
+  const view = find(menusFor(null, ctx({ canFullscreen: true })), "View");
+  assert.ok(itemLabels(view).includes("Enter Full Screen"));
+
+  const withoutApi = find(menusFor(null, ctx()), "View");
+  assert.ok(!itemLabels(withoutApi).includes("Enter Full Screen"));
+});
+
+test("from full screen the same item leads back", () => {
+  const view = find(menusFor(null, ctx({ canFullscreen: true, isFullscreen: true })), "View");
+  assert.ok(itemLabels(view).includes("Exit Full Screen"));
+});
+
+test("the narrow bar drops the F11 caption - there is no keyboard", () => {
+  const view = find(menusFor(null, ctx({ canFullscreen: true, isCompact: true })), "View");
+  const item = view.items.find((i) => i.label === "Enter Full Screen");
+  assert.equal(item.shortcut, undefined);
+});
+
 // --- Shape ---
 
 test("no menu promises a shortcut it cannot honour", () => {
-  // Горячие клавиши не реализованы, поэтому подписей быть не должно.
+  // Из горячих клавиш работает только F11, остальным подписей не полагается.
   for (const type of [null, "console", "projects", "telegram"]) {
-    for (const menu of menusFor(type, ctx())) {
+    for (const menu of menusFor(type, ctx({ canFullscreen: true }))) {
       for (const item of menu.items) {
-        assert.equal(
-          item.shortcut,
-          undefined,
-          `пункт "${item.label}" обещает ${item.shortcut}, но клавиши не работают`,
+        assert.ok(
+          item.shortcut === undefined || item.shortcut === "F11",
+          `пункт "${item.label}" обещает ${item.shortcut}, но клавиша не работает`,
         );
       }
     }
