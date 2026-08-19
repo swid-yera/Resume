@@ -2,17 +2,22 @@
 
 /* Шрифты и токены вынесены в colors_and_type.css (подключается перед этим файлом) */
 
+/* Шрифт в звёздочке только `inherit`: конкретное семейство село бы на каждый
+   элемент и заглушило наследование - внутри терминала и блоков кода
+   моноширинным остался бы один корень. Семейство названо у body, а `inherit`
+   заодно чинит поля и кнопки: сами они шрифт не наследуют. */
 * {
     margin: 0;
     padding: 0;
     box-sizing: border-box;
-    font-family: var(--font-sans);
+    font-family: inherit;
     user-select: none;
     -webkit-tap-highlight-color: transparent;
 }
 
 body {
     background: var(--bg-body);
+    font-family: var(--font-sans);
     /* dvh, а не vh: на телефоне адресная строка входит в vh, и нижняя полоса
        с доком оказывалась за краем экрана. */
     height: 100vh;
