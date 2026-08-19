@@ -9,36 +9,75 @@ import {
   setupRouter,
 } from "./router.js";
 
-// Заглушка окна: location.hash меняется только через replaceState, как в браузере.
+// Заглушка окна с настоящим стеком истории: адрес меняется только через
+// history, а переход назад шлёт оба события, как браузер, - сперва popstate,
+// следом hashchange.
 function fakeWindow(hash = "") {
   const win = {
     location: { hash, pathname: "/", search: "" },
     listeners: {},
+    left: false, // ушли с сайта: назад с первой записи документа
     addEventListener(name, cb) {
       (this.listeners[name] ??= []).push(cb);
     },
+    fire(name) {
+      (this.listeners[name] ?? []).forEach((cb) => cb());
+    },
   };
+
+  const hashOf = (url) => (url.startsWith("#") ? url : "");
+  const entries = [hash];
+  let index = 0;
+
   win.history = {
     calls: [],
+    get entries() {
+      return [...entries];
+    },
+    get index() {
+      return index;
+    },
+    pushState(_state, _title, url) {
+      win.history.calls.push(["push", url]);
+      entries.splice(index + 1);
+      entries.push(hashOf(url));
+      index = entries.length - 1;
+      win.location.hash = entries[index];
+    },
     replaceState(_state, _title, url) {
-      win.history.calls.push(url);
-      win.location.hash = url.startsWith("#") ? url : "";
+      win.history.calls.push(["replace", url]);
+      entries[index] = hashOf(url);
+      win.location.hash = entries[index];
+    },
+    back() {
+      win.history.calls.push(["back"]);
+      if (index === 0) {
+        win.left = true;
+        return;
+      }
+      index -= 1;
+      win.location.hash = entries[index];
+      win.fire("popstate");
+      win.fire("hashchange");
     },
   };
   return win;
 }
 
-// Настоящий onActiveWindowChange зовёт колбэк сразу при подписке, и активного
-// окна на этот момент ещё нет.
-function fakeActiveChange() {
+// Настоящий onActiveWindowChange зовёт колбэк сразу при подписке. На пустом
+// столе активного окна нет, а если адрес уже открыл своё - оно и активно.
+function fakeActiveChange(active = null) {
   const subs = [];
   const on = (cb) => {
     subs.push(cb);
-    cb(null);
+    cb(active);
   };
   on.fire = (type) => subs.forEach((cb) => cb(type));
   return on;
 }
+
+// Кнопка «назад» браузера: тот же переход, что делает и сам роутер.
+const pressBack = (win) => win.history.back();
 
 // --- Слаги ---
 
@@ -144,12 +183,12 @@ test("an opened window puts itself in the url", () => {
 
 test("closing the last window clears the url", () => {
   const win = fakeWindow("#about");
-  const onActive = fakeActiveChange();
+  const onActive = fakeActiveChange("text");
   setupRouter({ openWindow: () => {}, onActiveWindowChange: onActive, win });
 
   onActive.fire(null);
   assert.equal(win.location.hash, "");
-  assert.equal(win.history.calls.at(-1), "/");
+  assert.deepEqual(win.history.calls.at(-1), ["replace", "/"]);
 });
 
 test("a fragment that is not ours is left alone", () => {
@@ -171,6 +210,130 @@ test("hashchange opens the window the url now points at", () => {
   });
 
   win.location.hash = "#github";
-  win.listeners.hashchange.forEach((cb) => cb());
+  win.fire("hashchange");
   assert.deepEqual(opened, ["github"]);
+});
+
+// --- История: «назад» закрывает окно ---
+
+// Стол со стопкой окон: верхнее активно, закрытие снимает его и делает активным
+// то, что осталось, - как это делает window-manager.
+function fakeDesktop(win) {
+  const stack = [];
+  const subs = [];
+  const active = () => stack.at(-1) ?? null;
+  const notify = () => subs.forEach((cb) => cb(active()));
+
+  const desktop = {
+    stack,
+    open(type) {
+      if (!stack.includes(type)) stack.push(type);
+      notify();
+    },
+    closeTop() {
+      stack.pop();
+      notify();
+    },
+  };
+
+  setupRouter({
+    openWindow: (type) => desktop.open(type),
+    closeTopWindow: () => desktop.closeTop(),
+    onActiveWindowChange: (cb) => {
+      subs.push(cb);
+      cb(active());
+    },
+    win,
+  });
+  return desktop;
+}
+
+test("open windows take one step in history, switching between them stays on it", () => {
+  const win = fakeWindow("");
+  const desktop = fakeDesktop(win);
+
+  desktop.open("explorer");
+  desktop.open("console");
+
+  assert.deepEqual(win.history.entries, ["", "#terminal"]);
+  assert.equal(win.history.index, 1);
+});
+
+test("back closes the top window instead of leaving the site", () => {
+  const win = fakeWindow("");
+  const desktop = fakeDesktop(win);
+  desktop.open("console");
+
+  pressBack(win);
+
+  assert.deepEqual(desktop.stack, []);
+  assert.equal(win.location.hash, "");
+  assert.equal(win.left, false);
+});
+
+test("one step back closes one window, though the browser sends two events", () => {
+  const win = fakeWindow("");
+  const desktop = fakeDesktop(win);
+  desktop.open("explorer");
+  desktop.open("console");
+
+  pressBack(win);
+
+  assert.deepEqual(desktop.stack, ["explorer"]);
+});
+
+test("back walks down the stack of windows and only then leaves the site", () => {
+  const win = fakeWindow("");
+  const desktop = fakeDesktop(win);
+  desktop.open("explorer");
+  desktop.open("console");
+
+  pressBack(win);
+  // Оставшемуся окну снова нужен свой шаг: иначе следующий «назад» уведёт с сайта
+  assert.equal(win.location.hash, "#explorer");
+  assert.deepEqual(win.history.entries, ["", "#explorer"]);
+
+  pressBack(win);
+  assert.deepEqual(desktop.stack, []);
+  assert.equal(win.location.hash, "");
+
+  pressBack(win);
+  assert.equal(win.left, true);
+});
+
+test("closing the last window by hand takes its step out of history", () => {
+  const win = fakeWindow("");
+  const desktop = fakeDesktop(win);
+  desktop.open("console");
+  assert.equal(win.history.index, 1);
+
+  desktop.closeTop();
+
+  assert.equal(win.history.index, 0);
+  assert.equal(win.location.hash, "");
+  pressBack(win);
+  assert.equal(win.left, true);
+});
+
+test("a window opened straight from a link does not add a step of its own", () => {
+  const win = fakeWindow("#terminal");
+  const desktop = fakeDesktop(win);
+
+  assert.deepEqual(desktop.stack, ["console"]);
+  assert.deepEqual(win.history.entries, ["#terminal"]);
+  pressBack(win);
+  assert.equal(win.left, true);
+});
+
+test("back over a link-opened window closes what was opened on top of it", () => {
+  const win = fakeWindow("#terminal");
+  const desktop = fakeDesktop(win);
+
+  desktop.open("github");
+  assert.deepEqual(win.history.entries, ["#terminal", "#github"]);
+
+  pressBack(win);
+
+  assert.deepEqual(desktop.stack, ["console"]);
+  assert.equal(win.location.hash, "#terminal");
 });
