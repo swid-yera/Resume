@@ -92,7 +92,8 @@ export function renderBrowser(windowContent, address) {
                     <button class="browser-nav" data-nav="home" aria-label="Home">${icon("i-home")}</button>
                     <form class="browser-omnibox-form">
                         <input class="browser-omnibox" type="text" autocomplete="off"
-                               spellcheck="false" aria-label="Address bar">
+                               autocapitalize="off" autocorrect="off" spellcheck="false"
+                               enterkeyhint="go" aria-label="Address bar">
                     </form>
                     <a class="browser-nav browser-external" target="_blank" rel="noopener noreferrer"
                        aria-label="Open in a new tab" hidden>${icon("i-external")}</a>

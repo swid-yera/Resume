@@ -317,6 +317,21 @@ onMobileChange((mobile) => {
   }
 });
 
+// Окно глухо к нажатиям, пока не доехало. Держится на таймере, а не только на
+// animationend: с prefers-reduced-motion анимации нет и событие не придёт.
+function sealWhileOpening(el) {
+  el.classList.add("is-opening");
+  const unseal = () => el.classList.remove("is-opening");
+  el.addEventListener(
+    "animationend",
+    (e) => {
+      if (e.animationName === "window-open") unseal();
+    },
+    { once: true },
+  );
+  setTimeout(unseal, CONSTANTS.WINDOW_OPEN_SEAL_MS);
+}
+
 export function createWindow(type) {
   const el = windowTemplate.content.firstElementChild.cloneNode(true);
   const contentEl = el.querySelector(".window-content");
@@ -345,6 +360,7 @@ export function createWindow(type) {
   makeResizable(win);
 
   document.body.appendChild(el);
+  sealWhileOpening(el);
 
   // Узкому экрану координаты не нужны: окно раскладывает CSS во весь стол, а
   // инлайновый стиль перебил бы его.

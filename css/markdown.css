@@ -64,10 +64,12 @@
     padding: 3px var(--space-2);
 }
 
-.md-seg button:hover,
-.md-tool:hover {
-    background: var(--frost-fill);
-    color: var(--fg);
+@media (hover: hover) {
+    .md-seg button:hover,
+    .md-tool:hover {
+        background: var(--frost-fill);
+        color: var(--fg);
+    }
 }
 
 .md-seg button.is-active {
@@ -164,9 +166,11 @@
     text-decoration: none;
 }
 
-.md-link:hover {
-    border-color: var(--accent);
-    color: var(--fg);
+@media (hover: hover) {
+    .md-link:hover {
+        border-color: var(--accent);
+        color: var(--fg);
+    }
 }
 
 .md-link--primary {
@@ -222,8 +226,10 @@
     text-decoration: none;
 }
 
-.md-doc a:hover {
-    text-decoration: underline;
+@media (hover: hover) {
+    .md-doc a:hover {
+        text-decoration: underline;
+    }
 }
 
 /* Кнопки из фронтматтера лежат внутри .md-doc, поэтому правило для ссылок
@@ -232,14 +238,21 @@
     color: var(--fg-muted);
 }
 
-.md-doc .md-link:hover {
-    color: var(--fg);
-    text-decoration: none;
+@media (hover: hover) {
+    .md-doc .md-link:hover {
+        color: var(--fg);
+        text-decoration: none;
+    }
 }
 
-.md-doc .md-link--primary,
-.md-doc .md-link--primary:hover {
+.md-doc .md-link--primary {
     color: var(--accent-contrast);
+}
+
+@media (hover: hover) {
+    .md-doc .md-link--primary:hover {
+        color: var(--accent-contrast);
+    }
 }
 
 .md-doc img {
@@ -291,9 +304,14 @@
     transition: opacity var(--dur-fast) var(--ease-standard);
 }
 
-.md-doc pre:hover .md-copy,
 .md-copy:focus-visible {
     opacity: 1;
+}
+
+@media (hover: hover) {
+    .md-doc pre:hover .md-copy {
+        opacity: 1;
+    }
 }
 
 .md-doc blockquote {
@@ -372,8 +390,10 @@
     text-decoration: none;
 }
 
-.md-outline__item:hover {
-    color: var(--fg);
+@media (hover: hover) {
+    .md-outline__item:hover {
+        color: var(--fg);
+    }
 }
 
 .md-outline__item.is-active {

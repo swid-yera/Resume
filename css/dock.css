@@ -29,6 +29,7 @@
     height: var(--dock-icon-size);
     filter: var(--shadow-icon);
     border-radius: var(--radius-lg);
+    display: block;
 }
 
 .dock-item:focus-visible {

@@ -8,6 +8,12 @@
     background: var(--surface);
 }
 
+.folder-empty {
+    padding: var(--space-4);
+    color: var(--fg-muted);
+    font-size: var(--text-14);
+}
+
 .folder-item {
     display: flex;
     flex-direction: column;
@@ -18,9 +24,14 @@
     border-radius: var(--radius-md);
 }
 
-.folder-item:hover,
 .folder-item:focus {
     background: var(--frost-line);
+}
+
+@media (hover: hover) {
+    .folder-item:hover {
+        background: var(--frost-line);
+    }
 }
 
 .folder-item img,
@@ -38,11 +49,21 @@
     text-align: center;
 }
 
+/* Заглушка «Coming soon»: своих отступов у неё нет, а на телефоне окно во весь
+   экран, и заголовок упирался бы в кромку. */
+.text-content {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-5);
+}
+
 /* Звонки */
 .call-log {
     display: flex;
     flex-direction: column;
     gap: 15px;
+    padding: var(--space-4);
     overflow-y: auto;
     max-height: 100%;
 }
@@ -56,8 +77,10 @@
     transition: background var(--dur-fast) var(--ease-standard);
 }
 
-.call-item:hover {
-    background: var(--frost-line);
+@media (hover: hover) {
+    .call-item:hover {
+        background: var(--frost-line);
+    }
 }
 
 .call-item img {
@@ -107,11 +130,18 @@
     cursor: help;
 }
 
-.hint__btn:hover,
 .hint__btn:focus {
     color: var(--fg);
     border-color: var(--accent);
     outline: none;
+}
+
+@media (hover: hover) {
+    .hint__btn:hover {
+        color: var(--fg);
+        border-color: var(--accent);
+        outline: none;
+    }
 }
 
 .hint__bubble {
@@ -141,15 +171,25 @@
                 visibility var(--dur-fast);
 }
 
-.hint__btn:hover + .hint__bubble,
 .hint__btn:focus + .hint__bubble {
     opacity: 1;
     visibility: visible;
     transform: none;
 }
 
+@media (hover: hover) {
+    .hint__btn:hover + .hint__bubble {
+        opacity: 1;
+        visibility: visible;
+        transform: none;
+    }
+}
+
 /* Заметки */
+/* display: block обязателен: у строчного textarea браузер оставляет под ним
+   пустую строку, и поле в высоту окна начинало окно прокручивать. */
 .notes-area {
+    display: block;
     width: 100%;
     height: 100%;
     padding: var(--space-4);
@@ -227,9 +267,14 @@
     border: none;
 }
 
-.arrow:hover,
 .arrow:focus {
     background: var(--glass-strong);
+}
+
+@media (hover: hover) {
+    .arrow:hover {
+        background: var(--glass-strong);
+    }
 }
 
 .arrow[aria-disabled="true"] {

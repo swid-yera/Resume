@@ -22,6 +22,13 @@
     animation: window-minimize var(--dur-base) var(--ease-standard) forwards;
 }
 
+/* Пока окно выезжает, оно нажатий не принимает: на тач-экране после касания
+   браузер шлёт click, и тот попадает уже в новое окно - в место под пальцем,
+   где у уменьшенного анимацией окна оказывается кнопка закрытия. */
+.window.is-opening {
+    pointer-events: none;
+}
+
 /* Зоны изменения размера окна (невидимые, как в macOS) */
 .window-resize-handle {
     position: absolute;
@@ -139,10 +146,12 @@
 }
 
 /* Раскрывается только кнопка закрытия — min/max декоративные */
-.window-control.close:hover {
-    width: var(--window-control-expanded-width);
-    border-radius: var(--window-control-expanded-radius);
-    filter: brightness(1.15);
+@media (hover: hover) {
+    .window-control.close:hover {
+        width: var(--window-control-expanded-width);
+        border-radius: var(--window-control-expanded-radius);
+        filter: brightness(1.15);
+    }
 }
 
 .window-title {
@@ -197,10 +206,12 @@
     font-size: var(--text-13);
 }
 
+/* Только ширина: потолок высоты в процентах считается от области, в которой
+   картинка лежит, и резал всё подряд - превью проекта, аватар в чате. Своя
+   высота нужна одной галерее, и она задана в .gallery-item. */
 .window-content img,
 .window-content video {
     max-width: 100%;
-    max-height: 80%;
     border-radius: var(--radius-md);
     margin: 0 auto;
     display: block;

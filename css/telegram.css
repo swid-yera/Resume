@@ -42,9 +42,14 @@
     transition: background var(--dur-fast) var(--ease-standard);
 }
 
-.telegram-chat-item:hover,
 .telegram-chat-item:focus {
     background: var(--frost-fill);
+}
+
+@media (hover: hover) {
+    .telegram-chat-item:hover {
+        background: var(--frost-fill);
+    }
 }
 
 .telegram-chat-item.is-active {
@@ -55,6 +60,7 @@
 .telegram-chat-item img {
     width: 35px;
     height: 35px;
+    object-fit: cover;
     border-radius: var(--radius-pill);
 }
 
@@ -123,7 +129,12 @@
     transition: background var(--dur-fast) var(--ease-standard);
 }
 
-.telegram-input button:hover,
 .telegram-input button:focus {
     background: var(--accent-hover);
+}
+
+@media (hover: hover) {
+    .telegram-input button:hover {
+        background: var(--accent-hover);
+    }
 }

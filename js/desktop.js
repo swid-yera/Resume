@@ -91,13 +91,21 @@ export function setupFileDragging() {
     file.addEventListener("click", (e) => {
       if (e.ctrlKey || e.metaKey || e.shiftKey || e.button !== 0) return;
       e.preventDefault();
+      // На тач-экране открывает именно click: только он отличает касание от
+      // прокрутки стола. Указатель этого не знает - палец, уехавший вниз,
+      // заканчивает жест таким же pointerup, и иконка открывалась от свайпа.
+      if (isMobile()) endInteraction();
     });
 
-    file.addEventListener("pointerup", endInteraction);
+    file.addEventListener("pointerup", () => {
+      if (!isMobile()) endInteraction();
+    });
     // On touch (notably iOS Safari) a tap after setPointerCapture can end with
     // pointercancel instead of pointerup, so open here too. The `opening`
     // debounce dedupes if both fire.
-    file.addEventListener("pointercancel", endInteraction);
+    file.addEventListener("pointercancel", () => {
+      if (!isMobile()) endInteraction();
+    });
 
     file.addEventListener("keydown", (e) => {
       if (e.key === "Enter" || e.key === " ") {
@@ -181,19 +189,7 @@ export function renderDesktopFiles() {
 
 // --- Dock ---
 
-// Растворённый край включаем только когда прокручивать есть что: узнать это
-// из CSS нельзя, а на широком экране маска зря съедала бы крайние иконки.
-function watchDockOverflow() {
-  const dock = document.querySelector(".dock");
-  if (!dock) return;
-  const update = () =>
-    dock.classList.toggle("dock--overflows", dock.scrollWidth > dock.clientWidth);
-  update();
-  new ResizeObserver(update).observe(dock);
-}
-
 export function setupDockItems() {
-  watchDockOverflow();
   document.querySelectorAll(".dock-item").forEach((item) => {
     item.addEventListener("click", (e) => {
       e.stopPropagation();

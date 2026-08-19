@@ -69,8 +69,10 @@
     cursor: pointer;
 }
 
-.settings-seg:hover {
-    color: var(--fg);
+@media (hover: hover) {
+    .settings-seg:hover {
+        color: var(--fg);
+    }
 }
 
 .settings-seg.is-active {

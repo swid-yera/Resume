@@ -1,6 +1,7 @@
 import { folderContents, currentIndex } from "../state.js";
 import { escapeHtml } from "../utils.js";
 import { openWindow } from "../open-window.js";
+import { CONSTANTS } from "../constants.js";
 
 // --- Folder list ---
 
@@ -8,7 +9,7 @@ function renderFolder(windowContent, type) {
   const items = folderContents[type] || [];
   if (!items.length) {
     windowContent.innerHTML =
-      '<div class="folder-content"><p>This folder is empty.</p></div>';
+      '<p class="folder-empty">This folder is empty.</p>';
     return;
   }
 
@@ -49,7 +50,7 @@ export function renderFolderContent(windowContent, type, fileIndex) {
   const items = folderContents[type] || [];
   if (!items.length) {
     windowContent.innerHTML =
-      '<div class="folder-content"><p>This folder is empty.</p></div>';
+      '<p class="folder-empty">This folder is empty.</p>';
     return;
   }
   if (Number.isInteger(fileIndex) && items[fileIndex]) {
@@ -100,15 +101,33 @@ function renderGallery(windowContent, type, startIndex) {
     );
   };
 
-  leftArrow.addEventListener("click", () => {
+  const step = (dir) => {
     currentIndex[type] =
-      (currentIndex[type] - 1 + items.length) % items.length;
+      (currentIndex[type] + dir + items.length) % items.length;
     updateGallery();
-  });
+  };
 
-  rightArrow.addEventListener("click", () => {
-    currentIndex[type] = (currentIndex[type] + 1) % items.length;
-    updateGallery();
+  leftArrow.addEventListener("click", () => step(-1));
+  rightArrow.addEventListener("click", () => step(1));
+
+  // Пальцем галерею листают свайпом, а не стрелками по краям экрана. Порог
+  // отсекает дрожь, а сравнение с вертикалью - прокрутку, начатую по картинке.
+  let touchX = 0;
+  let touchY = 0;
+  container.addEventListener(
+    "touchstart",
+    (e) => {
+      touchX = e.touches[0].clientX;
+      touchY = e.touches[0].clientY;
+    },
+    { passive: true },
+  );
+
+  container.addEventListener("touchend", (e) => {
+    const dx = e.changedTouches[0].clientX - touchX;
+    const dy = e.changedTouches[0].clientY - touchY;
+    if (Math.abs(dx) < CONSTANTS.SWIPE_THRESHOLD || Math.abs(dx) <= Math.abs(dy)) return;
+    step(dx < 0 ? 1 : -1);
   });
 
   updateGallery();

@@ -1,11 +1,12 @@
 /* Терминал: тело консоли и хром её окна */
 
 .console {
-    --term-row-gap: 3px; /* ровный вертикальный зазор между строками */
+    --term-row-gap: 3px;              /* зазор между строками внутри блока */
+    --term-group-gap: var(--space-3);  /* зазор между группами «команда + вывод» */
 
     font-family: var(--font-terminal);
     font-size: var(--text-13);
-    line-height: 1.35;
+    line-height: var(--lh-snug);
     color: var(--term-fg);
     background: var(--term-bg);
     height: 100%;
@@ -25,7 +26,7 @@
     justify-content: space-between;
     height: 36px;
     background: var(--term-chrome);
-    border-bottom: 1px solid var(--term-chrome-line);
+    border-bottom: 1px solid var(--term-line);
 }
 
 .console-tabs__list {
@@ -46,14 +47,16 @@
     gap: var(--space-2);
     max-width: 180px;
     padding: 0 var(--space-3);
-    border-right: 1px solid var(--term-chrome-line);
+    border-right: 1px solid var(--term-line);
     color: var(--term-muted-fg);
     cursor: pointer;
     white-space: nowrap;
 }
 
-.console-tab:hover {
-    color: var(--term-fg);
+@media (hover: hover) {
+    .console-tab:hover {
+        color: var(--term-fg);
+    }
 }
 
 .console-tab.is-active {
@@ -94,9 +97,11 @@
     opacity: 0.55;
 }
 
-.console-tab__close:hover {
-    background: var(--term-chrome-line);
-    opacity: 1;
+@media (hover: hover) {
+    .console-tab__close:hover {
+        background: var(--term-fill);
+        opacity: 1;
+    }
 }
 
 .console-tabs__list.is-single .console-tab__close {
@@ -109,7 +114,7 @@
     align-items: center;
     gap: var(--space-1);
     padding: 0 var(--space-2);
-    border-left: 1px solid var(--term-chrome-line);
+    border-left: 1px solid var(--term-line);
 }
 
 .console-tabs__action {
@@ -127,9 +132,11 @@
                 color var(--dur-fast) var(--ease-standard);
 }
 
-.console-tabs__action:hover {
-    background: var(--term-chrome-line);
-    color: var(--term-fg);
+@media (hover: hover) {
+    .console-tabs__action:hover {
+        background: var(--term-fill);
+        color: var(--term-fg);
+    }
 }
 
 /* Прокручиваемое тело терминала между таб-строкой и статус-баром. */
@@ -137,7 +144,27 @@
     flex: 1;
     min-height: 0;
     overflow-y: auto;
-    padding: var(--space-3);
+    padding: var(--space-4);
+}
+
+/* Полоса прокрутки у терминала своя: общая в base.css красится акцентом
+   системы, а внутри консоли акцент - это цвет вывода, и полоса спорила бы с
+   ним. */
+.console-body::-webkit-scrollbar {
+    width: 8px;
+}
+
+.console-body::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.console-body::-webkit-scrollbar-thumb {
+    background: var(--term-line);
+    border-radius: var(--radius-xs);
+}
+
+.console-body::-webkit-scrollbar-thumb:hover {
+    background: var(--term-subtle-fg);
 }
 
 /* Единый вертикальный зазор между всеми строками вывода: и между блоками, и
@@ -158,7 +185,7 @@
 /* Отбивка между группами «команда + её вывод»: воздух перед новым приглашением
    (кроме самого первого). */
 .console-echo:not(:first-child) {
-    margin-top: 0.6em;
+    margin-top: calc(var(--term-group-gap) - var(--term-row-gap));
 }
 
 /* Грид-вывод (help / ls / dir): колонки держит CSS grid, а не добивка пробелами -
@@ -189,12 +216,13 @@
     justify-content: space-between;
     height: 24px;
     padding: 0 var(--space-3);
-    /* Яркая синяя полоса с тёмным текстом, как статус-бар редактора. */
-    background: var(--term-status-bg);
-    border-top: 1px solid var(--term-status-line);
+    /* Та же поверхность, что у таб-строки: терминал обрамляют две полосы
+       одного тона, а цветом в окне остаётся только вывод. */
+    background: var(--term-chrome);
+    border-top: 1px solid var(--term-line);
     font-family: var(--font-sans);
-    font-size: var(--text-11);
-    color: var(--term-status-fg);
+    font-size: var(--text-12);
+    color: var(--term-subtle-fg);
     user-select: none;
 }
 
@@ -205,10 +233,13 @@
     gap: var(--space-3);
 }
 
-.console-status-left { font-weight: var(--w-semibold); }
+.console-status-left {
+    color: var(--term-muted-fg);
+    font-weight: var(--w-medium);
+}
 
-/* Позиции справа - декоративные (UTF-8, Ln/Col, LF), но подсвечиваем ховером:
-   тёмный текст на светлой синей плашке. */
+/* Позиции справа - декоративные (UTF-8, Ln/Col, LF), но под курсором
+   подсвечиваются: та же заливка, что у действий в таб-строке. */
 .console-status-right span {
     padding: 0 var(--space-1);
     border-radius: var(--radius-xs);
@@ -216,9 +247,11 @@
                 color var(--dur-fast) var(--ease-standard);
 }
 
-.console-status-right span:hover {
-    background: var(--term-primary);
-    color: var(--term-status-fg);
+@media (hover: hover) {
+    .console-status-right span:hover {
+        background: var(--term-fill);
+        color: var(--term-fg);
+    }
 }
 
 .console-status-dot {
@@ -244,7 +277,13 @@
     display: flex;
     gap: var(--space-2);
     align-items: baseline;
-    margin-top: 0.55em;
+    margin-top: var(--term-group-gap);
+}
+
+/* Пустой вывод - это первое приглашение сразу под шапкой: отбивать его не от
+   чего. */
+.console-out:empty + .console-line {
+    margin-top: 0;
 }
 
 .console-ps1 {
@@ -319,11 +358,10 @@
     50.01%, 100% { opacity: 0; }
 }
 
-/* Подсказка из истории: серый хвост за кареткой. 60% приглушённого тона по
-   фону терминала - это 4.6:1, то есть подсказка читается, но спорить с набранным
-   текстом (11.3:1) не начинает. */
+/* Подсказка из истории: серый хвост за кареткой. Самый тихий тон палитры -
+   подсказка читается, но спорить с набранным текстом не начинает. */
 .t-ghost {
-    color: color-mix(in srgb, var(--term-muted-fg) 60%, var(--term-bg));
+    color: var(--term-subtle-fg);
 }
 
 /* Список вариантов по Ctrl+Space: колонки набираются сами, чтобы длинный
@@ -331,7 +369,7 @@
 .console-menu {
     margin-top: var(--space-2);
     padding: var(--space-2);
-    border: 1px solid var(--term-chrome-line);
+    border: 1px solid var(--term-line);
     border-radius: var(--radius-xs);
     background: var(--term-chrome);
     columns: 4 14ch;
@@ -358,8 +396,8 @@
 }
 
 .console-menu__item.is-current {
-    background: var(--term-status-bg);
-    color: var(--term-status-fg);
+    background: var(--term-accent-fill);
+    color: var(--term-fg);
 }
 
 /* Цветовые классы вывода и подсветки (ключи задаёт console.js). Классов больше,
@@ -389,29 +427,30 @@
 .console .t-thi     { font-style: italic; }
 
 /* Папка: синий фон + светлый текст - как $PSStyle.FileInfo.Directory (\e[44;1m).
-   Небольшой паддинг и скругление превращают имя в аккуратный чип. */
+   Плашка берётся от собственного акцента: сплошной синий из ANSI в этой
+   палитре светил бы ярче самого вывода. */
 .console .t-dir {
-    color: var(--frost-100);
-    background: var(--term-blue);
-    padding: 0 3px;
+    color: var(--term-primary);
+    background: var(--term-accent-fill);
+    padding: 0 var(--space-1);
     border-radius: var(--radius-xs);
 }
 
 
-/* Окно консоли: компактная карточка с тонкой кромкой, глубокой тенью и белым
-   кольцом в 1px по краю. Терминал остаётся тёмным и в светлом оформлении:
+/* Окно консоли: тонкая кромка и обычная тень окна - лишнее кольцо по краю
+   только спорило бы с системой. Терминал остаётся тёмным и в светлом оформлении:
    светлый cmd - это уже не терминал, а редактор. Держится это на том, что
    палитра --term-* объявлена только в :root и светлым блоком не трогается. */
 .window[data-type="console"] {
     width: 920px;
     height: 580px;
-    border: 1px solid var(--term-edge);
-    box-shadow: var(--shadow-deep), 0 0 0 1px var(--term-chrome-line);
+    border: 1px solid var(--term-line);
+    box-shadow: var(--shadow-window);
 }
 
 .window[data-type="console"] .window-header {
     background: var(--term-chrome);
-    border-bottom: 1px solid var(--term-chrome-line);
+    border-bottom: 1px solid var(--term-line);
 }
 
 /* Тело вплотную к кромке окна - без отступа window-content вокруг терминала. */
@@ -420,7 +459,7 @@
     border-radius: 0;
 }
 
-/* Заголовок «pwsh» с шевроном приглашения, синим акцентом. */
+/* Заголовок «pwsh» с шевроном приглашения. */
 .window[data-type="console"] .window-title {
     display: inline-flex;
     align-items: center;
@@ -429,12 +468,12 @@
     font-size: var(--text-13);
     font-weight: var(--w-medium);
     letter-spacing: var(--track-normal);
-    color: var(--term-primary);
+    color: var(--term-fg);
 }
 
 .window[data-type="console"] .window-title::before {
     content: "\203A";
     margin-right: var(--space-2);
     font-size: 1.25em;
-    opacity: 0.85;
+    color: var(--term-subtle-fg);
 }

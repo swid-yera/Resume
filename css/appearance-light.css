@@ -45,7 +45,12 @@
     box-shadow: var(--shadow-card);
 }
 
-:root[data-appearance="light"] .arrow:hover,
 :root[data-appearance="light"] .arrow:focus {
     background: var(--surface-high);
+}
+
+@media (hover: hover) {
+    :root[data-appearance="light"] .arrow:hover {
+        background: var(--surface-high);
+    }
 }

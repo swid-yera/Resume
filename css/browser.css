@@ -41,8 +41,10 @@
     transition: background var(--dur-fast);
 }
 
-.browser-nav:hover:not(:disabled) {
-    background: var(--frost-line);
+@media (hover: hover) {
+    .browser-nav:hover:not(:disabled) {
+        background: var(--frost-line);
+    }
 }
 
 .browser-nav:disabled {
@@ -114,9 +116,11 @@
     cursor: pointer;
 }
 
-.browser-breadcrumb .bc:hover {
-    color: var(--link-hover);
-    text-decoration: underline;
+@media (hover: hover) {
+    .browser-breadcrumb .bc:hover {
+        color: var(--link-hover);
+        text-decoration: underline;
+    }
 }
 
 .bc-sep {
@@ -144,9 +148,11 @@
     text-decoration: none;
 }
 
-.browser-fileitem:hover {
-    background: var(--frost-fill);
-    border-color: var(--border);
+@media (hover: hover) {
+    .browser-fileitem:hover {
+        background: var(--frost-fill);
+        border-color: var(--border);
+    }
 }
 
 .browser-fileicon {
@@ -297,8 +303,10 @@
     color: var(--link);
 }
 
-.browser-notice a:hover {
-    color: var(--link-hover);
+@media (hover: hover) {
+    .browser-notice a:hover {
+        color: var(--link-hover);
+    }
 }
 
 /* margin: auto в колонке-флексе ставит заглушку по центру окна, а не под шапку */
@@ -342,8 +350,10 @@
     transition: background var(--dur-fast);
 }
 
-.browser-blocked-open:hover {
-    background: var(--frost-line);
+@media (hover: hover) {
+    .browser-blocked-open:hover {
+        background: var(--frost-line);
+    }
 }
 
 /* Search */
@@ -370,8 +380,10 @@
     text-align: left;
 }
 
-.browser-result:hover {
-    background: var(--frost-fill);
+@media (hover: hover) {
+    .browser-result:hover {
+        background: var(--frost-fill);
+    }
 }
 
 .browser-result .browser-fileicon {

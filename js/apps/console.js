@@ -128,7 +128,8 @@ export function renderConsole(windowContent) {
                         <span class="console-field">
                             <span class="console-ink" aria-hidden="true"></span>
                             <input class="console-input" type="text" autocomplete="off"
-                                   autocapitalize="off" spellcheck="false" aria-label="Terminal input">
+                                   autocapitalize="off" autocorrect="off" spellcheck="false"
+                                   enterkeyhint="go" aria-label="Terminal input">
                             <span class="console-measure" aria-hidden="true"></span>
                             <span class="console-cursor" aria-hidden="true"></span>
                         </span>
@@ -473,12 +474,16 @@ export function renderConsole(windowContent) {
     }
   });
 
-  // Clicking anywhere in the terminal focuses the input.
+  // Касание по любому месту терминала должно поднимать клавиатуру, а её iOS
+  // даёт только на focus() прямо в обработчике жеста.
   root.addEventListener("pointerdown", (e) => {
-    if (e.target !== input) {
-      // Defer so text selection still works on the output.
-      setTimeout(() => input.focus(), 0);
-    }
+    if (e.pointerType === "touch" && e.target !== input) input.focus();
+  });
+
+  // У корня есть tabindex, поэтому клик мимо поля браузер уводит на него сам -
+  // и уже после обработчиков жеста. Возвращаем фокус туда, где его ждут.
+  root.addEventListener("focusin", (e) => {
+    if (e.target === root) input.focus();
   });
 
   renderOut();

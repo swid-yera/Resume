@@ -31,11 +31,18 @@
                 transform var(--dur-fast) var(--ease-standard);
 }
 
-.project-tile:hover,
 .project-tile:focus-visible {
     background: var(--frost-line);
     border-color: var(--accent);
     transform: translateY(-1px);
+}
+
+@media (hover: hover) {
+    .project-tile:hover {
+        background: var(--frost-line);
+        border-color: var(--accent);
+        transform: translateY(-1px);
+    }
 }
 
 .project-tile__preview {
@@ -45,6 +52,12 @@
     border-radius: var(--radius-sm);
     background: var(--abyss-700);
     display: block;
+}
+
+/* Превью держит собственное соотношение сторон: общее правило картинки в окне
+   (.window-content img) не должно резать его по высоте. */
+img.project-tile__preview {
+    max-height: none;
 }
 
 .project-tile__preview--empty {
@@ -139,11 +152,17 @@
                 transform var(--dur-fast) var(--ease-standard);
 }
 
-.project-tile:hover .project-tile__actions,
 .project-tile:focus-visible .project-tile__actions,
 .project-tile__actions:focus-within {
     opacity: 1;
     transform: translateY(0);
+}
+
+@media (hover: hover) {
+    .project-tile:hover .project-tile__actions {
+        opacity: 1;
+        transform: translateY(0);
+    }
 }
 
 .project-tile__btn {
@@ -161,9 +180,11 @@
                 color var(--dur-fast) var(--ease-standard);
 }
 
-.project-tile__btn:hover {
-    background: var(--frost-fill);
-    color: var(--fg);
+@media (hover: hover) {
+    .project-tile__btn:hover {
+        background: var(--frost-fill);
+        color: var(--fg);
+    }
 }
 
 .project-tile__btn--primary {
@@ -172,36 +193,13 @@
     color: var(--accent-contrast);
 }
 
-.project-tile__btn--primary:hover {
-    background: var(--accent-hover);
-    border-color: var(--accent-hover);
-    color: var(--accent-contrast);
-}
-
-/* Узкое окно: мета уходит под описание, тайл не ломается */
-@media (max-width: 640px) {
-    .project-tile {
-        grid-template-columns: 96px 1fr;
-    }
-
-    .project-tile__meta {
-        grid-column: 2;
-        flex-direction: row;
-        align-items: center;
-    }
-
-    .project-tile__preview {
-        width: 96px;
-    }
-
-    .project-tile__actions {
-        position: static;
-        opacity: 1;
-        transform: none;
-        grid-column: 1 / -1;
+@media (hover: hover) {
+    .project-tile__btn--primary:hover {
+        background: var(--accent-hover);
+        border-color: var(--accent-hover);
+        color: var(--accent-contrast);
     }
 }
-
 
 /* Имя файла на плитке проекта */
 .project-tile__file {

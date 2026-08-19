@@ -79,9 +79,11 @@
     transition: background var(--dur-fast) var(--ease-standard);
 }
 
-.gh-repos li:hover {
-    background: var(--accent-fill-soft);
-    border-radius: var(--radius-xs);
+@media (hover: hover) {
+    .gh-repos li:hover {
+        background: var(--accent-fill-soft);
+        border-radius: var(--radius-xs);
+    }
 }
 
 .gh-repos li:last-child {
@@ -95,10 +97,16 @@
     transition: color var(--dur-fast) var(--ease-standard);
 }
 
-.gh-repos a:hover,
 .gh-repos a:focus {
     color: var(--link-hover);
     text-decoration: underline;
+}
+
+@media (hover: hover) {
+    .gh-repos a:hover {
+        color: var(--link-hover);
+        text-decoration: underline;
+    }
 }
 
 .gh-profiles {
@@ -123,6 +131,13 @@
 .gh-readme h3 {
     color: var(--fg);
     margin-bottom: var(--space-2);
+}
+
+/* Картинка из README отдана ширине колонки, а высота ограничена экраном:
+   без потолка баннер репозитория занимал в окне несколько экранов подряд. */
+.gh-readme img {
+    width: auto;
+    max-height: 50vh;
 }
 
 .gh-readme p {

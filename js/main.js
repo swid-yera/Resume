@@ -31,6 +31,7 @@ import { setupMusic } from "./music.js";
 import { subscribePlayer } from "./apps/player-bridge.js";
 import { isPlaying } from "./apps/player-state.js";
 import { isMobile, onMobileChange } from "./mobile.js";
+import { trackKeyboard } from "./keyboard.js";
 
 document.addEventListener(
   "error",
@@ -168,6 +169,7 @@ function keepPlayerOnStage() {
 
 function init() {
   setupStartupOverlay();
+  trackKeyboard();
   // Проекты кладутся в C:\Users\antawkay\Documents\Projects до первого окна:
   // и Проводник, и терминал должны видеть их сразу.
   mountProjects();
@@ -197,7 +199,7 @@ function init() {
   });
 
   // Последним: окно из адресной строки открывается поверх уже готового стола.
-  setupRouter({ openWindow, onActiveWindowChange });
+  setupRouter({ openWindow, closeTopWindow, onActiveWindowChange });
 }
 
 init();

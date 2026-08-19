@@ -125,9 +125,14 @@
     transition: color var(--dur-fast) var(--ease-standard);
 }
 
-a.resume-contact:hover,
 a.resume-contact:focus-visible {
     color: var(--accent-text);
+}
+
+@media (hover: hover) {
+    a.resume-contact:hover {
+        color: var(--accent-text);
+    }
 }
 
 .resume-contact__label {
@@ -302,8 +307,10 @@ a.resume-contact:focus-visible {
     transition: border-color var(--dur-fast) var(--ease-standard);
 }
 
-.resume-card:hover {
-    border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+@media (hover: hover) {
+    .resume-card:hover {
+        border-color: color-mix(in srgb, var(--accent) 40%, transparent);
+    }
 }
 
 /* Скриншот главной страницы проекта. Правила .window-content img тут сбиты
@@ -412,10 +419,16 @@ a.resume-contact:focus-visible {
                 border-color var(--dur-fast) var(--ease-standard);
 }
 
-.resume-link:hover,
 .resume-link:focus-visible {
     border-color: color-mix(in srgb, var(--accent) 45%, transparent);
     color: var(--fg);
+}
+
+@media (hover: hover) {
+    .resume-link:hover {
+        border-color: color-mix(in srgb, var(--accent) 45%, transparent);
+        color: var(--fg);
+    }
 }
 
 .resume-link--primary {
@@ -424,11 +437,18 @@ a.resume-contact:focus-visible {
     color: var(--accent-contrast);
 }
 
-.resume-link--primary:hover,
 .resume-link--primary:focus-visible {
     border-color: transparent;
     background: var(--accent-hover);
     color: var(--accent-contrast);
+}
+
+@media (hover: hover) {
+    .resume-link--primary:hover {
+        border-color: transparent;
+        background: var(--accent-hover);
+        color: var(--accent-contrast);
+    }
 }
 
 /* Опыт и образование */

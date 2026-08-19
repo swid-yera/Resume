@@ -48,10 +48,16 @@
     outline: none;
 }
 
-.menu__item:hover,
 .menu__item:focus-visible {
     background: var(--accent);
     color: var(--accent-contrast);
+}
+
+@media (hover: hover) {
+    .menu__item:hover {
+        background: var(--accent);
+        color: var(--accent-contrast);
+    }
 }
 
 .menu__item.is-disabled {
@@ -95,9 +101,14 @@
 
 /* Строка под курсором залита акцентом, поэтому шорткат приглушается от цвета
    текста этой строки, а не от общего --fg-subtle: тот на заливке пропадает. */
-.menu__item:hover .menu__shortcut,
 .menu__item:focus-visible .menu__shortcut {
     color: color-mix(in srgb, var(--accent-contrast) 70%, transparent);
+}
+
+@media (hover: hover) {
+    .menu__item:hover .menu__shortcut {
+        color: color-mix(in srgb, var(--accent-contrast) 70%, transparent);
+    }
 }
 
 .menu__separator {

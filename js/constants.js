@@ -8,9 +8,11 @@ export const CONSTANTS = {
   BRIGHTNESS_MAX: 70,
   WINDOW_DRAG_MARGIN: 80,
   WINDOW_CASCADE_STEP: 32,
+  WINDOW_OPEN_SEAL_MS: 450,
   WINDOW_MIN_WIDTH: 320,
   WINDOW_MIN_HEIGHT: 220,
   FULLSCREEN_HINT_MS: 2500,
+  SWIPE_THRESHOLD: 40,
 };
 
 // Палитры тем живут в colors_and_type.css под :root[data-theme]. Здесь только
