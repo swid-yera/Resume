@@ -56,9 +56,15 @@ export function renderExplorer(windowContent, path) {
           <div class="ex-address">
             <div class="ex-crumbs"></div>
             <input class="ex-address-input" type="text" spellcheck="false"
-                   autocomplete="off" aria-label="Address" hidden>
+                   autocomplete="off" autocapitalize="off" autocorrect="off"
+                   enterkeyhint="go" aria-label="Address" hidden>
           </div>
-          <input class="ex-search" type="search" spellcheck="false" placeholder="Search">
+          <!-- Лупа нужна только там, где поиску не хватает места в строке:
+               на столе поле стоит открытым, и кнопку прячет CSS. -->
+          <button type="button" class="ex-btn ex-search-toggle" data-act="search"
+                  aria-label="Search"><svg class="fileicon" aria-hidden="true"><use href="#i-search"/></svg></button>
+          <input class="ex-search" type="search" spellcheck="false" autocorrect="off"
+                 autocapitalize="off" enterkeyhint="search" placeholder="Search">
         </div>
         <div class="ex-view"></div>
         <div class="ex-status">
@@ -78,6 +84,7 @@ export function renderExplorer(windowContent, path) {
   const view = windowContent.querySelector(".ex-view");
   const crumbs = windowContent.querySelector(".ex-crumbs");
   const address = windowContent.querySelector(".ex-address-input");
+  const toolbar = windowContent.querySelector(".ex-toolbar");
   const search = windowContent.querySelector(".ex-search");
   const status = windowContent.querySelector(".ex-status-text");
 
@@ -96,6 +103,7 @@ export function renderExplorer(windowContent, path) {
     state.selected = null;
     state.query = "";
     search.value = "";
+    toolbar.classList.remove("is-searching");
     draw();
   };
 
@@ -279,6 +287,15 @@ export function renderExplorer(windowContent, path) {
 
     const goTo = e.target.closest("[data-go]");
     if (goTo) return go(goTo.dataset.go);
+
+    // Поиск на узком экране открывается вместо адресной строки: две строки
+    // хрома там стоят дороже, чем одно лишнее касание.
+    if (e.target.closest('[data-act="search"]')) {
+      if (toolbar.classList.toggle("is-searching")) return search.focus();
+      search.value = "";
+      state.query = "";
+      return draw();
+    }
 
     const nav = e.target.closest("[data-nav]")?.dataset.nav;
     if (nav) {

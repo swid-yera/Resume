@@ -197,6 +197,7 @@ export function compactMenuItems(activeType, ctx) {
 // --- Rendering ---
 
 let barEl = null;
+let closeEl = null;
 let getCtx = null;
 let activeType = null;
 let openLabel = null;
@@ -255,6 +256,9 @@ function openBarMenu(label) {
 export function setActiveApp(type) {
   activeType = type ?? null;
   renderBar();
+  // Кнопка закрытия живёт в полосе меню, а не в окне: на телефоне у окна нет
+  // шапки, и закрывать его нечем. Без окна кнопке нечего делать.
+  if (closeEl) closeEl.hidden = !activeType;
 }
 
 // Набор меню зависит от ширины экрана, поэтому поворот телефона пересобирает бар.
@@ -269,6 +273,9 @@ export function setupMenuBar({ getCtx: ctxFn }) {
   if (!barEl) return;
   getCtx = ctxFn;
   renderBar();
+
+  closeEl = document.querySelector(".menu-bar__close");
+  closeEl?.addEventListener("click", () => getCtx().actions?.closeTop?.());
 
   barEl.addEventListener("click", (e) => {
     const btn = e.target.closest(".menu-bar__item");

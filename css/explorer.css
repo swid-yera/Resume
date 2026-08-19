@@ -52,9 +52,11 @@
     cursor: default;
 }
 
-.ex-nav-item:hover {
-    background: var(--frost-fill);
-    color: var(--fg);
+@media (hover: hover) {
+    .ex-nav-item:hover {
+        background: var(--frost-fill);
+        color: var(--fg);
+    }
 }
 
 /* Текущая папка: заливка акцентом и рельс слева. Подпись остаётся тёмной -
@@ -137,9 +139,11 @@
     cursor: pointer;
 }
 
-.ex-btn:hover:not(:disabled) {
-    background: var(--frost-fill);
-    color: var(--fg);
+@media (hover: hover) {
+    .ex-btn:hover:not(:disabled) {
+        background: var(--frost-fill);
+        color: var(--fg);
+    }
 }
 
 .ex-btn:disabled {
@@ -195,9 +199,11 @@
     cursor: pointer;
 }
 
-.ex-crumb:hover {
-    background: var(--frost-fill);
-    color: var(--fg);
+@media (hover: hover) {
+    .ex-crumb:hover {
+        background: var(--frost-fill);
+        color: var(--fg);
+    }
 }
 
 .ex-crumb.is-last {
@@ -241,6 +247,11 @@
 
 .ex-search:focus {
     border-color: var(--accent);
+}
+
+/* На столе поиск стоит открытым полем, лупу показывает только узкий экран */
+.ex-search-toggle {
+    display: none;
 }
 
 .ex-view {
@@ -296,9 +307,11 @@
     border-right: none;
 }
 
-.ex-col:hover {
-    background: var(--frost-fill);
-    color: var(--fg);
+@media (hover: hover) {
+    .ex-col:hover {
+        background: var(--frost-fill);
+        color: var(--fg);
+    }
 }
 
 .ex-col--size {
@@ -315,8 +328,10 @@
     cursor: default;
 }
 
-.ex-row:hover {
-    background: var(--frost-fill);
+@media (hover: hover) {
+    .ex-row:hover {
+        background: var(--frost-fill);
+    }
 }
 
 .ex-row.is-selected {
@@ -370,8 +385,10 @@
     cursor: default;
 }
 
-.ex-tile:hover {
-    background: var(--frost-fill);
+@media (hover: hover) {
+    .ex-tile:hover {
+        background: var(--frost-fill);
+    }
 }
 
 .ex-tile.is-selected {

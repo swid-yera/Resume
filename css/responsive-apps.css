@@ -1,6 +1,203 @@
-/* Узкие экраны: приложения. Окно, док и меню - в responsive-shell.css */
+/* Узкие экраны: приложения. Окно, док и меню - в responsive-shell.css
 
+   Запросов, как и в оболочке, три. Общий (узкий ИЛИ низкий) - «телефон в любой
+   ориентации»: там правится всё, что зависит от пальца, а не от размера экрана.
+   Узкий - только телефон стоймя: там панели и плитки разворачиваются в одну
+   колонку. Лёжа ширины хватает, и та же перестройка только съедала бы высоту,
+   поэтому у низкого экрана свой запрос: в нём режутся полосы приложения. */
+
+/* ============================================================
+   Телефон в любой ориентации: размеры под палец.
+   ============================================================ */
 @media (max-width: 768px), (max-height: 480px) {
+    /* Строки и кнопки под палец: ниже --tap-target попадание становится лотереей */
+    .ex-row,
+    .settings-seg,
+    .telegram-chat-item,
+    .project-tile__btn {
+        height: var(--tap-target);
+    }
+
+    .telegram-input button,
+    .arrow,
+    .settings-swatch {
+        width: var(--tap-target);
+        height: var(--tap-target);
+    }
+
+    /* Хром приложения - на ступень ниже: он стоит на экране всегда, и каждый
+       лишний пиксель здесь отнимается у содержимого. */
+    .ex-address,
+    .ex-search,
+    .ex-status,
+    .ex-crumb {
+        height: var(--tap-sm);
+    }
+
+    /* Кегль ведёт за собой значок: стрелки и лупа набраны глифами, и в 12px
+       на телефоне они читаются как соринки. */
+    .ex-btn,
+    .browser-nav {
+        width: var(--tap-sm);
+        height: var(--tap-sm);
+        font-size: var(--text-16);
+    }
+
+    /* Крошек в строке до четырёх, поэтому в ширину они не растут: зону нажатия
+       им даёт высота. */
+    .ex-crumb {
+        padding: 0 var(--space-2);
+    }
+
+    .project-tile__btn {
+        padding: 0 var(--space-4);
+    }
+
+    /* Шапка таблицы - подпись с сортировкой, а не строка списка: цель широкая
+       на всю колонку, и высоту ей хватает меньшей. */
+    .ex-col {
+        height: var(--space-8);
+    }
+
+    .console-tabs {
+        height: var(--tap-sm);
+    }
+
+    .console-tabs__action {
+        height: var(--tap-sm);
+        min-width: var(--tap-sm);
+    }
+
+    /* Кодировка, позиция каретки и перевод строки - справка для десктопа;
+       пальцем их не нажимают, а полосу они растягивают на весь низ экрана. */
+    .console-status-right {
+        display: none;
+    }
+
+    .console-status {
+        height: var(--tap-sm);
+    }
+
+    /* Имя файла - идентификатор, а не текст: переносить его по буквам нельзя,
+       «Documents» на узкой колонке превращалось в «Document / s». Таблица
+       вывода уезжает вбок целиком, как в настоящем терминале в узком окне. */
+    .console-grid {
+        overflow-x: auto;
+        scrollbar-width: none;
+    }
+
+    .console-grid::-webkit-scrollbar {
+        display: none;
+    }
+
+    .console-cell {
+        white-space: pre;
+        word-break: normal;
+    }
+
+    /* Все кнопки пульта одного размера: главную выделяет заливка, а не габарит */
+    .player-button,
+    .player-button.is-primary {
+        width: var(--tap-target);
+        height: var(--tap-target);
+    }
+
+    /* Зона нажатия у ползунка - вся высота поля, а не толщина полосы, поэтому
+       поле становится выше, а сама полоса уходит в дорожку и остаётся тонкой. */
+    .player-scrub,
+    .player-volume,
+    .settings-slider {
+        height: var(--space-5);
+        background: transparent;
+    }
+
+    .player-scrub::-webkit-slider-runnable-track,
+    .player-volume::-webkit-slider-runnable-track,
+    .settings-slider::-webkit-slider-runnable-track {
+        height: var(--space-1);
+        border-radius: var(--radius-pill);
+        background: var(--frost-line);
+    }
+
+    .player-scrub::-moz-range-track,
+    .player-volume::-moz-range-track,
+    .settings-slider::-moz-range-track {
+        height: var(--space-1);
+        border-radius: var(--radius-pill);
+        background: var(--frost-line);
+    }
+
+    /* Webkit кладёт ползунок на верх дорожки; сдвиг на (12 - 4) / 2 ставит его
+       по центру. Firefox центрирует сам. */
+    .player-scrub::-webkit-slider-thumb,
+    .player-volume::-webkit-slider-thumb,
+    .settings-slider::-webkit-slider-thumb {
+        margin-top: calc(var(--space-1) * -1);
+    }
+
+    /* Отклик на касание: наведения на тач-экране нет, а нажатие должно быть
+       видно. Заливка одна на все поверхности - та же, что даёт курсор. */
+    .ex-row:active,
+    .ex-tile:active,
+    .ex-btn:active,
+    .ex-crumb:active,
+    .ex-col:active,
+    .browser-nav:active,
+    .browser-fileitem:active,
+    .browser-result:active,
+    .folder-item:active,
+    .project-tile:active,
+    .telegram-chat-item:active,
+    .console-tabs__action:active {
+        background: var(--frost-fill);
+    }
+
+    /* Кнопка копирования живёт наведением на блок кода, которого тут нет */
+    .md-copy {
+        opacity: 1;
+    }
+
+    /* Имя приложения уже стоит в полосе меню - вторая такая же строка лишняя */
+    .telegram-header {
+        display: none;
+    }
+
+    /* Кнопки живут наведением, которого на тач-экране нет: показываем всегда
+       и ставим в поток, иначе они лягут поверх описания. */
+    .project-tile__actions {
+        position: static;
+        opacity: 1;
+        transform: none;
+    }
+
+    /* Рейка резюме на телефоне лежит не сбоку, а сверху, и монограмма столбиком
+       по центру занимала весь первый экран. В строку она читается как шапка
+       карточки: знак слева, имя и роль справа. */
+    .resume-id {
+        display: grid;
+        grid-template-columns: auto 1fr;
+        column-gap: var(--space-3);
+        text-align: left;
+    }
+
+    .resume-mono {
+        grid-row: span 2;
+    }
+
+    .resume-name {
+        margin-top: 0;
+        align-self: end;
+    }
+
+    .resume-role {
+        align-self: start;
+    }
+}
+
+/* ============================================================
+   Телефон стоймя: не хватает именно ширины.
+   ============================================================ */
+@media (max-width: 768px) {
     /* Боковые панели съедают ту самую ширину, ради которой их открывают */
     .ex-nav,
     .md-outline {
@@ -20,102 +217,130 @@
         padding: var(--space-4);
     }
 
-    /* Строки и кнопки под палец: ниже --tap-target попадание становится лотереей */
-    .ex-row {
-        height: var(--tap-target);
+    /* Четыре кнопки в палец шириной - это половина строки под навигацию, которой
+       в выдуманной ФС почти не пользуются. Остаются «назад» и «вверх»: вперёд
+       без истории мёртв, а обновлять нечего - дерево не меняется само. */
+    .ex-btn[data-nav="forward"],
+    .ex-btn[data-nav="refresh"] {
+        display: none;
     }
 
-    .ex-btn,
-    .browser-nav,
-    .telegram-input button,
-    .arrow {
-        width: var(--tap-target);
-        height: var(--tap-target);
-    }
-
-    .ex-crumb {
-        padding: var(--space-2);
-    }
-
-    /* Кнопки, путь и поиск в одну строку не встают, поэтому поиск занимает
-       свою: basis в целую ширину сам сталкивает его вниз. */
+    /* Кнопки, путь и поиск в одну строку не встают. Поиск уходит под лупу и
+       занимает строку целиком, когда его открыли: путь и поиск нужны по
+       очереди, а не разом (переключает js/apps/explorer.js). */
     .ex-toolbar {
-        flex-wrap: wrap;
+        gap: var(--space-2);
     }
 
-    .ex-address {
-        height: var(--tap-target);
+    .ex-search-toggle {
+        display: flex;
+        flex: none;
     }
 
     .ex-search {
+        display: none;
+    }
+
+    .ex-toolbar.is-searching .ex-address {
+        display: none;
+    }
+
+    .ex-toolbar.is-searching .ex-search {
+        display: block;
         width: auto;
-        flex: 1 1 100%;
-        height: var(--tap-target);
+        flex: 1 1 auto;
+        min-width: 0;
     }
 
-    /* Строка состояния держит переключатель вида, а он теперь в палец высотой */
-    .ex-status {
-        height: var(--tap-target);
-    }
-
-    /* Кнопкам в палец шириной остаётся слишком мало на адрес, поэтому он
-       занимает свою строку - как и поиск в Проводнике. */
-    .browser-toolbar {
-        flex-wrap: wrap;
+    /* Вперёд в браузере жмут реже всего, а строка адреса без него встаёт в один
+       ряд с кнопками - как в мобильных браузерах. */
+    .browser-nav[data-nav="forward"] {
+        display: none;
     }
 
     .browser-omnibox-form {
-        flex: 1 1 100%;
+        min-width: 0;
     }
 
     .browser-omnibox {
-        padding: var(--space-2) var(--space-4);
+        padding: var(--space-2) var(--space-3);
     }
 
-    /* Таб-строка терминала задаёт потолок кнопкам внутри себя */
-    .console-tabs {
-        height: var(--tap-target);
+    /* Ползунок яркости шире экрана быть не должен: 260px задано под десктоп */
+    .settings-slider {
+        width: 100%;
     }
 
-    .console-tabs__action {
-        height: var(--space-8);
-        min-width: var(--space-8);
+    /* Список чатов сбоку отнимал у переписки треть ширины. Стоймя он ложится
+       полосой сверху - как строка контактов в мессенджерах на телефоне. */
+    .telegram-body {
+        flex-direction: column;
     }
 
-    /* Все кнопки пульта одного размера: главную выделяет заливка, а не габарит */
-    .player-button,
-    .player-button.is-primary {
-        width: var(--tap-target);
-        height: var(--tap-target);
+    .telegram-chat-list {
+        display: flex;
+        width: auto;
+        flex: none;
+        border-right: none;
+        border-bottom: 1px solid var(--border);
+        overflow-x: auto;
     }
 
-    /* Зона нажатия у ползунка - вся высота поля, а не толщина полосы, поэтому
-       поле становится выше, а сама полоса уходит в дорожку и остаётся тонкой. */
-    .player-scrub,
-    .player-volume {
-        height: var(--space-5);
-        background: transparent;
+    .telegram-chat-item {
+        flex: none;
     }
 
-    .player-scrub::-webkit-slider-runnable-track,
-    .player-volume::-webkit-slider-runnable-track {
-        height: var(--space-1);
-        border-radius: var(--radius-pill);
-        background: var(--frost-line);
+    .telegram-chat-item img {
+        flex: none;
     }
 
-    .player-scrub::-moz-range-track,
-    .player-volume::-moz-range-track {
-        height: var(--space-1);
-        border-radius: var(--radius-pill);
-        background: var(--frost-line);
+    /* На узком экране пузырь в 70% ширины обрывает даже короткую фразу */
+    .telegram-message {
+        max-width: 85%;
     }
 
-    /* Webkit кладёт ползунок на верх дорожки; сдвиг на (12 - 4) / 2 ставит его
-       по центру. Firefox центрирует сам. */
-    .player-scrub::-webkit-slider-thumb,
-    .player-volume::-webkit-slider-thumb {
-        margin-top: calc(var(--space-1) * -1);
+    /* Окно, список и плитка дают три поля подряд, и на 390px они съедают
+       четверть ширины. Внешние ужимаем, рамка плитки остаётся - она и делит
+       проекты между собой. */
+    .projects {
+        gap: var(--space-2);
+        padding: var(--space-2);
+    }
+
+    /* То же у GitHub: окно, карточка профиля, блок readme */
+    .github-profile {
+        padding: var(--space-2);
+    }
+
+    .gh-profile,
+    .gh-readme,
+    .gh-repos {
+        padding: var(--space-3);
+    }
+
+    /* Отступ ставил аватар вровень с readme в две колонки; в одну колонку он
+       остаётся пустой полосой над аватаром. */
+    .gh-left-column {
+        padding-top: 0;
+    }
+
+    /* Плитка проекта в столбик: превью во всю ширину, под ним текст и кнопки.
+       Боком картинка ужимается до почтовой марки, а рядом с ней текст остаётся
+       в колонке шириной в три слова. */
+    .project-tile {
+        grid-template-columns: 1fr;
+        align-items: start;
+        gap: var(--space-3);
+        padding: var(--space-3);
+    }
+
+    .project-tile__preview {
+        width: 100%;
+    }
+
+    .project-tile__meta {
+        flex-direction: row;
+        align-items: center;
     }
 
     /* Плитка мельче, чтобы в ряд вставала не одна */
@@ -135,5 +360,42 @@
 
     .folder-item span {
         font-size: var(--text-12);
+    }
+}
+
+/* ============================================================
+   Телефон лёжа: не хватает высоты.
+   ============================================================ */
+@media (max-height: 480px) {
+    /* Нижние полосы приложений - подписи, а не кнопки: лёжа они стоят строки
+       списка, поэтому садятся на ступень. */
+    .ex-status,
+    .console-status {
+        height: var(--space-8);
+    }
+
+    /* Тулбар держит высоту кнопок, поля вокруг них лёжа уже не нужны */
+    .ex-toolbar,
+    .browser-toolbar {
+        padding-top: var(--space-1);
+        padding-bottom: var(--space-1);
+    }
+
+    /* На строку списка остаётся ширина экрана минус панель и вырез, и четыре
+       колонки в неё не встают - таблица уезжала вбок. Тип файла и так виден по
+       значку, поэтому уходит он, а дата с размером остаются. */
+    .ex-table {
+        --ex-grid: minmax(140px, 1fr) 150px 90px;
+    }
+
+    .ex-col--kind {
+        display: none;
+    }
+
+    /* Потолок в 70% высоты - запас под подписи на столе; лёжа он оставляет от
+       фотографии треть экрана впустую. */
+    .gallery-item img,
+    .gallery-item video {
+        max-height: 100%;
     }
 }

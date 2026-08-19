@@ -1,8 +1,14 @@
 /* Узкие экраны: система ведёт себя как мобильная - окно раскрывается на весь
-   стол, иконки раскладывает сетка, док прокручивается вбок.
+   экран, иконки раскладывает сетка, док становится двумя рядами.
 
    Файл подключается после приложений: он перекрывает заданные ими размеры окна,
-   а те объявлены с атрибутом, поэтому здесь селекторы тоже с атрибутом. */
+   а те объявлены с атрибутом, поэтому здесь селекторы тоже с атрибутом.
+
+   Запросов три, по дефицитной оси. Общий (узкий ИЛИ низкий) - «телефон в любой
+   ориентации»: тач вместо мыши, окно во весь экран, зоны нажатия в палец. Узкий -
+   телефон стоймя, где не хватает ширины: там перестраиваются док и панели
+   приложений. Низкий - он же лёжа, где не хватает высоты: там режется всё, что
+   лежит горизонтальными полосами. */
 
 /* Иконки стоят там, где их положили, только на большом столе. Условие -
    отрицание мобильного: широкий экран И достаточно высокий. */
@@ -21,15 +27,20 @@
     }
 }
 
-/* Узкий экран - телефон стоймя, низкий - он же лёжа. Тот же запрос лежит в
-   js/mobile.js: раскладку делит CSS, а поведение - JS, и разъезжаться им нельзя. */
+/* ============================================================
+   Телефон в любой ориентации. Тот же запрос лежит в js/mobile.js:
+   раскладку делит CSS, а поведение - JS, и разъезжаться им нельзя.
+   ============================================================ */
 @media (max-width: 768px), (max-height: 480px) {
-    /* Шкалы под палец: рисунок мельче, зона нажатия крупнее */
+    /* Полоса меню выше десктопной: в неё должна целиком влезать кнопка в палец */
     :root {
-        --file-icon-size: 72px;
+        --menu-height: calc(48px + env(safe-area-inset-top, 0px));
+        --file-icon-size: 64px;
         --dock-icon-size: 44px;
         --window-header-height: 44px;
-        --window-control-size: 20px;
+        /* Поле вокруг содержимого обводило приложение полоской фона окна: на
+           столе это скруглённый край листа, а во весь экран - лишняя рамка. */
+        --window-content-padding: 0px;
     }
 
     /* Стол раскладывает иконки сам: перетаскивать их пальцем нечем, а
@@ -38,16 +49,20 @@
         display: grid;
         grid-template-columns: repeat(auto-fill, minmax(84px, 1fr));
         align-content: start;
-        gap: var(--space-5) var(--space-2);
-        padding: calc(var(--menu-height) + var(--space-5)) var(--space-4)
-                 var(--desktop-padding-bottom);
+        gap: var(--space-5) var(--space-3);
+        padding: calc(var(--menu-height) + var(--space-4))
+                 calc(var(--space-4) + env(safe-area-inset-right, 0px))
+                 var(--desktop-padding-bottom)
+                 calc(var(--space-4) + env(safe-area-inset-left, 0px));
         touch-action: pan-y;
         overflow-y: auto;
     }
 
+    /* Иконка не перехватывает жест: стол под ней должен прокручиваться */
     .file {
         position: static;
         min-width: 0;
+        touch-action: pan-y;
     }
 
     .file span {
@@ -59,16 +74,39 @@
         font-size: var(--text-12);
     }
 
-    /* Окно - лист во весь стол, как приложение на телефоне */
+    /* Окно - приложение во весь экран: снизу ничего не оставляем, док и так
+       уходит под него. Дно отдаёт домашнему индикатору содержимое, а не рамка -
+       иначе под ним осталась бы полоса фона окна. */
     .window,
     .window[data-type] {
         left: 0;
         top: var(--menu-height);
         width: 100%;
-        height: calc(100dvh - var(--menu-height) - var(--desktop-padding-bottom));
+        height: calc(100dvh - var(--menu-height) - var(--keyboard-inset));
         max-width: none;
         max-height: none;
         border-radius: 0;
+    }
+
+    /* Шапки у приложения нет: во весь экран открыто ровно одно, и его имя уже
+       стоит в полосе меню - вторая такая же строка только отнимала бы высоту у
+       содержимого. Закрывает окно кнопка в той же полосе. Пульт - не приложение
+       во весь экран, а плашка над доком, и своя шапка ему нужна. */
+    .window:not([data-type="player"]) .window-header {
+        display: none;
+    }
+
+    .window:not([data-type="player"]) .window-content {
+        height: 100%;
+    }
+
+    /* Вырез и домашний индикатор откусывают полосу от экрана: viewport-fit=cover
+       пускает под них страницу, поэтому от края отходит содержимое, а фон окна
+       остаётся во всю ширину. Лёжа вырез сбоку, стоймя env() отдаёт нули. */
+    .window-content {
+        padding-left: env(safe-area-inset-left, 0px);
+        padding-right: env(safe-area-inset-right, 0px);
+        padding-bottom: calc(var(--window-content-padding) + env(safe-area-inset-bottom, 0px));
     }
 
     /* Растягивать лист нечего, а невидимые кромки съедали бы края содержимого */
@@ -76,27 +114,28 @@
         display: none;
     }
 
+    /* Ниже - шапка пульта: у остальных окон её на телефоне нет */
     .window-header {
         height: var(--window-header-height);
         padding: 0 var(--space-4);
         cursor: default;
     }
 
-    /* Разворачивать нечего: окно и так во весь стол */
+    /* Разворачивать нечего: окно и так во весь экран */
     .window-control.maximize {
         display: none;
     }
 
-    /* Расстояние между огоньками держит их зоны нажатия непересекающимися */
+    /* Огоньки мелкие, а нажимается зона в палец шириной. Просвет между ними
+       больше этой зоны, иначе соседняя перекрывала бы половину кнопки. */
     .window-controls {
-        gap: var(--space-6);
+        gap: var(--space-8);
     }
 
     .window-control {
         position: relative;
     }
 
-    /* Огонёк остаётся мелким, а нажимается зона в палец шириной */
     .window-control::after {
         content: "";
         position: absolute;
@@ -111,8 +150,9 @@
     .window[data-type="player"] {
         top: auto;
         bottom: var(--desktop-padding-bottom);
-        left: var(--space-2);
-        width: calc(100% - var(--space-4));
+        left: calc(var(--space-2) + env(safe-area-inset-left, 0px));
+        width: calc(100% - var(--space-4)
+                    - env(safe-area-inset-left, 0px) - env(safe-area-inset-right, 0px));
         height: 200px;
         border-radius: var(--radius-lg);
     }
@@ -120,16 +160,55 @@
     /* Меню-бар: пять меню в строку не помещаются, поэтому имя приложения само
        и есть кнопка единственного меню (см. js/menu-bar.js). */
     .menu-bar {
-        padding: env(safe-area-inset-top, 0px) var(--space-3) 0;
+        padding: env(safe-area-inset-top, 0px)
+                 calc(var(--space-2) + env(safe-area-inset-right, 0px))
+                 0
+                 calc(var(--space-2) + env(safe-area-inset-left, 0px));
     }
 
     .menu-bar__app {
         display: flex;
         align-items: center;
         min-height: var(--tap-target);
+        padding: 0 var(--space-3);
         color: var(--fg);
         font-size: var(--text-14);
         font-weight: var(--w-semibold);
+    }
+
+    /* Единственная кнопка бара занимает пол-экрана, и заливка акцентом читалась
+       бы как включённый режим, а не как открытое меню. */
+    .menu-bar__app.is-open {
+        background: var(--frost-fill);
+        color: var(--fg);
+    }
+
+    .menu-bar__close:not([hidden]) {
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: var(--tap-target);
+        height: var(--tap-target);
+        margin-right: calc(var(--space-2) * -1);
+        border: none;
+        background: transparent;
+        color: var(--fg);
+    }
+
+    /* Тот же огонёк, что в шапке окна на столе: закрытие остаётся красным
+       кружком системы, просто переехало в полосу меню. */
+    .menu-bar__close::before {
+        content: "\00d7";
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        width: var(--space-6);
+        height: var(--space-6);
+        border-radius: var(--radius-pill);
+        background: var(--traffic-red);
+        color: var(--abyss-900);
+        font-size: var(--text-16);
+        line-height: 1;
     }
 
     .datetime {
@@ -148,39 +227,46 @@
         font-size: var(--text-14);
     }
 
-    /* Док во всю ширину и с прокруткой: девять иконок в строку не помещаются */
+    /* Отклик на касание: подсветка строки меню курсором сюда не доезжает */
+    .menu__item:active {
+        background: var(--accent);
+        color: var(--accent-contrast);
+    }
+
+    /* Док - такая же системная поверхность, как полоса меню, и стекло у них
+       общее. Одного блюра без заливки на обоях не видно: получалась размытая
+       клякса под иконками вместо панели. */
     .dock {
-        left: var(--space-2);
-        right: var(--space-2);
-        transform: none;
-        justify-content: flex-start;
-        gap: var(--space-3);
+        bottom: calc(var(--space-3) + env(safe-area-inset-bottom, 0px));
+        gap: var(--space-2);
         padding: var(--space-2);
-        overflow-x: auto;
-        overscroll-behavior-x: contain;
-        scrollbar-width: none;
-    }
-
-    .dock::-webkit-scrollbar {
-        display: none;
-    }
-
-    /* Растворённый край честнее обрубленного: по нему видно, что за границей
-       дока есть ещё иконки, а не что последняя криво обрезана. */
-    .dock--overflows {
-        -webkit-mask-image: linear-gradient(to right, transparent 0, #000 var(--space-4),
-                            #000 calc(100% - var(--space-4)), transparent 100%);
-        mask-image: linear-gradient(to right, transparent 0, #000 var(--space-4),
-                    #000 calc(100% - var(--space-4)), transparent 100%);
-    }
-
-    .dock-item {
-        flex: 0 0 auto;
+        background: var(--glass-strong);
+        backdrop-filter: blur(var(--blur-glass));
     }
 
     /* Подсказка держится на наведении, которого на тач-экране нет */
     .dock-tooltip {
         display: none;
+    }
+
+    /* Полоса прокрутки шириной в 8 пикселей - десктопный хром: пальцем за неё
+       не взяться, а места она занимает как колонка текста. Прокрутку показывает
+       само содержимое. */
+    .window-content::-webkit-scrollbar,
+    .github-profile::-webkit-scrollbar,
+    .call-log::-webkit-scrollbar,
+    .notes-area::-webkit-scrollbar,
+    .telegram-chat-list::-webkit-scrollbar {
+        width: 0;
+        height: 0;
+    }
+
+    .window-content,
+    .github-profile,
+    .call-log,
+    .notes-area,
+    .telegram-chat-list {
+        scrollbar-width: none;
     }
 
     /* Поле мельче 16px iOS считает поводом приблизить страницу, и та застревает
@@ -189,16 +275,68 @@
     .browser-omnibox,
     .ex-address-input,
     .ex-search,
+    .notes-area,
     .telegram-input input {
         font-size: var(--text-16);
     }
 
+}
+
+/* ============================================================
+   Телефон стоймя: не хватает именно ширины.
+   ============================================================ */
+@media (max-width: 768px) {
     .gh-body,
     .gh-profiles {
         grid-template-columns: 1fr;
     }
+}
 
-    .telegram-chat-list {
-        width: 100px;
+/* ============================================================
+   Телефон стоймя и не лёжа: док. Лёжа ширины хватает на все девять иконок в
+   строку, и перенос там крал бы треть высоты.
+   ============================================================ */
+@media (max-width: 768px) and (min-height: 481px) {
+    /* Док в два ряда: девять иконок в строку стоймя не встают ни при каком
+       размере, а прокрутка вбок прятала бы половину приложений за краем. */
+    :root {
+        --desktop-padding-bottom: calc(136px + env(safe-area-inset-bottom, 0px));
+    }
+
+    /* Ширина ровно под пять иконок: она и переносит строку, и заодно центрирует
+       остаток - у переноса по месту второй ряд прижимался бы влево. Считаем по
+       содержимому: у светлого оформления есть ещё и кромка, и при обычном
+       box-sizing она бы съела место под пятую иконку. */
+    .dock {
+        box-sizing: content-box;
+        width: calc(5 * var(--dock-icon-size) + 4 * var(--space-2));
+        flex-wrap: wrap;
+        justify-content: center;
+    }
+
+    .dock-item {
+        width: var(--dock-icon-size);
+    }
+}
+
+/* ============================================================
+   Телефон лёжа: не хватает высоты. Каждая горизонтальная полоса стоит здесь
+   строки содержимого, поэтому системный хром ужимается на ступень.
+   ============================================================ */
+@media (max-height: 480px) {
+    :root {
+        --menu-height: calc(var(--space-10) + env(safe-area-inset-top, 0px));
+    }
+
+    .menu-bar__app,
+    .menu-bar__close:not([hidden]) {
+        height: var(--space-10);
+        min-height: var(--space-10);
+    }
+
+    /* Единственное меню бара длиннее экрана, и на 44px в него влезало семь
+       строк из четырнадцати. Строка остаётся крупнее AA-минимума. */
+    .menu__item {
+        height: var(--tap-sm);
     }
 }

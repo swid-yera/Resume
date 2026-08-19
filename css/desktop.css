@@ -18,14 +18,14 @@
     isolation: isolate;
 }
 
-/* Десктоп: обычная плотность экрана — лёгкий сжатый фон */
+/* Десктоп: обычная плотность экрана - лёгкий сжатый фон */
 @media (min-width: 1024px) {
     .desktop {
         background-image: url(photos/wppr-tv.webp);
     }
 }
 
-/* Десктоп: retina/высокая плотность — фон без потерь */
+/* Десктоп: retina/высокая плотность - фон без потерь */
 @media (min-width: 1024px) and (min-resolution: 2dppx) {
     .desktop {
         background-image: url(photos/wppr-retina.webp);
@@ -84,7 +84,7 @@
     cursor: default;
 }
 
-/* Пустое место слева, где раньше был значок системы */
+/* Отступ слева на месте значка системы: имя приложения не липнет к краю */
 .menu-bar__spacer {
     width: 14px;
     height: 14px;
@@ -105,14 +105,21 @@
                 color var(--dur-fast) var(--ease-standard);
 }
 
-.menu-bar__item:hover {
-    background: var(--frost-fill);
-    color: var(--fg);
+@media (hover: hover) {
+    .menu-bar__item:hover {
+        background: var(--frost-fill);
+        color: var(--fg);
+    }
 }
 
 .menu-bar__item.is-open {
     background: var(--accent);
     color: var(--accent-contrast);
+}
+
+/* Только для телефона: на столе окно закрывают его же огоньки */
+.menu-bar__close {
+    display: none;
 }
 
 .datetime {
