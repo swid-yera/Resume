@@ -61,15 +61,14 @@ export function setupFileDragging() {
       if (!isDragging) return;
 
       hasMoved = true;
-      const maxX = window.innerWidth - file.offsetWidth - CONSTANTS.PADDING;
-      const maxY =
-        window.innerHeight - file.offsetHeight - CONSTANTS.PADDING - CONSTANTS.DESKTOP_PADDING_BOTTOM;
-      const minY = CONSTANTS.PADDING + CONSTANTS.DESKTOP_PADDING_TOP;
+      // Стол свободный: иконку кладут куда угодно, в том числе под док. Держим
+      // только в пределах экрана - у стола overflow: hidden, и уехавшую за край
+      // иконку было бы не достать.
+      const maxX = window.innerWidth - file.offsetWidth;
+      const maxY = window.innerHeight - file.offsetHeight;
 
-      file.style.left =
-        Math.max(CONSTANTS.PADDING, Math.min(e.clientX - offsetX, maxX)) + "px";
-      file.style.top =
-        Math.max(minY, Math.min(e.clientY - offsetY, maxY)) + "px";
+      file.style.left = Math.max(0, Math.min(e.clientX - offsetX, maxX)) + "px";
+      file.style.top = Math.max(0, Math.min(e.clientY - offsetY, maxY)) + "px";
     });
 
     const endInteraction = () => {
