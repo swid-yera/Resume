@@ -2,7 +2,7 @@
 name: AniTop
 image: anitop.webp
 url: https://anitop.antawkay.com
-stack: [TypeScript, Vue 3, Vite, Cloudflare]
+stack: [TypeScript, Vue 3, Cloudflare]
 year: 2026
 status: live
 date: 2026-06-14T18:35:00Z
@@ -28,8 +28,8 @@ description: Каталог аниме: топы и рейтинги, поиск
 
 ## Стек
 
-Одностраничное приложение на Vue 3 и TypeScript, вёрстка на Bootstrap, сборка
-Vite, хостинг Cloudflare.
+Одностраничное приложение на Vue 3 и TypeScript, вёрстка на Bootstrap,
+хостинг Cloudflare.
 
 ## Ссылки
 

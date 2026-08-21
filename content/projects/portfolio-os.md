@@ -1,21 +1,21 @@
 ---
-name: Portfolio OS
+name: Portfolio
 image: portfolio-os.webp
 repo: https://github.com/Antawq/Resume
-stack: [JavaScript, без фреймворков, Vite, GitHub Pages]
+stack: [JavaScript, без фреймворков, GitHub Pages]
 year: 2026
 status: live
 date: 2026-07-24T20:12:00Z
 description: Этот сайт: рабочий стол, окна, Проводник, терминал и браузер на чистом JS
 ---
 
-# Portfolio OS
+# Portfolio
 
 Сайт, в котором вы сейчас находитесь. Портфолио, притворяющееся настольной
 системой: окна двигаются и меняют размер, у файлов есть пути, а у терминала -
 своя файловая система.
 
-![Рабочий стол Portfolio OS](projects/portfolio-os.webp)
+![Рабочий стол Portfolio](projects/portfolio-os.webp)
 
 ## Что умеет
 
@@ -31,8 +31,8 @@ description: Этот сайт: рабочий стол, окна, Провод�
 
 ## Стек
 
-JavaScript без фреймворков: в рантайме только `marked` и `dompurify`. Сборка
-Vite, деплой через GitHub Actions на GitHub Pages, домен и CDN на Cloudflare.
+JavaScript без фреймворков: в рантайме только `marked` и `dompurify`.
+Хостинг GitHub Pages, домен и CDN на Cloudflare.
 
 Логика, которую можно проверить без браузера, лежит отдельными модулями: 377
 тестов на `node --test`.
