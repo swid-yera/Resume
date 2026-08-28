@@ -8,7 +8,7 @@
     position: fixed;
     top: 0;
     left: 0;
-    background-image: url(photos/wppr-phone.webp);
+    background-image: url(../photos/wppr-phone.webp);
     background-position: center;
     background-size: cover;
     background-repeat: no-repeat;
@@ -21,14 +21,14 @@
 /* Десктоп: обычная плотность экрана - лёгкий сжатый фон */
 @media (min-width: 1024px) {
     .desktop {
-        background-image: url(photos/wppr-tv.webp);
+        background-image: url(../photos/wppr-tv.webp);
     }
 }
 
 /* Десктоп: retina/высокая плотность - фон без потерь */
 @media (min-width: 1024px) and (min-resolution: 2dppx) {
     .desktop {
-        background-image: url(photos/wppr-retina.webp);
+        background-image: url(../photos/wppr-retina.webp);
     }
 }
 
