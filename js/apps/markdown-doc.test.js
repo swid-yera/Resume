@@ -13,7 +13,7 @@ import {
 
 const DOC = `---
 name: AniTop
-url: https://anitop.antawkay.com
+url: https://anitop.me
 stack: [Vue 3, Vite, TypeScript]
 year: 2026
 status: live

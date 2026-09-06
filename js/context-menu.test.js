@@ -60,7 +60,7 @@ test("a desktop icon can be opened and inspected", () => {
 test("a project tile offers site, repo, link and info", () => {
   const project = {
     name: "AniTop",
-    url: "https://anitop.antawkay.com",
+    url: "https://anitop.me",
     repo: "https://github.com/Antawq/AniTop",
   };
   const items = itemsForTarget({ kind: "project", project }, ctx);

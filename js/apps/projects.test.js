@@ -15,7 +15,7 @@ test("a full record keeps every field", () => {
   const p = normalizeProject({
     image: "anitop.webp",
     name: "AniTop",
-    url: "https://anitop.antawkay.com",
+    url: "https://anitop.me",
     repo: "https://github.com/Antawq/AniTop",
     description: "Каталог аниме",
     stack: ["Vue 3", "Vite"],

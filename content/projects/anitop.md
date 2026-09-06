@@ -33,4 +33,4 @@ description: Каталог аниме: топы и рейтинги, поиск
 
 ## Ссылки
 
-- Сайт: <https://anitop.antawkay.com>
+- Сайт: <https://anitop.me>
